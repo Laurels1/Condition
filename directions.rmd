@@ -1,0 +1,69 @@
+---
+title: "Directions for using Condition functions"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("R/RelConditionEPU.R")
+```
+
+### Functions included
+
+* `RelConditionEPU.R` - This is the main function for calculating the condition factor
+* `connect_to_database.R` - Provides a connection to "sole"
+* `pull_from_svdbs.R` - Executed sql query and pulls daa from SVDBS database
+* `plot_condition.R` - plots the output of `RelConditionEPU.R`. NOT COMPLETE
+* `utilities.R` - collection of small functions used in plotting
+* `install_cond_packages.R` - installs all required packages (This will eventually be redundant since we will turn into
+an R package)
+* `gam_calcs.R` - where GAM analyses are done. NOT CODED YET
+
+### Data included
+
+* `lw_parameters_Condition.csv` - describe what this is
+* `NEFSC_survey_data_8-15-19.RDS` - data pull- describe what this is
+
+
+### Running Code
+
+``` {r run, echo=T, eval=F, message=F} 
+# source the main function (When this is turned into a package, this will not be necessary)
+source("R/RelConditionEPU.R")
+# calculate condition factor
+annualCondition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
+# plot results
+plot_condition(annualCondition,out.dir="output")
+# analysis
+gam_calcs(annualCondition,out.dir="output")
+
+```
+
+### Main function
+
+The argument `pullNewData` is a boolean indicating whether to pull directly from the SVDBS database (TRUE) (for which you'll need to enter Oracle credentials) or to use a previously pulled dat set (FALSE, which is quicker!)
+The argument `out.dir` specifies the name of the output directory that will be created (within the current working directory) to store output files
+``` {r main, echo=T, eval=T, message=F} 
+annualCondition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
+print(annualCondition)
+```
+
+### Plotting
+
+Use the function `plot_condition`. This is not currently functional. I will leave it up to you to finish it. It currently takes the argument annualCondition which is the output from the main function.
+``` {r plot, echo=T, eval=F, message=F} 
+plot_condition(annualCondition,out.dir = "output")
+```
+
+### Gam stuff
+
+This function exists but is not complete
+``` {r gam, echo=T, eval=F, message=F} 
+gam_calcs(annualCondition,out.dir = "output")
+```
+
+
+
+
+I hope this reorganization helps you and doesn't hinder your progress. Please let me know if i have caused more problems for you.
+
