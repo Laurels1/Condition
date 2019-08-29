@@ -32,7 +32,7 @@ pull_from_svdbs<- function(uid) {
   (b.tow=s.tow) ;"
   )
   
-  survey <- sqlQuery(sole, qry)
+  survey <- RODBC::sqlQuery(sole, qry)
 
   return(survey)
 }

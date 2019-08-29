@@ -30,8 +30,9 @@ an R package)
 ``` {r run, echo=T, eval=F, message=F} 
 # source the main function (When this is turned into a package, this will not be necessary)
 source("R/RelConditionEPU.R")
-# calculate condition factor
-annualCondition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
+# calculate condition factor. 
+# First time using set pullNewData = T
+annualCondition <- RelConditionEPU(pullNewData = TRUE, out.dir="output")
 # plot results
 plot_condition(annualCondition,out.dir="output")
 # analysis
