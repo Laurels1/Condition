@@ -282,6 +282,6 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 #View(fluke)
 
 #write.csv(fluke, "Fluke_Cond.csv")
-return(annualcond)
+return(list(annualcond=annualcond,stom = stom.epu))
 
 }
