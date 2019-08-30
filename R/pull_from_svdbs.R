@@ -1,7 +1,11 @@
+#'Data pull from SVDBS
 #'
+#'larger description of data pull
 #'
 #'@param uid character string. Username of individuals oracle account
 #'
+#'@return data.frame
+#'\item{survey}{raw data pull from SVDBS}
 #'
 #' @export
 

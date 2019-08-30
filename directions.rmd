@@ -8,6 +8,9 @@ knitr::opts_chunk$set(echo = TRUE)
 source("R/RelConditionEPU.R")
 ```
 
+If knitting this document doesn't work using the knit button try this:
+`rmarkdown::render(here::here("directions.rmd"))`
+
 ### Functions included
 
 * `RelConditionEPU.R` - This is the main function for calculating the condition factor
@@ -32,11 +35,11 @@ an R package)
 source("R/RelConditionEPU.R")
 # calculate condition factor. 
 # First time using set pullNewData = T
-annualCondition <- RelConditionEPU(pullNewData = TRUE, out.dir="output")
+condition <- RelConditionEPU(pullNewData = TRUE, out.dir="output")
 # plot results
-plot_condition(annualCondition,out.dir="output")
+plot_condition(condition$annualcond,out.dir="output")
 # analysis
-gam_calcs(annualCondition,out.dir="output")
+gam_calcs(condition$stom,out.dir="output")
 
 ```
 
@@ -45,22 +48,23 @@ gam_calcs(annualCondition,out.dir="output")
 The argument `pullNewData` is a boolean indicating whether to pull directly from the SVDBS database (TRUE) (for which you'll need to enter Oracle credentials) or to use a previously pulled dat set (FALSE, which is quicker!)
 The argument `out.dir` specifies the name of the output directory that will be created (within the current working directory) to store output files
 ``` {r main, echo=T, eval=T, message=F} 
-annualCondition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
-print(annualCondition)
+condition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
+print(condition$annualcond)
+print(head(condition$stom))
 ```
 
 ### Plotting
 
-Use the function `plot_condition`. This is not currently functional. I will leave it up to you to finish it. It currently takes the argument annualCondition which is the output from the main function.
+Use the function `plot_condition`. This is not currently functional. I will leave it up to you to finish it. It currently takes the argument condition$annualcond which is the output from the main function.
 ``` {r plot, echo=T, eval=F, message=F} 
-plot_condition(annualCondition,out.dir = "output")
+plot_condition(condition$annualcond,out.dir = "output")
 ```
 
 ### Gam stuff
 
 This function exists but is not complete
 ``` {r gam, echo=T, eval=F, message=F} 
-gam_calcs(annualCondition,out.dir = "output")
+gam_calcs(condition$stom,out.dir = "output")
 ```
 
 

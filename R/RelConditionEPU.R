@@ -5,8 +5,9 @@
 #' @param pullNewData boolean. Should a connection to oracle be made to pull data or use existing data
 #' @param out.dir character string. name of directory in which plots and data files will be saved
 #'
-#' @return
-#' \item{annualcond}{tibble (n x 6) }
+#' @return list of 2 items
+#' \item{annualcond}{tibble (n x 6) Condition factor for each species, sex over time}
+#' \item{stom}{data.frame (m x 52). stomach contents by year, cruise, sex, species etc.}
 #'
 #' @export
 
