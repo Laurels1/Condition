@@ -15,7 +15,7 @@ If knitting this document doesn't work using the knit button try this:
 
 * `RelConditionEPU.R` - This is the main function for calculating the condition factor
 * `connect_to_database.R` - Provides a connection to "sole"
-* `pull_from_svdbs.R` - Executed sql query and pulls daa from SVDBS database
+* `pull_from_svdbs.R` - Executed sql query and pulls data from SVDBS database
 * `plot_condition.R` - plots the output of `RelConditionEPU.R`. NOT COMPLETE
 * `utilities.R` - collection of small functions used in plotting
 * `install_cond_packages.R` - installs all required packages (This will eventually be redundant since we will turn into
