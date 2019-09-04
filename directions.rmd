@@ -24,8 +24,10 @@ an R package)
 
 ### Data included
 
-* `lw_parameters_Condition.csv` - describe what this is
-* `NEFSC_survey_data_8-15-19.RDS` - data pull- describe what this is
+* `lw_parameters_Condition.csv` - These are the static length-weight parameters used to calulate predicted weight at a given length by species and sex. Individual fish lengths and weights from the autumn NEFSC bottom trawl survey were used to calculate length-weight parameters below:
+Weight = e^(COEFFICIENT_FALL)*Length^(EXPONENT_FALL)
+Where length is in cm and weight is in kg.
+* `NEFSC_survey_data_8-15-19.RDS` - This is a data pull (taken Aug. 15th, 2019) of NEFSC fall bottom trawl survey data including species, sex, individual fish lengths and weights, bottom temperature, stomach volume, local population abundance (expcatchnum) and biomass (expcatchwt).
 
 
 ### Running Code
