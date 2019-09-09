@@ -254,6 +254,9 @@ stom.epu$Species[stom.epu$SVSPP==197] <- 'Goosefish'
 annualcond <- stom.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3)
 
+#Format output to be read into plotting function:
+
+
 #View(annualcond)
 #condFormat <- tidyr::gather(condN, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
 #condFormat <- tidyr::spread(condN, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
