@@ -250,9 +250,14 @@ stom.epu$Species[stom.epu$SVSPP==197] <- 'Goosefish'
 # 
 
 
-#Get count on condition by species
-annualcond <- stom.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcond, nCond>=3)
+#Summarize annually and filter based on count of condition data by species
+annualcond <- stom.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condNshelf <- dplyr::filter(annualcond, nCond>=3)
+condNshelfSpp <- annualcond %>% dplyr::group_by(Species, sex) %>% dplyr::nYear = dplyr::n())
+
+#Summarize annually by EPU
+annualcondEPU <- stom.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcondEPU, nCond>=3)
 
 #Format output to be read into plotting function:
 
@@ -261,7 +266,7 @@ condN <- dplyr::filter(annualcond, nCond>=3)
 #condFormat <- tidyr::gather(condN, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
 #condFormat <- tidyr::spread(condN, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
 
-readr::write_csv(condN, here::here(out.dir,"AnnualRelCond2019_audited.csv"))
+readr::write_csv(condNshelf, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
 
 condSS <- condN %>% dplyr::filter(EPU == "SS")
 readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
