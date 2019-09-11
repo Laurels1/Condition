@@ -26,7 +26,7 @@ library(data.table)
 #library(TeachingDemos)
 #library(dplyr)
 #library(tidyr)
-#library(tidyverse)
+library(tidyverse)
 #library(gapminder)
 library(rgdal)
 library(Survdat)
@@ -35,10 +35,14 @@ library(Survdat)
 library(magrittr)
 #library(readr)
 
-RelConditionEPU <- function(pullNewData=F,out.dir="output") {
+#Turn off the function when running outside of function to test new code
+#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
-  if (!dir.exists(out.dir)) dir.create(out.dir)
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
   
+#Turn this on when running outside of function
+out.dir="output"
+
   data.dir <- "data"
   gis.dir  <- "gis"
 
@@ -52,21 +56,22 @@ RelConditionEPU <- function(pullNewData=F,out.dir="output") {
 #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE)
 
-if (pullNewData == T) {
+  #comment out if not running as function
+#if (pullNewData == T) {
   # grabs data from oracle
-  uid <- readline("Please Enter your username for oracle: ")
-  message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
-  survey <- pull_from_svdbs(uid) 
+#  uid <- readline("Please Enter your username for oracle: ")
+#  message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
+#  survey <- pull_from_svdbs(uid) 
   # save data pull
   #dateOfPull <- format(Sys.time(), "%m-%d-%y")
   #saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
-  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
-} else {
+#  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
+#} else {
   # Otherwise, load data below:
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
   survey <- readRDS(here::here(out.dir, "NEFSC_survey_data_8-15-19.rds"))
-}
+#}
   
  
 
@@ -253,11 +258,15 @@ stom.epu$Species[stom.epu$SVSPP==197] <- 'Goosefish'
 #Summarize annually and filter based on count of condition data by species
 annualcond <- stom.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
-condNshelfSpp <- annualcond %>% dplyr::group_by(Species, sex) %>% dplyr::nYear = dplyr::n())
+condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>% 
+  dplyr::filter(n >= 20)
+
 
 #Summarize annually by EPU
 annualcondEPU <- stom.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
+condNSpp <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
+  dplyr::filter(n >= 20)
 
 #Format output to be read into plotting function:
 
@@ -266,18 +275,18 @@ condN <- dplyr::filter(annualcondEPU, nCond>=3)
 #condFormat <- tidyr::gather(condN, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
 #condFormat <- tidyr::spread(condN, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
 
-readr::write_csv(condNshelf, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
+readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
 
-condSS <- condN %>% dplyr::filter(EPU == "SS")
+condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
 readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
 
-condGOM <- condN %>% dplyr::filter(EPU == "GOM")
+condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
 readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
 
-condGB <- condN %>% dplyr::filter(EPU == "GB")
+condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
 readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
 
-condMAB <- condN %>% dplyr::filter(EPU == "MAB")
+condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
 readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 
 
@@ -291,6 +300,8 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 #View(fluke)
 
 #write.csv(fluke, "Fluke_Cond.csv")
-return(list(annualcond=annualcond,stom = stom.epu))
 
-}
+#Comment out output while adding in code and running outside of the function
+#return(list(annualcond=annualcond,stom = stom.epu))
+
+#}
