@@ -36,12 +36,12 @@ library(magrittr)
 #library(readr)
 
 #Turn off the function when running outside of function to test new code
-#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
+RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
-#  if (!dir.exists(out.dir)) dir.create(out.dir)
+  if (!dir.exists(out.dir)) dir.create(out.dir)
   
 #Turn this on when running outside of function
-out.dir="output"
+#out.dir="output"
 
   data.dir <- "data"
   gis.dir  <- "gis"
@@ -57,28 +57,28 @@ out.dir="output"
 #sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE)
 
   #comment out if not running as function
-#if (pullNewData == T) {
+if (pullNewData == T) {
   # grabs data from oracle
-#  uid <- readline("Please Enter your username for oracle: ")
-#  message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
-#  survey <- pull_from_svdbs(uid) 
+  uid <- readline("Please Enter your username for oracle: ")
+  message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
+  survey <- pull_from_svdbs(uid) 
   # save data pull
   #dateOfPull <- format(Sys.time(), "%m-%d-%y")
   #saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
-#  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
-#} else {
+  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
+} else {
   # Otherwise, load data below:
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
   survey <- readRDS(here::here(out.dir, "NEFSC_survey_data_8-15-19.rds"))
-#}
+}
   
  
 
 fall <- survey[survey$SEASON == 'FALL',]
+#------------------------------------------------------------------------------
 
 #reading in condition lw paramteters for tidyverse:
-
 LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 
 
@@ -302,6 +302,6 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 #write.csv(fluke, "Fluke_Cond.csv")
 
 #Comment out output while adding in code and running outside of the function
-#return(list(annualcond=annualcond,stom = stom.epu))
+return(list(annualcond=annualcond,stom = stom.epu))
 
-#}
+}
