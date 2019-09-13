@@ -12,88 +12,49 @@
 
 plot_condition <- function(annualCondition,out.dir = "output") {
   
-  #This section below is for plotting annual condition:
+  speciesNames <- unique(annualCondition$Species)
+  # quantiles to group into
+  quantilesNormal <- qnorm(c(0.25,0.5,0.75)) 
+  # values Q1 <= 0.25
+  # values 0.25 > Q2 <= 0.5
+  # values 0.5 > Q3 <= 0.75
+  # values 0.75 > Q4
+  yearRange <- c(min(annualCondition$YEAR):max(annualCondition$YEAR))
+  # create an expanded grid to fill in missing years with NA's
+  fullTable <- dplyr::as_tibble(expand.grid(Species=speciesNames,YEAR= yearRange,sex = c("M","F"),stringsAsFactors = F))
+  annualCondition <- dplyr::right_join(annualCondition,fullTable,by=c("Species","YEAR","sex"))
   
-  #-------------------------------------------------------------------------------
-#CF <- as.data.table(read.csv(file.path(data.dir, "NEFMC_RelativeWeight_2019.csv")))
-#CF <- as.data.table(read.csv(file.path(data.dir, "AnnualRelCond2019_audited.csv")))
-CF <- as.data.table(annualCondition)
-#formatting annual condition for plotting
-
-#CF <- CF[c(1:34),]
-#Convert to long format
-CF.fixed <- CF[, c(1:4), with = F]
-CF.fixed[, YEAR := 1992]
-setnames(CF.fixed, "X1992", "CF")
-
-for(i in 5:ncol(CF)){
-  CF.year <- CF[, c(1:3, i), with = F]
-  CF.year[, YEAR := 1992 + (i - 4)]
-  setnames(CF.year, paste("X", 1992 + (i-4), sep = ''), "CF")
-  CF.fixed <- rbind(CF.fixed, CF.year)
-}
-
-setkey(CF.fixed,
-       species,
-       stock,
-       sex)
-
-CF.fixed[, z := ztrans(CF), by = key(CF.fixed)]
-
-#Rearrangements for the plot
-CF.data <- matrix(CF.fixed[, z], nrow(unique(CF.fixed)), length(unique(CF.fixed[, YEAR])), byrow = T)
-
-setkey(CF.fixed,
-       species,
-       stock,
-       sex)
-
-#labels for the plot
-CF.fixed[sex == 'male', sex.label := ', M']
-CF.fixed[sex == 'female', sex.label := ', F']
-CF.fixed[sex == 'combined', sex.label := '']
-CF.fixed[stock == 'unit', stock := '']
-
-setkey(CF.fixed,
-       species,
-       stock,
-       sex)
-
-graph.colors<-colorRampPalette(c('#C6E2FF','#00008B'))
-
-opar <- par()
-jpeg(file = here::here(out.dir, "NEFMC_Fish_RelCondition_2019.jpg"), res = 200, height = 1450,
-     width = 2000)
-#Main figure
-par(mar = c(2, 2, 3, 18), fig = c(0, 1, 0.1, 1))
-
-#image rotates matrix 90 degrees so use transverse matrix and order variables in reverse order in .csv file
-image(y = image.x(nrow(unique(CF.fixed))),
-      x = image.x(length(unique(CF.fixed[, YEAR]))), z = t(CF.data),
-      breaks = c(-10, -1, 0, 1, 10), col = graph.colors(4),
-      xlim = c(0,1), ylim = c(0,1), axes = F, xlab = '', ylab = '', useRaster = T)
-
-my.axis(3, at = image.x(length(unique(CF.fixed[, YEAR])))[seq(5, 25, 5)] -
-          0.5 * (image.x(length(unique(CF.fixed[, YEAR])))[2]),
-        labels = seq(1995, 2015, 5))
-
-axis(4, at = image.x(nrow(unique(CF.fixed)))[-1] -
-       0.5 * (image.x(nrow(unique(CF.fixed)))[2]),
-     label = paste(unique(CF.fixed)[, species], ' ', unique(CF.fixed)[, stock],
-                   unique(CF.fixed)[, sex.label], sep = ''), las = T, lwd = 0)
-
-my.box()
-
-#Key
-par(mar = c(0.7, 0.5, 0.2, 0.5), fig = c(0.2, 0.5, 0, 0.1), new = T)
-image(x = image.x(4), z = t(matrix(1:4,1,4)), col = graph.colors(4), axes = F,
-      xlim = c(0,1), ylim = c(0,1))
-axis(3, at = image.x(4), labels = c(-3, -1, 0, 1, 3), cex = 2)
-my.box()
-
-dev.off()
-
-par(opar)
-
+  #This section below is for plotting annual condition:
+  conditionMatrix <- yearRange # inital value
+  rowNames <- "Year" # initial value 
+  for (species in speciesNames) { # for each plot each species is a row
+    for (asex in c("M","F")) {
+      # pull each species/Sex one at a time. 
+      speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == asex) %>% dplyr::arrange(YEAR)
+      # normalize data first
+      normData <- (speciesData$MeanCond - mean(speciesData$MeanCond,na.rm = T))/sd(speciesData$MeanCond,na.rm=T)
+      # each year is placed in category 1-4 based on quantiles above
+      quant <- 1
+      for (iq in quantilesNormal) {
+        quant <- quant + (normData > iq)
+      }
+      conditionMatrix <- rbind(conditionMatrix,quant)
+      rowNames <- rbind(rowNames,paste0(species," - ",asex))
+    }
+  }
+  conditionMatrix <- as.data.frame(conditionMatrix)
+  rownames(conditionMatrix) <- as.vector(rowNames)
+  
+  #lattice::levelplot(conditionMatrix)
+  graph.colors<-colorRampPalette(c('#C6E2FF','#00008B'))
+  image(t(conditionMatrix[2:59,]),xaxt="n",yaxt="n",col=graph.colors(4))
+  
+  axis(1,at=seq(0,1,length.out=dim(conditionMatrix)[2]),labels=conditionMatrix[1,],las=2)
+  axis(4,at=seq(0,1,length.out=dim(conditionMatrix)[1]-1),labels=as.vector(tail(rowNames,-1)),las=1)
+  
+  
+  return(conditionMatrix)
 
 }
+  
+    
