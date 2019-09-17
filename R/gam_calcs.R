@@ -1,19 +1,29 @@
 #' gam stuff
 #'
-#'@param annualCondition tibble. Output from RelConditionEPU.R
+#'@param annualcond tibble. Output from RelConditionEPU.R
 #'@param out.dir character string. name of directory in which plots and data files will be saved
 #'
-#'
 
-gam_calcs <- function(annualCondition,out.dir="output") {
+library(gam)
+
+#turn off function while changing code
+#gam_calcs <- function(annualcond,out.dir="output") {
   
-   RelCond <- annualCondition
+#   RelCond <- stom.epu
    #GAM analyses relating condition to environmental parameters:
-   form.cond <- formula(RelCond ~ s(BOTTEMP))
+##Need to loop over species:
+   form.cond <- formula(RelCond ~ s(BOTTEMP) +s(EPU))
                         #+ s(EXPCATCHNUM) + s(stom_full))
   
    condGAM <- gam::gam(form.cond, family= gaussian, data=stom.epu)
   
+   summary(condGAM)
+   
+   plot(condGAM, pages=1, residuals=TRUE) #show partial residuals
+   plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
+   
+### plot GAM not working, erorr says could not find function "gam.check"
+   gam.check(condGAM) # run model checks including checking smoothing basis dimensions
   
    stepgam <- gam::step.Gam(condGAM,scope=list(
      "BOTTEMP" = ~ 1 + BOTTEMP + lo(BOTTEMP) + S(BOTTEMP)),
@@ -24,4 +34,4 @@ gam_calcs <- function(annualCondition,out.dir="output") {
    gamrun1.res <-plot (stepgam, ylab="Relative Condition", rug=T, cex=1.05, lwd=6,residuals=T)
 
   
-}
+#}
