@@ -36,12 +36,12 @@ library(magrittr)
 #library(readr)
 
 #Turn off the function when running outside of function to test new code
-RelConditionEPU <- function(pullNewData=F,out.dir="output") {
+#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
-  if (!dir.exists(out.dir)) dir.create(out.dir)
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
   
 #Turn this on when running outside of function
-#out.dir="output"
+out.dir="output"
 
   data.dir <- "data"
   gis.dir  <- "gis"
@@ -302,6 +302,6 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2018_MAB.csv"))
 #write.csv(fluke, "Fluke_Cond.csv")
 
 #Comment out output while adding in code and running outside of the function
-return(list(annualcond=annualcond,stom = stom.epu))
+#return(list(annualcond=annualcond,stom = stom.epu))
 
-}
+#}

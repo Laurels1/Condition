@@ -5,15 +5,18 @@
 #'
 
 library(gam)
+library(dplyr)
 
 #turn off function while changing code
-gam_calcs <- function(annualcond,out.dir="output") {
+#gam_calcs <- function(annualcond,out.dir="output") {
   
 #   RelCond <- stom.epu
    #GAM analyses relating condition to environmental parameters:
 ##Need to loop over species:
-   form.cond <- formula(RelCond ~ s(BOTTEMP) +s(EPU))
-                        #+ s(EXPCATCHNUM) + s(stom_full))
+SppGAM <- dplyr::do(stom.epu, group_by(Species))
+
+   form.cond <- formula(RelCond ~ s(BOTTEMP) +s(EXPCATCHNUM))
+                        #+s(EPU)  + s(stom_full))
   
    condGAM <- gam::gam(form.cond, family= gaussian, data=stom.epu)
   
@@ -34,4 +37,4 @@ gam_calcs <- function(annualcond,out.dir="output") {
 #   gamrun1.res <-plot (stepgam, ylab="Relative Condition", rug=T, cex=1.05, lwd=6,residuals=T)
 
   
-}
+#}
