@@ -66,7 +66,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   
    # legend
    par(mar = c(4.5, 8, 0.0, 14), fig = c(0, 1, 0, 0.1), new = T)
-   image( z = t(matrix(1:4,1,4)), axes = F, col = graph.colors(4), xlim = c(0,1), ylim = c(0,1))
+   image(x=seq(0, 1, by = 1 / 4), z = t(matrix(1:4,1,4)), axes = F, col = graph.colors(4), xlim = c(0,1), ylim = c(0,1),xlab="")
    axis(1, at = seq(1/8, 1, by = 1 / 4), labels = c( 1, 2, 3, 4), cex = 2)
    axis(2,at = 0.5, labels="Quantile",las=2)
    box()
