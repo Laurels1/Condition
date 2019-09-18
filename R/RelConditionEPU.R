@@ -278,16 +278,16 @@ condNSpp <- condN %>% dplyr::add_count(Species, EPU, sex) %>%
 readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
 
 condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
-readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
+readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2018_SS.csv"))
 
 condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
-readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
+readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2018_GOM.csv"))
 
 condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
-readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
+readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2018_GB.csv"))
 
 condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
-readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
+readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2018_MAB.csv"))
 
 
 #select fluke annual condition data:

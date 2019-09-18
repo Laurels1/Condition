@@ -35,7 +35,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   conditionMatrix <- NULL# inital value
   rowNames <- NULL # initial value 
   for (species in speciesNames) { # for each plot each species is a row
-    for (asex in c("M","F")) {
+    for (asex in c("F")) {
       # pull each species/Sex one at a time. 
       speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == asex) %>% dplyr::arrange(YEAR)
       # normalize data first

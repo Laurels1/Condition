@@ -60,6 +60,15 @@ print(head(condition$stom))
 Use the function `plot_condition`. It currently takes the argument condition$annualcond which is the output from the main function. You'll need to pass a character string for the name of the output jpg created. See the header of the function for "help" 
 ``` {r plot, echo=T, eval=T, message=F} 
 condMat <- plot_condition(condition$annualcond,filename = "condition_2018", out.dir = "output")
+
+ data.dir <- "data"
+condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_GOM.csv"))), filename = "GOM_condition_2018", out.dir = "output")
+
+condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_GB.csv"))), filename = "GB_condition_2018", out.dir = "output")
+                          
+condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_MAB.csv"))), filename = "MAB_condition_2018", out.dir = "output")
+                          
+condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_SS.csv"))), filename = "SS_condition_2018", out.dir = "output")                          
 ```
 
 ``` {r getplot, echo=F, eval=T, message=F} 
