@@ -38,6 +38,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
     for (asex in c("M","F")) {
       # pull each species/Sex one at a time. 
       speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == asex) %>% dplyr::arrange(YEAR)
+      if (dim(speciesData)[1] == 0) {next} # no data
       # normalize data first
       normData <- (speciesData$MeanCond - mean(speciesData$MeanCond,na.rm = T))/sd(speciesData$MeanCond,na.rm=T)
       # each year is placed in category 1-4 based on quantiles above
