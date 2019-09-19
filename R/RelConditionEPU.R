@@ -36,12 +36,12 @@ library(magrittr)
 #library(readr)
 
 #Turn off the function when running outside of function to test new code
-RelConditionEPU <- function(pullNewData=F,out.dir="output") {
+#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
-  if (!dir.exists(out.dir)) dir.create(out.dir)
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
   
 #Turn this on when running outside of function
-#out.dir="output"
+out.dir="output"
 
   data.dir <- "data"
   gis.dir  <- "gis"
@@ -278,16 +278,16 @@ condNSpp <- condN %>% dplyr::add_count(Species, EPU, sex) %>%
 readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
 
 condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
-readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
+readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2018_SS.csv"))
 
 condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
-readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
+readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2018_GOM.csv"))
 
 condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
-readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
+readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2018_GB.csv"))
 
 condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
-readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
+readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2018_MAB.csv"))
 
 
 #select fluke annual condition data:
@@ -302,6 +302,6 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 #write.csv(fluke, "Fluke_Cond.csv")
 
 #Comment out output while adding in code and running outside of the function
-return(list(annualcond=annualcond,stom = stom.epu))
+#return(list(annualcond=annualcond,stom = stom.epu))
 
-}
+#}
