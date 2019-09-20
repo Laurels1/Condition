@@ -1,0 +1,25 @@
+
+Family: gaussian 
+Link function: identity 
+
+Formula:
+RelCond ~ s(BOTTEMP, k = 10) + s(EXPCATCHNUM, k = 10) + s(LON, 
+    LAT, k = 25) + s(stom_full, k = 10)
+
+Parametric coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  99.1469     0.1624   610.4   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                  edf Ref.df     F  p-value    
+s(BOTTEMP)     0.2640      9 0.047   0.1754    
+s(EXPCATCHNUM) 0.7147      9 0.283   0.0573 .  
+s(LON,LAT)     9.2826     24 2.317 6.84e-11 ***
+s(stom_full)   5.2003      9 4.917 3.00e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.0752   Deviance explained = 8.56%
+GCV = 36.588  Scale est. = 36.148    n = 1370
