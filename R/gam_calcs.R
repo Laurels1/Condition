@@ -16,10 +16,10 @@ library(dplyr)
 ##Need to loop over species:
 #SppGAM <- dplyr::do(stom.epu, group_by(Species))
 
-spp <- unique(stom.epu$SVSPP)
+spp <- unique(stom.epu$Species)
 #spp <- spp[1]
 for(sp in spp) {
-condSPP <- stom.epu %>% dplyr::filter(SVSPP==sp)
+condSPP <- stom.epu %>% dplyr::filter(Species==sp)
   
    form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHNUM, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
                         #+s(EPU)  + s(stom_full))
