@@ -18,7 +18,6 @@ out.dir = "output"
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-##Need to figure out how to not drop NAs
 CondClean <- stom.epu %>% dplyr::filter((is.na(stom_full) | !(Species == "American Plaice" & stom_full >0.3)),
                                         (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
                                         (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
@@ -26,14 +25,14 @@ CondClean <- stom.epu %>% dplyr::filter((is.na(stom_full) | !(Species == "Americ
 
 #GAM analyses relating condition to environmental parameters, by species:
 
-spp <- unique(stom.epu$Species)
+spp <- unique(CondClean$Species)
 datalist = list()
 
 for(sp in spp) {
-condSPP <- stom.epu %>% dplyr::filter(Species==sp)
+condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-#condSPP <- stom.epu %>% dplyr::filter(SVSPP==13)
+#condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
 
    form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHNUM, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
                         #+s(EPU)
@@ -54,16 +53,20 @@ GAMnames=c('Species', 'bt.p', 'num.p', 'lon.lat.p', 'stom.p', 'r.sq', 'dev.expl'
 names(dl)=GAMnames
 datalist[[sp]] <- dl
 
+#Use for testing plot with single species
+#filename <-here::here(out.dir, paste0('Spiny Dogfish_condition.jpg'))
+
    filename <- here::here(out.dir,paste0(sp,"_condition.jpg"))
    jpeg(filename)
-   plot(condGAM, pages=1, residuals=TRUE, rug=T, cex=1.05, lwd=6) #show partial residuals
+   par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+   plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
    dev.off()
    
    #plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
  
    
 ### gam.check not working, erorr says could not find function "gam.check"
- #  gam.check(condGAM) # run model checks including checking smoothing basis dimensions
+#   gam.check(condGAM) # run model checks including checking smoothing basis dimensions
 }
 
 AllSPP = do.call(rbind, datalist)
