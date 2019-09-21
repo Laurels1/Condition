@@ -6,6 +6,9 @@
 
 #files
 *.html
+*.txt
+*.jpg
+
 
 # folders
 output/
