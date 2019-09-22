@@ -34,7 +34,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #turn on for testing a single species outside of loop:
 #condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
 
-   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHNUM, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
+   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25, by = EPU) +s(stom_full, k=10), data=condSPP)
                         #+s(EPU)
   
    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, select=T)
@@ -49,7 +49,7 @@ GAMstats <- summary(condGAM)
 SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3)))
 
 dl=data.frame(SumCondGAM)
-GAMnames=c('Species', 'bt.p', 'num.p', 'lon.lat.p', 'stom.p', 'r.sq', 'dev.expl', 'gcv')
+GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'Lat Lon', 'Stomach Fullness', 'R sq.', 'Deviance Explained', 'GCV')
 names(dl)=GAMnames
 datalist[[sp]] <- dl
 
@@ -71,5 +71,5 @@ datalist[[sp]] <- dl
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary_ExpcatchWt.csv"))   
 
