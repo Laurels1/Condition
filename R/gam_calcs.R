@@ -34,8 +34,8 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #turn on for testing a single species outside of loop:
 #condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
 
-   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25, by = EPU) +s(stom_full, k=10), data=condSPP)
-                        #+s(EPU)
+   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
+                        #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
   
    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, select=T)
   
