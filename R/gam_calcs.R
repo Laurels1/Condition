@@ -43,8 +43,8 @@ CondClean <- AvgStomLag %>% dplyr::filter((is.na(stom_full) | !(Species == "Amer
 spp <- unique(CondClean$Species)
 datalist = list()
 
-for(sp in spp) {
-condSPP <- CondClean %>% dplyr::filter(Species==sp)
+#for(sp in spp) {
+#condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
 condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
@@ -85,7 +85,7 @@ datalist[[sp]] <- dl
    
 ### gam.check not working, erorr says could not find function "gam.check"
 #   gam.check(condGAM) # run model checks including checking smoothing basis dimensions
-}
+#}
 
 AllSPP = do.call(rbind, datalist)
 
