@@ -15,8 +15,21 @@ library(readr)
 #turn on output dir when not using funtion
 out.dir = "output"
 
+load("~/EDAB/Condition/Condition/data/1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata")
+#View(Zooplankton_Primary_Prod)
+Calfin <- Zooplankton_Primary_Prod
+#head(Calfin)
+CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>% 
+  gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
+  mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
+         if_else(CalEPU=='SLI.gom', 'GOM',
+         if_else(CalEPU=='SLI.mab', 'MAB',
+         if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
+
+CondCal <- dplyr::left_join(stom.epu, CalfinFormat, by=c("YEAR", "EPU"))
+  
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
-AvgStom <- stom.epu %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(stom_full, na.rm=TRUE))
+AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(stom_full, na.rm=TRUE))
 ##Can't get lag and mutate to work
 #AvgStomLag <- AvgStom %>% dplyr::mutate(AvgStomLag1=(AvgStomFull %in% YEAR-1))
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
@@ -43,13 +56,13 @@ CondClean <- AvgStomLag %>% dplyr::filter((is.na(stom_full) | !(Species == "Amer
 spp <- unique(CondClean$Species)
 datalist = list()
 
-#for(sp in spp) {
-#condSPP <- CondClean %>% dplyr::filter(Species==sp)
+for(sp in spp) {
+condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
+#condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
 
-   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +(YEAR), data=condSPP)
+   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge), data=condSPP)
                          #+s(stom_full, k=10)                      
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
                         #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
@@ -66,7 +79,7 @@ GAMstats <- summary(condGAM)
 SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3)))
 
 dl=data.frame(SumCondGAM)
-GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'Lat Lon', 'Stomach Fullness', 'R sq.', 'Deviance Explained', 'GCV')
+GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'Lat Lon', 'Average Stomach Fullness Lag-1Year', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV')
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
 names(dl)=GAMnames
 datalist[[sp]] <- dl
@@ -85,9 +98,9 @@ datalist[[sp]] <- dl
    
 ### gam.check not working, erorr says could not find function "gam.check"
 #   gam.check(condGAM) # run model checks including checking smoothing basis dimensions
-#}
+}
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_test.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary_AvgStomLag_Copepod.csv"))   
 
