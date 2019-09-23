@@ -38,7 +38,7 @@ library(magrittr)
 #Turn off the function when running outside of function to test new code
 #RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
- # if (!dir.exists(out.dir)) dir.create(out.dir)
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
   
 #Turn this on when running outside of function
 out.dir="output"

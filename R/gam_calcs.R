@@ -17,8 +17,18 @@ out.dir = "output"
 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
 AvgStom <- stom.epu %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(stom_full, na.rm=TRUE))
-##Lag isn't working
-AvgStomLag <- AvgStom %>% dplyr::mutate(AvgStomLag1=AvgStomFull %in% YEAR-1)
+##Can't get lag and mutate to work
+#AvgStomLag <- AvgStom %>% dplyr::mutate(AvgStomLag1=(AvgStomFull %in% YEAR-1))
+#AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
+#Clunky way of lagging but it works:
+A <- AvgStom %>% select(YEAR, Species, EPU, sex, AvgStomFull)
+B <- unique(A)
+C <- B %>% dplyr::mutate(YEARstom= YEAR)
+D <- C %>% dplyr::ungroup()
+E <- D %>% dplyr::select(Species, YEARstom, EPU, sex, AvgStomFullLag=AvgStomFull)
+Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFull))
+AvgStomLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR", "EPU", "sex"))
 
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
@@ -37,9 +47,10 @@ for(sp in spp) {
 condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-#condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
+condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
 
-   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
+   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +(YEAR), data=condSPP)
+                         #+s(stom_full, k=10)                      
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
                         #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
   
@@ -56,6 +67,7 @@ SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAM
 
 dl=data.frame(SumCondGAM)
 GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'Lat Lon', 'Stomach Fullness', 'R sq.', 'Deviance Explained', 'GCV')
+#error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
 names(dl)=GAMnames
 datalist[[sp]] <- dl
 
@@ -77,5 +89,5 @@ datalist[[sp]] <- dl
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary_ExpcatchWt.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_test.csv"))   
 

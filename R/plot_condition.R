@@ -37,7 +37,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   for (species in speciesNames) { # for each plot each species is a row
     for (asex in c("M","F")) {
       # pull each species/Sex one at a time. 
-      speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == asex) %>% dplyr::arrange(YEAR)
+      speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == "F") %>% dplyr::arrange(YEAR)
       if (dim(speciesData)[1] == 0) {next} # no data
       # normalize data first
       normData <- (speciesData$MeanCond - mean(speciesData$MeanCond,na.rm = T))/sd(speciesData$MeanCond,na.rm=T)
