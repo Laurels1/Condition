@@ -14,11 +14,16 @@ library(readr)
 
 #turn on output dir when not using funtion
 out.dir = "output"
-  
+
+#Average stomach fullness by Species, YEAR, EPU and sex for the year before
+AvgStom <- stom.epu %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(stom_full, na.rm=TRUE))
+##Lag isn't working
+AvgStomLag <- AvgStom %>% dplyr::mutate(AvgStomLag1=AvgStomFull %in% YEAR-1)
+
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-CondClean <- stom.epu %>% dplyr::filter((is.na(stom_full) | !(Species == "American Plaice" & stom_full >0.3)),
+CondClean <- AvgStomLag %>% dplyr::filter((is.na(stom_full) | !(Species == "American Plaice" & stom_full >0.3)),
                                         (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
                                         (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
 
@@ -36,6 +41,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 
    form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10), data=condSPP)
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
+                        #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
   
    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, select=T)
   
