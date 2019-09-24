@@ -16,6 +16,11 @@ library(readr)
 out.dir = "output"
 data.dir <- "data"
 
+#Creating average Relative Condition and stomach fullness by tow
+AvgTowCond <- stom.epu %>% group_by(CRUISE6, STRATUM, STATION, TOW, Species, sex) %>% 
+  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowStomFull=(mean(stom_full))) %>%
+  unique(AvgTowRelCond)
+
 AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring.csv"))
 AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer.csv"))
 AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall.csv"))
@@ -73,7 +78,7 @@ CondClean <- AvgStomLag %>% dplyr::filter((is.na(stom_full) | !(Species == "Amer
                                         (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
 
 
-#GAM analyses relating condition to environmental parameters, by species:
+####GAM analyses relating condition to environmental parameters, by species:
 
 spp <- unique(CondClean$Species)
 datalist = list()
@@ -82,10 +87,28 @@ for(sp in spp) {
 condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-#condSPP <- CondClean %>% dplyr::filter(Species=='Spiny Dogfish')
+condSPP <- CondClean %>% dplyr::filter(Species=='Goosefish') %>% mutate(sp='Goosefish')
 
-   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge), data=condSPP)
-                         #+s(stom_full, k=10)                      
+#Full model
+   form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
+#Single index
+  #form.cond <- formula(RelCond ~ s(BOTTEMP, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(EXPCATCHWT, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(EXPCATCHNUM, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(LON, LAT, k=25), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(AvgStomFullLag, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(stom_full, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(CopepodSmallLarge, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(AvgTempSpring, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(AvgTempSummer, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(AvgTempFall, k=10), data=condSPP)
+  #form.cond <- formula(RelCond ~ s(AvgTempWinter, k=10), data=condSPP)
+#Eplains highest deviance:
+  #form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(stom_full, k=10) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring), data=condSPP)
+#Mechanisms model:
+  #form.cond <- formula(RelCond ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring), data=condSPP)
+
+
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
                         #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
   
@@ -98,18 +121,22 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 
 GAMstats <- summary(condGAM)
 
-SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3)))
+SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
 
 dl=data.frame(SumCondGAM)
-GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'Lat Lon', 'Average Stomach Fullness Lag-1Year', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV')
+#Full model output:
+GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT', 'AvgStomFull', 'CopepodSL', 'AvgTempSpring', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'AvgStomFull', 'CopepodSL', 'AvgTempSpring','YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+
+
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
 names(dl)=GAMnames
 datalist[[sp]] <- dl
 
 #Use for testing plot with single species
-#filename <-here::here(out.dir, paste0('Spiny Dogfish_condition.jpg'))
+filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
 
-   filename <- here::here(out.dir,paste0(sp,"_condition.jpg"))
+#   filename <- here::here(out.dir,paste0(sp,"_YEAR_condition.jpg"))
    jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
@@ -124,5 +151,5 @@ datalist[[sp]] <- dl
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary_AvgStomLag_Copepod.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Condition_Summary_Goose_YEAR.csv"))   
 
