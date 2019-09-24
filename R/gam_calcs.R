@@ -14,6 +14,28 @@ library(readr)
 
 #turn on output dir when not using funtion
 out.dir = "output"
+data.dir <- "data"
+
+AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring.csv"))
+AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer.csv"))
+AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall.csv"))
+AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter.csv"))
+
+AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::rename(YEAR=Year) %>%
+  gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
+
+AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::rename(YEAR=Year) %>%
+  gather(EPU, AvgTempSummer, c(GB, GOM,SS, MAB), na.rm=F)
+
+AvgTempFallFormat <- AvgTempFallData %>% dplyr::rename(YEAR=Year) %>%
+  gather(EPU, AvgTempFall, c(GB, GOM,SS, MAB), na.rm=F)
+
+AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::rename(YEAR=Year) %>%
+  gather(EPU, AvgTempWinter, c(GB, GOM,SS, MAB), na.rm=F)
+
+AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
+
+CondAvgTemp <- dplyr::left_join(stom.epu, AvgTemp, by=c("YEAR", "EPU"))
 
 load("~/EDAB/Condition/Condition/data/1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata")
 #View(Zooplankton_Primary_Prod)
@@ -26,7 +48,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% select(YEAR, SLI.gbk, 
          if_else(CalEPU=='SLI.mab', 'MAB',
          if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
-CondCal <- dplyr::left_join(stom.epu, CalfinFormat, by=c("YEAR", "EPU"))
+CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
   
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
 AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(stom_full, na.rm=TRUE))
