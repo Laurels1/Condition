@@ -28,14 +28,14 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   # values 0.75 > Q4
   yearRange <- c(min(annualCondition$YEAR):max(annualCondition$YEAR))
   # create an expanded grid to fill in missing years with NA's
-  fullTable <- dplyr::as_tibble(expand.grid(Species=speciesNames,YEAR= yearRange,sex = c("M","F"),stringsAsFactors = F))
+  fullTable <- dplyr::as_tibble(expand.grid(Species=speciesNames,YEAR= yearRange,sex = c("F"),stringsAsFactors = F))
   annualCondition <- dplyr::right_join(annualCondition,fullTable,by=c("Species","YEAR","sex"))
   
   #This section below is for plotting annual condition:
   conditionMatrix <- NULL# inital value
   rowNames <- NULL # initial value 
   for (species in speciesNames) { # for each plot each species is a row
-    for (asex in c("M","F")) {
+    for (asex in c("F")) {
       # pull each species/Sex one at a time. 
       speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == "F") %>% dplyr::arrange(YEAR)
       if (dim(speciesData)[1] == 0) {next} # no data
@@ -63,7 +63,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   # xaxis
    axis(1,at=seq(0,1,length.out=length(yearRange)),labels=yearRange,cex.axis = 0.8,las=2)
    # yaxis
-   axis(4,at=seq(0,1,length.out=length(rowNames)),labels=rowNames,cex.axis=0.5,las=1)
+   axis(4,at=seq(0,1,length.out=length(rowNames)),labels=rowNames,cex.axis=0.8,las=1)
   
    # legend
    par(mar = c(4.5, 8, 0.0, 14), fig = c(0, 1, 0, 0.1), new = T)

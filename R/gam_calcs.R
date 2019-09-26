@@ -114,22 +114,22 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #Full model
 #   form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
 #Single index
-#  form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
+# form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHWT, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
+# form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullLag, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
+  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
 #Eplains highest deviance:
 #  form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullStrata, k=10) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Mechanisms model:
-  form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=15) +s(EXPCATCHWT, k=15) +s(AvgStomFullLag, k=15) +s(CopepodSmallLarge, k=15) +s(AvgTempSpring, k=15), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 
 
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
@@ -150,11 +150,11 @@ dl=data.frame(SumCondGAM)
 #Full model output:
 #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #Full Model with reasonable mechanisms relating to condition changes:
-GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #Model with highest deviance explained:
 #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT','Stomach fullness','AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #single variable runs
-#GAMnames=c('Species', 'AvgStomFullStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'Year', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
@@ -164,7 +164,7 @@ datalist[[sp]] <- dl
 #Use for testing plot with single species
 #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
 
-   filename <- here::here(out.dir,paste0(sp,"_Mechanisms_AvgCondStrata.jpg"))
+   filename <- here::here(out.dir,paste0(sp,"_Year_AvgCondStrata.jpg"))
    jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
@@ -174,14 +174,14 @@ datalist[[sp]] <- dl
  
    
 #gam.check (run model checks including checking smoothing basis dimensions)
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_AvgCondStrata.txt")))
    
-   mgcv::gam.check(condGAM) 
+#   mgcv::gam.check(condGAM) 
    
-   sink()
+#   sink()
 }
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgRelCondStrata_Mechanisms.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgRelCondStrata_Year.csv"))   
 
