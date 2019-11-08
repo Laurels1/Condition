@@ -59,7 +59,7 @@ CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
-load("~/EDAB/Condition/Condition/data/1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata")
+load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
 Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
