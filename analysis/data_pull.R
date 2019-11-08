@@ -11,4 +11,4 @@
 fishCondition <- CondClean %>% dplyr::select(Species, sex, YEAR,EPU, RelCond,EXPCATCHWT,EXPCATCHNUM,stom_full,
                            AvgTempWinter,AvgTempSpring,AvgTempFall,AvgTempSummer,CopepodSmallLarge)
 
-save(fishCondition,file=here::here("output","fishCondition.rda"))
+save(fishCondition,file=here::here("analysis","fishcondition.rda"))
