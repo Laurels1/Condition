@@ -1,0 +1,130 @@
+---
+title: "Common trends in the condition of northwest Atlantic finfish"
+author: "Scott Large"
+date: "November 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, warnings = FALSE}
+library(ggplot2)
+library(dplyr)
+# remotes::install_github("fate-ewi/bayesdfa")
+library(bayesdfa)
+library(rstan)
+
+## Set up multicore
+options(mc.cores = parallel::detectCores()-1)
+
+```
+
+
+> I just dropped in to see what condition my condition was in...
+> -- Kenny Rogers
+
+Load the data
+
+```{r load-data}
+## Load in data
+load(here::here("data/fishcondition.rda"))
+
+dat <- fishCondition %>% 
+  dplyr::mutate(name = gsub(" ", "_", tolower(Species))) %>% 
+  dplyr::group_by(name, EPU, sex, YEAR) %>% 
+  dplyr::summarize(MeanCond = mean(RelCond),
+                   nCond = n()) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(nCond > 2,
+                !name %in% c("atl_herring", "haddock", "mackerel", "sea_raven", "white_hake",
+                             "ocean_pout", "witch_flounder"),
+                EPU == "MAB",
+                sex == "F") %>% 
+  dplyr::select(YEAR,
+                MeanCond,
+                name) %>% 
+  dplyr::group_by(name) %>% 
+  dplyr::mutate(MeanCond = scale(MeanCond, scale = TRUE, center = TRUE)) %>% 
+  dplyr::arrange(YEAR)
+
+dat_wide <- dat %>% 
+  tidyr::pivot_wider(values_from = MeanCond) %>% 
+  dplyr::select(-YEAR) %>%
+  t() %>% 
+  as.matrix()
+
+dat_time <- as.integer(unique(dat$YEAR))
+dat_name <- as.character(unique(dat$name))
+
+```
+
+
+```{r test-dfa, message = FALSE, warning = FALSE}
+
+
+matplot(t(dat_wide),
+  type = "l",
+  ylab = "Response", xlab = "Time"
+)
+
+
+m <- find_dfa_trends(y = dat_wide, 
+                     iter = 2000, 
+                     zscore = FALSE,
+                     kmin = 1, 
+                     kmax = 4, 
+                     chains = 4, 
+                     compare_normal = TRUE,
+                     variance = c("equal", "unequal"))
+saveRDS(m, here::here("analysis/best_model_test.rds"))
+
+# m <- readRDS(here::here("analysis/best_model_test.rds"))
+
+
+f1 <- m$best_model
+r <- rotate_trends(f1)
+
+plot_trends(r, years = dat_time) + theme_minimal()
+plot_fitted(f1, names = dat_name) + theme_minimal()
+plot_loadings(r, names = dat_name, violin = FALSE) + theme_minimal()
+```
+
+
+<!-- f1 <- fit_dfa( -->
+<!--   y = sim_dat$y_sim, num_trends = 1, zscore = TRUE, -->
+<!--   iter = 200, chains = 1, thin = 1 -->
+<!-- ) -->
+<!-- is_converged(f1, threshold = 1.05) -->
+
+
+<!-- r <- rotate_trends(f1) -->
+<!-- names(r) -->
+<!-- plot_trends(r) -->
+<!-- plot_fitted(f1) -->
+
+<!-- f2 <- fit_dfa( -->
+<!--   y = sim_dat$y_sim, num_trends = 2, zscore = TRUE, -->
+<!--   iter = 200, chains = 1, thin = 1 -->
+<!-- ) -->
+<!-- r2 <- rotate_trends(f2) -->
+<!-- f3 <- fit_dfa( -->
+<!--   y = sim_dat$y_sim, num_trends = 3, zscore = TRUE, -->
+<!--   iter = 200, chains = 1, thin = 1 -->
+<!-- ) -->
+<!-- r3 <- rotate_trends(f3) -->
+
+<!-- plot_fitted(f2) -->
+<!-- round(r2$Z_rot_mean, 2) -->
+<!-- plot_loadings(r2) -->
+
+<!-- loo1 <- loo(f1) -->
+<!-- loo1$estimates -->
+
+<!-- m <- find_dfa_trends( -->
+<!--   y = s$y_sim, iter = 180, -->
+<!--   kmin = 1, kmax = 5, chains = 1, compare_normal = TRUE, -->
+<!--   variance = c("equal", "unequal") -->
+<!-- ) -->
+
