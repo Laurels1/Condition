@@ -20,7 +20,7 @@ If knitting this document doesn't work using the knit button try this:
 * `utilities.R` - collection of small functions used in plotting
 * `install_cond_packages.R` - installs all required packages (This will eventually be redundant since we will turn into
 an R package)
-* `gam_calcs.R` - where GAM analyses are done. NOT CODED YET
+#* `gam_calcs.R` - where GAM analyses are done. NOT CODED YET
 
 ### Data included
 
@@ -50,7 +50,7 @@ gam_calcs(condition$stom,out.dir="output")
 The argument `pullNewData` is a boolean indicating whether to pull directly from the SVDBS database (TRUE) (for which you'll need to enter Oracle credentials) or to use a previously pulled dat set (FALSE, which is quicker!)
 The argument `out.dir` specifies the name of the output directory that will be created (within the current working directory) to store output files
 ``` {r main, echo=T, eval=T, message=F} 
-condition <- RelConditionEPU(pullNewData = FALSE, out.dir="output")
+condition <- RelConditionEPU(pullNewData = TRUE, out.dir="output")
 print(condition$annualcond)
 print(head(condition$stom))
 ```
@@ -59,20 +59,27 @@ print(head(condition$stom))
 
 Use the function `plot_condition`. It currently takes the argument condition$annualcond which is the output from the main function. You'll need to pass a character string for the name of the output jpg created. See the header of the function for "help" 
 ``` {r plot, echo=T, eval=T, message=F} 
-condMat <- plot_condition(condition$annualcond,filename = "condition_2018", out.dir = "output")
+#These aren't working:
+condMat <- plot_condition(condition$annualcond,filename = "condition_2019", out.dir = "output")
 
- data.dir <- "data"
-condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_GOM.csv"))), filename = "GOM_condition_2018", out.dir = "output")
+condGOM <- plot_condition(annualCondition=condSS, filename = "GOM_condition_2019", out.dir = "output")
 
-condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_GB.csv"))), filename = "GB_condition_2018", out.dir = "output")
+condMat <- plot_condition(annualCondition=condGB, filename = "GB_condition_2019", out.dir = "output")
                           
-condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_MAB.csv"))), filename = "MAB_condition_2018", out.dir = "output")
+condMat <- plot_condition(annualCondition=condMAB, filename = "MAB_condition_2019", out.dir = "output")
                           
-condMat <- plot_condition((readr::read_csv(here::here(data.dir, "AnnualRelCond2018_SS.csv"))), filename = "SS_condition_2018", out.dir = "output")                          
+condMat <- plot_condition(annualCondition=condSS, filename = "SS_condition_2019", out.dir = "output")                          
+
+#Used these for 2019 SOE instead:
+#condShelf <- plot_condition(condNshelfSpp,filename = "Shelf_condition_2019", out.dir = "output")
+condShelf <- plot_condition(condGOM,filename = "GOM_condition_2019", out.dir = "output")
+condShelf <- plot_condition(condGB,filename = "GB_condition_2019", out.dir = "output")
+condShelf <- plot_condition(condMAB,filename = "MAB_condition_2019", out.dir = "output")
+
 ```
 
 ``` {r getplot, echo=F, eval=T, message=F} 
-knitr::include_graphics(here::here("output","condition_2018.jpg"))
+knitr::include_graphics(here::here("output","condition_2019.jpg"))
 
 ```
 
@@ -81,12 +88,11 @@ knitr::include_graphics(here::here("output","condition_2018.jpg"))
 ### Gam stuff
 
 This function exists but is not complete
-``` {r gam, echo=T, eval=F, message=F} 
-gam_calcs(condition$stom,out.dir = "output")
-```
+#``` {r gam, echo=T, eval=F, message=F} 
+#gam_calcs(condition$stom,out.dir = "output")
+#```
 
 
 
 
-I hope this reorganization helps you and doesn't hinder your progress. Please let me know if i have caused more problems for you.
 

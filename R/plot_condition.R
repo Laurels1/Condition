@@ -17,11 +17,23 @@
 #' @export
 
 
-plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
+plot_condition <- function(annualCondition,filename= "test1",out.dir = "output") {
+    
+  speciesNames <- annualCondition %>% dplyr::filter(sex == "F") %>%
+    dplyr::select(Species) %>%
+    dplyr::distinct(Species)
+  speciesNames <- speciesNames$Species
+  print(speciesNames)
   
-  speciesNames <- unique(annualCondition$Species)
+  #speciesNames <- sort(unique(annualCondition$Species))
+    
+  #List species alphabetically, doesn't work:
+  #speciesNames <- annualCondition$Species %>% dplyr::distinct(Species) %>% dplyr::arrange(desc(Species))  
   # quantiles to group into
-  quantilesNormal <- qnorm(c(0.25,0.5,0.75)) 
+#    quantilesNormal <- qnorm(c(0.25,0.5,0.75)) 
+  #5 groupings:
+     quantilesNormal <- qnorm(c(0.2,0.4,0.6,0.8)) 
+     nQuants <- length(quantilesNormal)+1
   # values Q1 <= 0.25
   # values 0.25 > Q2 <= 0.5
   # values 0.5 > Q3 <= 0.75
@@ -34,9 +46,10 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
   #This section below is for plotting annual condition:
   conditionMatrix <- NULL# inital value
   rowNames <- NULL # initial value 
-  for (species in speciesNames) { # for each plot each species is a row
+  for (species in speciesNames) { # each species is a row in the plot
     for (asex in c("F")) {
       # pull each species/Sex one at a time. 
+      
       speciesData <- annualCondition %>% dplyr::filter(Species == species & sex == "F") %>% dplyr::arrange(YEAR)
       if (dim(speciesData)[1] == 0) {next} # no data
       # normalize data first
@@ -47,7 +60,7 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
         quant <- quant + (normData > iq)
       }
       conditionMatrix <- rbind(conditionMatrix,quant)
-      rowNames <- rbind(rowNames,paste0(species," - ",asex))
+      rowNames <- rbind(rowNames,paste0(species))
     }
   }
     # convert to dataframe and add row and column names
@@ -59,18 +72,22 @@ plot_condition <- function(annualCondition,filename="temp",out.dir = "output") {
    jpeg(filename = here::here(out.dir,paste0(filename,".jpg")), res = 200, height = 2000, width = 1450)
    graph.colors<-colorRampPalette(c('#C6E2FF','#00008B'))
    par(mar = c(4, 2, 2, 11), fig = c(0, 1, 0.1, 1))
-   image(t(conditionMatrix),xaxt="n",yaxt="n",col=graph.colors(4))
+   image(t(conditionMatrix),xaxt="n",yaxt="n",col=graph.colors(nQuants))
   # xaxis
    axis(1,at=seq(0,1,length.out=length(yearRange)),labels=yearRange,cex.axis = 0.8,las=2)
-   # yaxis
+   # yaxis (need to arrange in alphabetical)
    axis(4,at=seq(0,1,length.out=length(rowNames)),labels=rowNames,cex.axis=0.8,las=1)
   
    # legend
    par(mar = c(4.5, 8, 0.0, 14), fig = c(0, 1, 0, 0.1), new = T)
-   image(x=seq(0, 1, by = 1 / 4), z = t(matrix(1:4,1,4)), axes = F, col = graph.colors(4), xlim = c(0,1), ylim = c(0,1),xlab="")
-   axis(1, at = seq(1/8, 1, by = 1 / 4), labels = c( 1, 2, 3, 4), cex = 2)
-   axis(2,at = 0.5, labels="Quantile",las=2)
-   box()
+#   image(x=seq(0, 1, by = 1 / 4), z = t(matrix(1:4,1,4)), axes = F, col = graph.colors(4), xlim = c(0,1), ylim = c(0,1),xlab="")
+#   axis(1, at = seq(1/8, 1, by = 1 / 4), labels = c( 1, 2, 3, 4), cex = 2)
+#   axis(2,at = 0.5, labels="Quantile",las=2)
+  #legend for 5 groupings:
+   image(x=seq(0, 1, by = 1 / nQuants), z = t(matrix(1:nQuants,1,nQuants)), axes = F, col = graph.colors(nQuants), xlim = c(0,1), ylim = c(0,1),xlab="")
+   axis(1, at = seq(1/8, 1, by = 1 / nQuants), labels = c( "Very bad", "Bad", "Neutral", "Good", "Very Good"), cex = 2)
+   #axis(2,at = 0.5,las=2)
+    box()
    dev.off()
    
    return(conditionMatrix)
