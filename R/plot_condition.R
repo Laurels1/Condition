@@ -72,7 +72,7 @@ plot_condition <- function(annualCondition,filename= "test1",out.dir = "output")
 #   jpeg(filename = here::here(out.dir,paste0(filename,".jpg")), res = 200, height = 2000, width = 1450)
    jpeg(filename = here::here(out.dir,paste0(filename,".jpg")), res = 200, height = 1350, width = 1450)
 #  graph.colors<-colorRampPalette(c('#C6E2FF','#00008B')) #blue color palette
-  graph.colors<-colorRampPalette(c('steelblue2','tomato2')) #blue color palette
+  graph.colors<-colorRampPalette(c('steelblue2','gray77','tomato2')) #blue color palette
 #   graph.colors <- colorspace::diverge_hcl #Red lowest, blue highest
 #  graph.colors <- RColorBrewer::brewer.pal(5, "RdBu") #Divergent ramp red to blue
 #  par(mar = c(4, 2, 2, 11), fig = c(0, 1, 0.1, 1)) #fig indicates how much of plot to take up, with c(0,1,0,1) being the whole space
