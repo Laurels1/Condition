@@ -53,11 +53,11 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = s
   coord_equal() +
   scale_fill_viridis_c() +
   theme_bw() +
-  scale_fill_discrete(labels = c( "Poor Condition", 
-                                  "Bad",
-                                  "Neutral",
-                                  "Good",
-                                  "Good Condition")) +
+#  scale_fill_discrete(labels = c( "Poor Condition", 
+#                                  "Bad",
+#                                  "Neutral",
+#                                  "Good",
+#                                  "Good Condition")) +
   scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
   theme(legend.position = "bottom", legend.title = element_blank(), 
  #       legend.text = element_text(labels = c("-2" = "Poor Condition", 
