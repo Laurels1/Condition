@@ -58,7 +58,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = s
 #                                  "Neutral",
 #                                  "Good",
 #                                  "Good Condition")) +
-  scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
+  #scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
   theme(legend.position = "bottom", legend.title = element_blank(), 
  #       legend.text = element_text(labels = c("-2" = "Poor Condition", 
 #                                               "0" = "Neutral",
@@ -67,6 +67,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = s
         axis.text.y = element_text(size = 8), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 
+plot(p2)
 ggsave("MABcondition_2019_viridis.jpg", width = 6, height = 3.75, units = "in", dpi = 300)
 
 #p1 + p2
