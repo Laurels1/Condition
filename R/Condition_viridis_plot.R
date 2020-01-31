@@ -2,6 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(patchwork)
 library(forcats)
+library(scales)
 
 
 #annualCondition <- read.csv("https://raw.githubusercontent.com/Laurels1/Condition/master/data/AnnualRelCond2018_GB.csv",
@@ -20,22 +21,29 @@ speciesNames <- annualCondition %>%
 xs = quantile(speciesNames$scaleCond, seq(0,1, length.out = 6), na.rm = TRUE)
 
 speciesNames <- speciesNames %>% 
-  mutate(category = cut(scaleCond, breaks = xs, labels = c( "Poor Condition", 
-                                                            "Bad",
-                                                            "Neutral",
-                                                            "Good",
-                                                            "Good Condition")))
+  mutate(category = cut(scaleCond, breaks = xs
+                        #, labels = c( "Poor Condition", 
+                        #                                    "Bad",
+                        #                                    "Neutral",
+                        #                                    "Good",
+                        #                                    "Good Condition")
+                        ))
 
 
 sortNames <- speciesNames %>% 
-  filter(YEAR <= 2014) %>%
+  filter(YEAR > 2014) %>%
   group_by(Species) %>% 
   summarize(total = sum(scaleCond)) %>% 
-  arrange(total) %>% 
+  arrange(desc(total)) %>% 
   mutate(Species = factor(Species, levels = unique(Species))) %>%
   pull(Species)
 
 speciesNames$Species <-   factor(speciesNames$Species, levels = sortNames)
+
+#See 5 scale colors for viridis:
+#scales::show_col(viridis::viridis_pal()(5))
+vir <- viridis::viridis_pal()(5)
+
 
 #jpeg("test.MABcondition_2019.jpg", res = 200, height = 1350, width = 1450)
 
@@ -49,9 +57,14 @@ speciesNames$Species <-   factor(speciesNames$Species, levels = sortNames)
 #ggsave("MABcondition_2019_test.jpg", width = 6, height = 4, units = "in", dpi = 300)
 
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = scaleCond)) +
+ # p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = scaleCond)) +
   geom_tile() +
   coord_equal() +
-  scale_fill_viridis_c() +
+  scale_fill_viridis_c(breaks= xs, values= vir, labels = c("Poor Condition", 
+                                           "Lower",
+                                           "Neutral",
+                                           "Higher",
+                                           "Good Condition")) +
   theme_bw() +
 #  scale_fill_discrete(labels = c( "Poor Condition", 
 #                                  "Bad",
