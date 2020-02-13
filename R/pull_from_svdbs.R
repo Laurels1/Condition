@@ -12,7 +12,7 @@
 pull_from_svdbs<- function(uid) {
   
  # makes a connection
-  sole <- connect_to_database("sole",uid=uid)
+  sole <- dbutils::connect_to_database("sole",uid=uid)
   qry <- c(
     "select b.cruise6,b.stratum,b.tow,b.station,
   s.est_year year,season, est_month month,est_day day,
