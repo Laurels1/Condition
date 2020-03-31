@@ -24,11 +24,7 @@ plot_condition <- function(annualCondition,filename= "test1",out.dir = "output")
     dplyr::distinct(Species)
   speciesNames <- speciesNames$Species
   print(speciesNames)
-  
-  #speciesNames <- sort(unique(annualCondition$Species))
-    
-  #List species alphabetically, doesn't work:
-  #speciesNames <- annualCondition$Species %>% dplyr::distinct(Species) %>% dplyr::arrange(desc(Species))  
+
   # quantiles to group into
 #    quantilesNormal <- qnorm(c(0.25,0.5,0.75)) 
   #5 groupings:
@@ -38,10 +34,17 @@ plot_condition <- function(annualCondition,filename= "test1",out.dir = "output")
   # values 0.25 > Q2 <= 0.5
   # values 0.5 > Q3 <= 0.75
   # values 0.75 > Q4
+     
+  #remove 2017 data if in MAB:
+  annualCondition <- annualCondition %>% dplyr::filter(!(EPU == "MAB" & YEAR == 2017))
+     
   yearRange <- c(min(annualCondition$YEAR):max(annualCondition$YEAR))
   # create an expanded grid to fill in missing years with NA's
   fullTable <- dplyr::as_tibble(expand.grid(Species=speciesNames,YEAR= yearRange,sex = c("F"),stringsAsFactors = F))
   annualCondition <- dplyr::right_join(annualCondition,fullTable,by=c("Species","YEAR","sex"))
+  
+  #remove 2017 data if in MAB:
+#  annualCondition <- annualCondition %>% dplyr::filter(!(EPU == "MAB" & YEAR == 2017))
   
   #This section below is for plotting annual condition:
   conditionMatrix <- NULL# inital value
@@ -72,7 +75,11 @@ plot_condition <- function(annualCondition,filename= "test1",out.dir = "output")
 #   jpeg(filename = here::here(out.dir,paste0(filename,".jpg")), res = 200, height = 2000, width = 1450)
    jpeg(filename = here::here(out.dir,paste0(filename,".jpg")), res = 200, height = 1350, width = 1450)
 #  graph.colors<-colorRampPalette(c('#C6E2FF','#00008B')) #blue color palette
-  graph.colors<-colorRampPalette(c('steelblue2','gray77','tomato2')) #blue color palette
+   #printer and color blind frindly color scales:
+#   install.packages("viridis")
+#   library(viridis)
+#   viridis_pal(option = "D")(5) 
+  graph.colors<-colorRampPalette(c('steelblue2','gray77','tomato2')) #blue, gray, red color palette
 #   graph.colors <- colorspace::diverge_hcl #Red lowest, blue highest
 #  graph.colors <- RColorBrewer::brewer.pal(5, "RdBu") #Divergent ramp red to blue
 #  par(mar = c(4, 2, 2, 11), fig = c(0, 1, 0.1, 1)) #fig indicates how much of plot to take up, with c(0,1,0,1) being the whole space
