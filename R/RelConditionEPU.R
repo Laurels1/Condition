@@ -17,31 +17,32 @@ source("R/connect_to_database.R")
 source("R/pull_from_svdbs.R")
 source("R/utilities.R")
 source("R/plot_condition.R")
+#source("R/StomFullnessData_allfh.R")
 #Required packages
 #library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
+library(Survdat)
 library(data.table)
 # library(graphics)
 # library(grDevices)
 #library(TeachingDemos)
-#library(dplyr)
-#library(tidyr)
+library(dplyr)
+library(tidyr)
 library(tidyverse)
 #library(gapminder)
 library(rgdal)
-library(Survdat)
-#library(RODBC)
+library(RODBC)
 #library(gam)
 library(magrittr)
 #library(readr)
 
 #Turn off the function when running outside of function to test new code
-RelConditionEPU <- function(pullNewData=T,out.dir="output") {
+#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
   # create output directory if it doesnt exist
-  if (!dir.exists(out.dir)) dir.create(out.dir)
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
   
 #Turn this on when running outside of function
-#out.dir="output"
+ out.dir="output"
 
   data.dir <- "data"
   gis.dir  <- "gis"
@@ -70,7 +71,10 @@ if (pullNewData == T) {
   # Otherwise, load data below:
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
-  survey <- readRDS(here::here(out.dir, "NEFSC_survey_data_12-12-19.rds"))
+  #or if that doesn't work:
+  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
+  survey 
+  #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
 }
   
  
@@ -155,119 +159,101 @@ cond <- dplyr::mutate(mergeindwt,
 
 #unique(cond$YEAR)
 
-#This adds columns for stomach fullness without deleting rows with NA stomach data:
-stom <- cond
-stom$'stom_grams' <- NA
-stom[!is.na(stom$STOM_WGT),'stom_grams'] <- stom[!is.na(stom$STOM_WGT),'STOM_WGT']
-stom[is.na(stom$STOM_WGT),'stom_grams'] <- stom[is.na(stom$STOM_WGT),'STOM_VOLUME']
-
-#stom.new <- stom[,c('STOM_WGT',"STOM_VOLUME",'stom_grams')]
-#stom.new[!is.na(stom.new$STOM_WGT),]
-
-stom$'stom_full' <- NA
-stom$'stom_full' <- (stom$'stom_grams'/1000)/stom$'INDWT'
-
-stom <- dplyr::filter(stom, is.na(stom_full) | stom_full <1)
-stom <- dplyr::filter(stom, !is.na(YEAR))
-
-#View(cond)
-#View(stom)
-
 #Parse condition data by EPU:
 #Grab strata
 #load(file.path(data.dir, 'Survdat.RData'))
 
 strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
-data.table::setnames(stom,"BEGLAT","LAT") # change name of column header
-data.table::setnames(stom,"BEGLON","LON")
-stom <- stom %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
+data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
+data.table::setnames(cond,"BEGLON","LON")
+cond <- cond %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
 
-stom.epu <- Survdat::poststrat(as.data.table(stom), strata)
-data.table::setnames(stom.epu, 'newstrata', 'EPU')
+cond.epu <- Survdat::poststrat(as.data.table(cond), strata)
+data.table::setnames(cond.epu, 'newstrata', 'EPU')
 #check if scup exists, doesn't because LWparams only have unsexed 
-#sort(unique(stom.epu$SEX[stom.epu$SVPP==143]))
+#sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
 
-#View(stom.epu)
-#stomno <- filter(stom.epu, is.na(SEX))
+#View(cond.epu)
+#condno <- filter(cond.epu, is.na(SEX))
 
 #summarize condition as annual average:
 
-condstdev <- aggregate(stom.epu$RelCond, by = list('SVSPP'=stom.epu$SVSPP), sd)
+condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
 names(condstdev)[ncol(condstdev)] = 'condSD'
 
-stom.001wgt <- subset(stom.epu, stom.epu$INDWT == 0.001)
-condClean <- subset(stom.epu, stom.epu$INDWT > 0.001)
+cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
+condClean <- subset(cond.epu, cond.epu$INDWT > 0.001)
 
 
-condsd <- merge(condClean, condstdev, by='SVSPP', all.stom.epu=T, all.condClean = F)
-stom.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond > (100-condsd$condSD))
-#stom.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
+condsd <- merge(condClean, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
+cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond > (100-condsd$condSD))
+#cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
 
+cond.epu <- cond.sd %>% dplyr::filter(is.na(SEX) | SEX != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
+cond.epu <- cond.epu %>% dplyr::filter(is.na(SEX) | SEX != 4)
 
-
-
-stom.epu <- stom.sd %>% dplyr::filter(is.na(SEX) | SEX != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
-stom.epu <- stom.epu %>% dplyr::filter(is.na(SEX) | SEX != 4)
-
-stom.epu <- stom.epu %>% dplyr::mutate(sex = SEX)
+cond.epu <- cond.epu %>% dplyr::mutate(sex = SEX)
 
 #recoding SEX (1,2) to sex (M, F)
-stom.epu$sex[stom.epu$SEX==1] <- 'M'
-stom.epu$sex[stom.epu$SEX==2] <- 'F'
+cond.epu$sex[cond.epu$SEX==1] <- 'M'
+cond.epu$sex[cond.epu$SEX==2] <- 'F'
 
 
 
 #Tried to use LOGGED_SPECIES_NAME for species names, but doesn't exist before 2001 and too many version of names
 #Names for SVSPP codes '013','015','023','026','028','032','072','073','074','075','076','077','078','102','103','104','105','106','107','108','121','131','135','141','143','145','155','164','193','197':
-stom.epu <- stom.epu %>% dplyr::mutate(Species = SVSPP)
+cond.epu <- cond.epu %>% dplyr::mutate(Species = SVSPP)
 
-stom.epu$Species[stom.epu$SVSPP==013] <- 'Smooth Dogfish'
-stom.epu$Species[stom.epu$SVSPP==015] <- 'Spiny Dogfish'
-stom.epu$Species[stom.epu$SVSPP==023] <- 'Winter Skate'
-stom.epu$Species[stom.epu$SVSPP==026] <- 'Little Skate'
-stom.epu$Species[stom.epu$SVSPP==028] <- 'Thorny Skate'
-stom.epu$Species[stom.epu$SVSPP==032] <- 'Atl Herring'
-stom.epu$Species[stom.epu$SVSPP==072] <- 'Silver Hake'
-stom.epu$Species[stom.epu$SVSPP==073] <- 'Atl Cod'
-stom.epu$Species[stom.epu$SVSPP==074] <- 'Haddock'
-stom.epu$Species[stom.epu$SVSPP==075] <- 'Pollock'
-stom.epu$Species[stom.epu$SVSPP==076] <- 'White Hake'
-stom.epu$Species[stom.epu$SVSPP==077] <- 'Red Hake'
-stom.epu$Species[stom.epu$SVSPP==078] <- 'Spotted Hake'
-stom.epu$Species[stom.epu$SVSPP==102] <- 'American Plaice'
-stom.epu$Species[stom.epu$SVSPP==103] <- 'Summer Flounder'
-stom.epu$Species[stom.epu$SVSPP==104] <- 'Fourspot'
-stom.epu$Species[stom.epu$SVSPP==105] <- 'Yellowtail'
-stom.epu$Species[stom.epu$SVSPP==106] <- 'Winter Flounder'
-stom.epu$Species[stom.epu$SVSPP==107] <- 'Witch Flounder'
-stom.epu$Species[stom.epu$SVSPP==108] <- 'Windowpane Flounder'
-stom.epu$Species[stom.epu$SVSPP==121] <- 'Mackerel'
-stom.epu$Species[stom.epu$SVSPP==131] <- 'Butterfish'
-stom.epu$Species[stom.epu$SVSPP==135] <- 'Bluefish'
-stom.epu$Species[stom.epu$SVSPP==141] <- 'Black Sea Bass'
-stom.epu$Species[stom.epu$SVSPP==143] <- 'Scup'
-stom.epu$Species[stom.epu$SVSPP==145] <- 'Weakfish'
-stom.epu$Species[stom.epu$SVSPP==155] <- 'Acadian Redfish'
-stom.epu$Species[stom.epu$SVSPP==164] <- 'Sea Raven'
-stom.epu$Species[stom.epu$SVSPP==193] <- 'Ocean Pout'
-stom.epu$Species[stom.epu$SVSPP==197] <- 'Goosefish'
-# 
-
+cond.epu$Species[cond.epu$SVSPP==013] <- 'Smooth Dogfish'
+cond.epu$Species[cond.epu$SVSPP==015] <- 'Spiny Dogfish'
+cond.epu$Species[cond.epu$SVSPP==023] <- 'Winter Skate'
+cond.epu$Species[cond.epu$SVSPP==026] <- 'Little Skate'
+cond.epu$Species[cond.epu$SVSPP==028] <- 'Thorny Skate'
+cond.epu$Species[cond.epu$SVSPP==032] <- 'Atl Herring'
+cond.epu$Species[cond.epu$SVSPP==072] <- 'Silver Hake'
+cond.epu$Species[cond.epu$SVSPP==073] <- 'Atl Cod'
+cond.epu$Species[cond.epu$SVSPP==074] <- 'Haddock'
+cond.epu$Species[cond.epu$SVSPP==075] <- 'Pollock'
+cond.epu$Species[cond.epu$SVSPP==076] <- 'White Hake'
+cond.epu$Species[cond.epu$SVSPP==077] <- 'Red Hake'
+cond.epu$Species[cond.epu$SVSPP==078] <- 'Spotted Hake'
+cond.epu$Species[cond.epu$SVSPP==102] <- 'American Plaice'
+cond.epu$Species[cond.epu$SVSPP==103] <- 'Summer Flounder'
+cond.epu$Species[cond.epu$SVSPP==104] <- 'Fourspot'
+cond.epu$Species[cond.epu$SVSPP==105] <- 'Yellowtail'
+cond.epu$Species[cond.epu$SVSPP==106] <- 'Winter Flounder'
+cond.epu$Species[cond.epu$SVSPP==107] <- 'Witch Flounder'
+cond.epu$Species[cond.epu$SVSPP==108] <- 'Windowpane Flounder'
+cond.epu$Species[cond.epu$SVSPP==121] <- 'Mackerel'
+cond.epu$Species[cond.epu$SVSPP==131] <- 'Butterfish'
+cond.epu$Species[cond.epu$SVSPP==135] <- 'Bluefish'
+cond.epu$Species[cond.epu$SVSPP==141] <- 'Black Sea Bass'
+cond.epu$Species[cond.epu$SVSPP==143] <- 'Scup'
+cond.epu$Species[cond.epu$SVSPP==145] <- 'Weakfish'
+cond.epu$Species[cond.epu$SVSPP==155] <- 'Acadian Redfish'
+cond.epu$Species[cond.epu$SVSPP==164] <- 'Sea Raven'
+cond.epu$Species[cond.epu$SVSPP==193] <- 'Ocean Pout'
+cond.epu$Species[cond.epu$SVSPP==197] <- 'Goosefish'
 
 #Summarize annually and filter based on count of condition data by species
-annualcond <- stom.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>% 
   dplyr::filter(n >= 20)
 
 
 #Summarize annually by EPU
-annualcondEPU <- stom.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSpp <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
   dplyr::filter(n >= 20)
 
+#Summarize annually by Strata
+annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcondStrata, nCond>=3)
+condNSpp <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>% 
+  dplyr::filter(n >= 20)
 #Format output to be read into plotting function:
 
 

@@ -16,16 +16,20 @@ library(readr)
 out.dir = "output"
 data.dir <- "data"
 
+gis.dir  <- "gis"
+
 #-------------------------------------------------------------
+source("R/StomFullnessData_allfh.R")
+
 #Explore different ways of aggregating Relative Condition:
 #Creating Average Relative Condition and Average Stomach Fullness by tow, species, sex
 #AvgTowCond <- stom.epu %>% group_by(CRUISE6, STRATUM, STATION, TOW, Species, sex) %>% 
 #  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowStomFull=(mean(stom_full))) %>%
 #  distinct(AvgTowRelCond, .keep_all = T)
 
-#Creating Average Relative Condition and Average Stomach Fullness by strata, species, sex
-AvgStrataCond <- stom.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-  mutate(AvgRelCondStrata=(mean(RelCond)), AvgStomFullStrata=(mean(stom_full))) %>%
+#Creating Average Relative Condition by strata, species, sex
+AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+  mutate(AvgRelCondStrata=(mean(RelCond))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
@@ -74,26 +78,56 @@ CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
  
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
-AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(AvgStomFullStrata, na.rm=TRUE))
+#This brings in stomach fullness data from allfh database (from StomFullnessData_allfh.R):
+#average stomach fullness by EPU:
+stomdata <- stom
+
+#Creating Average Fall Stomach Fullness by year, STRATUM, species, sex
+AvgStomFullStrata <- stomdata %>% dplyr::filter(season == "FALL") %>%
+  group_by(year, STRATUM, Species, pdsex) %>% 
+  mutate(AvgStomFullStrata=(mean(stom_full)))
+
+#Creating Average Fall Stomach Fullness by year, EPU, species, sex
+AvgStomFullEPU <- AvgStomFullStrata %>% dplyr::filter(season == "FALL") %>%
+  group_by(year, EPU, Species, pdsex) %>% 
+  mutate(AvgStomFullEPU=(mean(stom_full)))
+
+# change stomach data variables to merge with condition data: 
+#year, season, EPU, Species, pdid, pdsex, pdwgt
+stom.data <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
+  distinct(YEAR, STRATUM, EPU, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullEPU, AvgStomFullStrata)
+
+#merge stomach fullness into condition data:
+#####Error with STRATUM being interger/factor:
+AvgStom <- dplyr::left_join(CondCal, stom.data, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX'))
+
+#Old code for stomach data not from allfh:
+#AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(AvgStomFullStrata, na.rm=TRUE))
 ##Can't get lag and mutate to work
 #AvgStomLag <- AvgStom %>% dplyr::mutate(AvgStomLag1=(AvgStomFull %in% YEAR-1))
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
-A <- AvgStom %>% select(YEAR, Species, EPU, sex, AvgStomFull)
+A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
 B <- unique(A)
 C <- B %>% dplyr::mutate(YEARstom= YEAR)
 D <- C %>% dplyr::ungroup()
-E <- D %>% dplyr::select(Species, YEARstom, EPU, sex, AvgStomFullLag=AvgStomFull)
+E <- D %>% dplyr::select(Species, YEARstom, STRATA, sex, AvgStomFullStratalag=AvgStomFullStrata)
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFull))
-AvgStomLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR", "EPU", "sex"))
+AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullEPU))
+AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
+  select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
+        'EXPCATCHWT', 'EXPCATCHNUM', 'RelCond', 'condSD', 'AvgRelCondStrata',
+         'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
+         'AvgStomFullStratalag')
 
 #---------------------------------------------------------------------------------
+#allfh data includes a better audit of food habits data and eliminates the need for these removals:
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-CondClean <- AvgStomLag %>% dplyr::filter((is.na(AvgStomFullStrata) | !(Species == "American Plaice" & AvgStomFullStrata >0.3)),
-                                        (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
+CondClean <- AvgStomStrataLag %>% dplyr::filter(
+  #(is.na(AvgStomFullStrata) | !(Species == "American Plaice" & AvgStomFullStrata >0.3)),
+   #                                     (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
                                         (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
 
 
