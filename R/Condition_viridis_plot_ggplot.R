@@ -26,9 +26,9 @@ CondBreaks = xs[2:6]
 speciesNames <- speciesNames %>% 
   mutate(category = cut(scaleCond, breaks = xs
                         , labels = c( "Poor Condition", 
-                                                            "Bad",
+                                                            "Mediocre",
                                                             "Neutral",
-                                                            "Good",
+                                                            "OK",
                                                             "Good Condition")
                         ))
 
@@ -61,22 +61,22 @@ vir <- viridis::viridis_pal()(5)
  p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = scaleCond)) +
   geom_tile() +
   coord_equal() +
-#  scale_fill_viridis_c()
-  scale_fill_viridis_c(breaks= CondBreaks, values= vir) +
+  scale_fill_viridis_c()
+  #scale_fill_viridis_c(breaks= CondBreaks, values= vir) +
   theme_bw() +
-#  scale_fill_discrete(labels = c( "Poor Condition", 
-#                                  "Bad",
-#                                  "Neutral",
-#                                  "Good",
-#                                  "Good Condition")) +
+  scale_fill_discrete(labels = c( "Poor Condition", 
+                                  "Bad",
+                                  "Neutral",
+                                  "Good",
+                                  "Good Condition")) +
   scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
   theme(legend.position = "bottom", legend.title = element_blank(), 
  #       legend.text = element_text(labels = c("-2" = "Poor Condition", 
 #                                               "0" = "Neutral",
 #                                               "3" = "Good Condition")),
-        axis.title = element_blank(), axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        axis.title = element_blank(), axis.text.x = element_text(size = 8), 
+        axis.text.y = element_text(size = 8), panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) 
 
 ggsave("MABcondition_2019_viridis.jpg", width = 6, height = 3.75, units = "in", dpi = 300)
 
