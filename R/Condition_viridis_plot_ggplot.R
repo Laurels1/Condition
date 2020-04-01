@@ -64,21 +64,12 @@ vir <- viridis::viridis_pal()(5)
   scale_fill_viridis_c()
   #scale_fill_viridis_c(breaks= CondBreaks, values= vir) +
   theme_bw() +
-<<<<<<< HEAD:R/Condition_viridis_plot_ggplot.R
   scale_fill_discrete(labels = c( "Poor Condition", 
                                   "Bad",
                                   "Neutral",
                                   "Good",
                                   "Good Condition")) +
   scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
-=======
-#  scale_fill_discrete(labels = c( "Poor Condition", 
-#                                  "Bad",
-#                                  "Neutral",
-#                                  "Good",
-#                                  "Good Condition")) +
-  #scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
->>>>>>> 6fb5cbeb8056160f4362a9d92ffcebbc31e6ff44:R/Condition_viridis_plot.R
   theme(legend.position = "bottom", legend.title = element_blank(), 
  #       legend.text = element_text(labels = c("-2" = "Poor Condition", 
 #                                               "0" = "Neutral",
