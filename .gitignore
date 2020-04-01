@@ -8,7 +8,8 @@
 *.html
 *.txt
 *.jpg
-
+Rprof.out
+.RDataTmp
 
 # folders
 output/
