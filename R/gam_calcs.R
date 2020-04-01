@@ -29,7 +29,8 @@ source("R/StomFullnessData_allfh.R")
 
 #Creating Average Relative Condition by strata, species, sex
 AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-  mutate(AvgRelCondStrata=(mean(RelCond))) %>%
+  mutate(AvgRelCondStrata=(mean(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
+         AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
