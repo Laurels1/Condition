@@ -20,6 +20,7 @@ gis.dir  <- "gis"
 
 #-------------------------------------------------------------
 source("R/StomFullnessData_allfh.R")
+source("R/RelConditionEPU.R")
 
 #Explore different ways of aggregating Relative Condition:
 #Creating Average Relative Condition and Average Stomach Fullness by tow, species, sex
