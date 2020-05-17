@@ -19,6 +19,7 @@ data.dir <- "data"
 gis.dir  <- "gis"
 
 #-------------------------------------------------------------
+#Not working currently to source, but reminder to run these files first:
 source("R/StomFullnessData_allfh.R")
 source("R/RelConditionEPU.R")
 
@@ -28,7 +29,7 @@ source("R/RelConditionEPU.R")
 #  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowStomFull=(mean(stom_full))) %>%
 #  distinct(AvgTowRelCond, .keep_all = T)
 
-#Creating Average Relative Condition by strata, species, sex
+#CreatAvgStrataConding Average Relative Condition by strata, species, sex
 AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
          AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT))) %>%
@@ -100,7 +101,7 @@ stom.data <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDI
   distinct(YEAR, STRATUM, EPU, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullEPU, AvgStomFullStrata)
 
 #merge stomach fullness into condition data:
-#####Error with STRATUM being interger/factor:
+#make sure allfh data includes STRATUM as factor with leading zero for merge
 AvgStom <- dplyr::left_join(CondCal, stom.data, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #Old code for stomach data not from allfh:

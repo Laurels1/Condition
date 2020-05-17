@@ -20,7 +20,10 @@ load(file.path(data.dir, 'allfh.RData'))
 allfh$LAT <- allfh$declat 
 allfh$LON <- allfh$declon *-1
 allfh$CRUISE6 <- allfh$cruise6
-allfh$STRATUM <- allfh$stratum
+#STRATUM in CondCal for gam_calcs.R is a factor. 
+#stratum in allfh is an interger and removes the leading zero.
+#Create a new variable STRATUM that is a factor with a leading zero for merge.
+allfh$STRATUM <- as.factor(paste("0",allfh$stratum,sep=''))
 allfh$STATION <- allfh$station
 
 #head(allfh)
