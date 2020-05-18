@@ -96,7 +96,6 @@ AvgStomFullEPU <- AvgStomFullStrata %>% dplyr::filter(season == "FALL") %>%
   mutate(AvgStomFullEPU=(mean(stom_full)))
 
 # change stomach data variables to merge with condition data: 
-#year, season, EPU, Species, pdid, pdsex, pdwgt
 stom.data <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
   distinct(YEAR, STRATUM, EPU, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullEPU, AvgStomFullStrata)
 
@@ -114,9 +113,9 @@ A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
 B <- unique(A)
 C <- B %>% dplyr::mutate(YEARstom= YEAR)
 D <- C %>% dplyr::ungroup()
-E <- D %>% dplyr::select(Species, YEARstom, STRATA, sex, AvgStomFullStratalag=AvgStomFullStrata)
+E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullEPU))
+AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
   select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
         'EXPCATCHWT', 'EXPCATCHNUM', 'RelCond', 'condSD', 'AvgRelCondStrata',
