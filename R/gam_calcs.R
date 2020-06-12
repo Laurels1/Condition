@@ -81,7 +81,11 @@ CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Bring in total zooplankton biomass 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
+
+Zoop <- ZoopBio %>% dplyr::rename(YEAR=Year)
  
+CondZoo <- dplyr::left_join(CondCal, Zoop, by = c("YEAR", "EPU"))
+
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
 #This brings in stomach fullness data from allfh database (from StomFullnessData_allfh.R):
@@ -104,7 +108,7 @@ stom.data <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDI
 
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
-AvgStom <- dplyr::left_join(CondCal, stom.data, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX'))
+AvgStom <- dplyr::left_join(CondZoo, stom.data, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #Old code for stomach data not from allfh:
 #AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(AvgStomFullStrata, na.rm=TRUE))
