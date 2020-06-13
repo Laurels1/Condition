@@ -20,8 +20,8 @@ gis.dir  <- "gis"
 
 #-------------------------------------------------------------
 #Not working currently to source, but reminder to run these files first:
-source("R/StomFullnessData_allfh.R")
-source("R/RelConditionEPU.R")
+#source("R/StomFullnessData_allfh.R")
+#source("R/RelConditionEPU.R")
 
 #Explore different ways of aggregating Relative Condition:
 #Creating Average Relative Condition and Average Stomach Fullness by tow, species, sex
@@ -127,7 +127,7 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
   select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
         'EXPCATCHWT', 'EXPCATCHNUM', 'RelCond', 'condSD', 'AvgRelCondStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
-         'AvgStomFullStratalag')
+         'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
 
 #---------------------------------------------------------------------------------
 #allfh data includes a better audit of food habits data and eliminates the need for these removals:
@@ -162,8 +162,9 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
+form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
@@ -197,7 +198,7 @@ dl=data.frame(SumCondGAM)
 #Model with highest deviance explained:
 #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT','Stomach fullness','AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #single variable runs
-GAMnames=c('Species', 'AvgStomFullStratalag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'Zooplankton Biomass Anomaly', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
@@ -207,7 +208,7 @@ datalist[[sp]] <- dl
 #Use for testing plot with single species
 #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
 
-   filename <- here::here(out.dir,paste0(sp,"_AvgStomLag_AvgCondStrata.jpg"))
+   filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
    jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
@@ -226,5 +227,5 @@ datalist[[sp]] <- dl
 
 AllSPP = do.call(rbind, datalist)
 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgRelCondStrata_StomFullStrataLag.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 
