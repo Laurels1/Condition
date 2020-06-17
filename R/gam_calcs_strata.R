@@ -167,7 +167,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
 #form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
@@ -176,7 +176,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
 #Eplains highest deviance:
-#  form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullStrata, k=10) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Mechanisms model:
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 
@@ -201,9 +201,9 @@ dl=data.frame(SumCondGAM)
 #Full Model with reasonable mechanisms relating to condition changes:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #Model with highest deviance explained:
-#GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT','Stomach fullness','AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #single variable runs
-GAMnames=c('Species', 'AvgStomFullLag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'AvgStomFullLag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
@@ -214,10 +214,10 @@ datalist[[sp]] <- dl
 #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
 
 #Single variable output:
-   filename <- here::here(out.dir,paste0(sp,"_StomFullStrata_AvgCondStrata.jpg"))
+#   filename <- here::here(out.dir,paste0(sp,"_StomFullStrata_AvgCondStrata.jpg"))
 #Full model output:
 
-# filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
+ filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
    jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
@@ -237,9 +237,9 @@ datalist[[sp]] <- dl
 AllSPP = do.call(rbind, datalist)
 
 #Full model output:
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 
 #Single variable output:
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrata.csv"))   
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrata.csv"))   
 
 
