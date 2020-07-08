@@ -246,13 +246,16 @@ condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>%
 #Summarize annually by EPU
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
-condNSpp <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
+condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
   dplyr::filter(n >= 20)
+
+condEPU <- condNSppEPU 
+readr::write_csv(condEPU, here::here(out.dir,"RelCond2019_EPU.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondStrata, nCond>=3)
-condNSpp <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>% 
+condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>% 
   dplyr::filter(n >= 20)
 #Format output to be read into plotting function:
 
