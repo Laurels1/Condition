@@ -249,8 +249,15 @@ condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
   dplyr::filter(n >= 20)
 
-condEPU <- condNSppEPU 
-readr::write_csv(condEPU, here::here(out.dir,"RelCond2019_EPU.csv"))
+#Output for socio-economic models:
+annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+#condN <- dplyr::filter(annualcondEPU, nCond>=3)
+condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU) 
+#%>% 
+#  dplyr::filter(n >= 20)
+
+condEPUlen <- condNSppEPUlen 
+readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2019_EPU_length.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
