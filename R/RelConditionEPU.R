@@ -11,13 +11,14 @@
 #'
 #' @export
 
-
-source("R/install_cond_packages.R")
-source("R/connect_to_database.R")
-source("R/pull_from_svdbs.R")
-source("R/utilities.R")
-source("R/plot_condition.R")
+#Once package is complete, source files below:
+# source("R/install_cond_packages.R")
+# source("R/connect_to_database.R")
+# source("R/pull_from_svdbs.R")
+# source("R/utilities.R")
+# source("R/plot_condition.R")
 #source("R/StomFullnessData_allfh.R")
+
 #Required packages
 #library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
@@ -57,25 +58,25 @@ library(magrittr)
 #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE)
 
-  #comment out if not running as function
-if (pullNewData == T) {
-  # grabs data from oracle
-  uid <- readline("Please Enter your username for oracle: ")
-  message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
-  survey <- pull_from_svdbs(uid) 
-  # save data pull
-  dateOfPull <- format(Sys.time(), "%m-%d-%y")
-  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
-#  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
-} else {
+#   #comment out if not running as function
+# if (pullNewData == T) {
+#   # grabs data from oracle
+#   uid <- readline("Please Enter your username for oracle: ")
+#   message(paste0("Pulling data from svdbs ... please wait ... data will be saved in directory: ",here::here(out.dir)))
+#   survey <- pull_from_svdbs(uid) 
+#   # save data pull
+#   dateOfPull <- format(Sys.time(), "%m-%d-%y")
+#   saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
+# #  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
+# } else {
   # Otherwise, load data below:
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
   #or if that doesn't work:
   readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
-  survey 
-  #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
-}
+#   survey 
+#   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
+# }
   
  
 
@@ -271,19 +272,20 @@ condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>%
 #condFormat <- tidyr::gather(condN, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
 #condFormat <- tidyr::spread(condN, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
 
-readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
-
-condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
-readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
-
-condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
-readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
-
-condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
-readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
-
-condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
-readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
+#Outputing condition data by EPU:
+# #readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
+# 
+# #condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
+# #readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
+# 
+# #condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
+# #readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
+# 
+# #condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
+# #readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
+# # 
+# # condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
+# # readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 
 
 #select fluke annual condition data:
@@ -298,6 +300,6 @@ readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 #write.csv(fluke, "Fluke_Cond.csv")
 
 #Comment out output while adding in code and running outside of the function
-return(list(condNshelfSpp=condNshelfSpp,condGB=condGB,condSS=condSS,condGOM=condGOM,condMAB=condMAB,stom = stom.epu))
+#return(list(condNshelfSpp=condNshelfSpp,condGB=condGB,condSS=condSS,condGOM=condGOM,condMAB=condMAB,stom = stom.epu))
 
-}
+#}
