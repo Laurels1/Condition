@@ -89,7 +89,7 @@ fh.epu$Species[fh.epu$svspp==197] <- 'Goosefish'
 
 #prey volume by prey group and EPU for 2020 SOE:
 prey <- fh.epu %>%
-  dplyr::filter(!is.na(Species), year >1990, pdwgt >=1, !is.na(pdgutwt)) %>%
+  dplyr::filter(!is.na(Species), year >1990, pdwgt >=1, !is.na(pdgutw)) %>%
   select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, analcat)
 
 #calculate stomach fullness and remove duplicates due to each row being a prey item:
