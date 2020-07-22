@@ -113,6 +113,8 @@ stom.data.EPU <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, 
 stom.data.strata <- AvgStomFullStrata %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
   distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullStrata)
 
+stom.data.strata$SEX <- as.factor(stom.data.strata$SEX) 
+
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
   #merge by strata for Condition GAM and multi-model dataset:
@@ -147,10 +149,13 @@ D <- C %>% dplyr::ungroup()
 E <- D %>% dplyr::select(Species, YEARstom, CRUISE6, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
-AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "CRUISE6", "STRATUM", "EPU", "sex")) %>%
+
+AvgStomTowLag <- dplyr::inner_join(AvgStom2, Stomlag, by=c("YEAR"="YEARstom", "SEASON", "Species", "CRUISE6", "STRATUM", "EPU", "sex")) %>%
   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
          'EXPCATCHWT', 'EXPCATCHNUM', 'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
+        'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
+AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
+
 
 #Multi-model dataset:
 readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   

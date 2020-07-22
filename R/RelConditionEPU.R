@@ -73,7 +73,7 @@ library(magrittr)
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
   #or if that doesn't work:
-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
+survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
 #   survey 
 #   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
 # }
