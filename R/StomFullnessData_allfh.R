@@ -86,6 +86,12 @@ fh.epu$Species[fh.epu$svspp==197] <- 'Goosefish'
 
 #pdwgt is indwt (individual fish weight in grams) pulled from union_fscs_svbio
 #pdsex is sex of predator fish, pdgutw and pdgutv are full data sets of stomach weights and volumes
+
+#prey volume by prey group and EPU for 2020 SOE:
+prey <- fh.epu %>%
+  dplyr::filter(!is.na(Species), year >1990, pdwgt >=1, !is.na(pdgutwt)) %>%
+  select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, analcat)
+
 #calculate stomach fullness and remove duplicates due to each row being a prey item:
 uniqstom <- fh.epu %>%
   dplyr::filter(!is.na(Species), year >1990, pdwgt >= 1, !is.na(pdgutw)) %>%
