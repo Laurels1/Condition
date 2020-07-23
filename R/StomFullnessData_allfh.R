@@ -84,10 +84,12 @@ fh.epu$Species[fh.epu$svspp==164] <- 'Sea Raven'
 fh.epu$Species[fh.epu$svspp==193] <- 'Ocean Pout'
 fh.epu$Species[fh.epu$svspp==197] <- 'Goosefish'
 
+#Feeding guilds by planktivore/benthivore/piscivore? Varies by size of predator.
+
 #pdwgt is indwt (individual fish weight in grams) pulled from union_fscs_svbio
 #pdsex is sex of predator fish, pdgutw and pdgutv are full data sets of stomach weights and volumes
 
-#prey volume by prey group and EPU for 2020 SOE:
+#prey volume by prey group and EPU for 2020 SOE (need to use allwt_stratfin_byvars.R to get diet comps by prey weight):
 prey <- fh.epu %>%
   dplyr::filter(!is.na(Species), year >1990, pdwgt >=1, !is.na(pdgutw)) %>%
   select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, analcat)
