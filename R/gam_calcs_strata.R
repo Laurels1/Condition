@@ -150,9 +150,10 @@ E <- D %>% dplyr::select(Species, YEARstom, CRUISE6, STRATUM, EPU, SEASON, sex, 
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 
-AvgStomTowLag <- dplyr::inner_join(AvgStom2, Stomlag, by=c("YEAR"="YEARstom", "SEASON", "Species", "CRUISE6", "STRATUM", "EPU", "sex")) %>%
+AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR"="YEARstom", "SEASON", "Species", "CRUISE6", "STRATUM", "EPU", "sex")) %>%
   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
-         'EXPCATCHWT', 'EXPCATCHNUM', 'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+         'EXPCATCHWT', 'EXPCATCHNUM', 
+         'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
 AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
 
