@@ -127,36 +127,39 @@ AvgStom <- dplyr::left_join(CondZoo, stom.data.strata, by = c('YEAR', 'SEASON', 
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
   #Lagged stomach index by strata for Condition GAM:
-# A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
+ # A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
  # B <- unique(A)
  # C <- B %>% dplyr::mutate(YEARstom= YEAR)
  # D <- C %>% dplyr::ungroup()
  # E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
  # Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
  # AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
- # AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "SEASON", "sex")) %>%
- #   select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'SEASON','Species', 'sex',
+ # AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
+ #    select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'SEASON','Species', 'sex',
  #         'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
  #          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
  #          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
  #          'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
 
 #Lagged stomach index by tow for multi-model dataset:
-A <- AvgStom %>% select(YEAR, Species, CRUISE6, STRATUM, EPU, SEASON, sex, AvgStomFullStrata)
+A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, SEASON, sex, AvgStomFullStrata)
 B <- unique(A)
 C <- B %>% dplyr::mutate(YEARstom= YEAR)
 D <- C %>% dplyr::ungroup()
-E <- D %>% dplyr::select(Species, YEARstom, CRUISE6, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
+E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 
-AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR"="YEARstom", "SEASON", "Species", "CRUISE6", "STRATUM", "EPU", "sex")) %>%
+AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "STRATUM", "EPU", "sex")) %>%
   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
          'EXPCATCHWT', 'EXPCATCHNUM', 
          'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
 AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
 
+#check merge rows by counting distinct rows:
+DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, STATION, TOW, EPU, SEASON, sex))
+DistRowsStomlag <- nrow(dplyr::distinct(Stomlag, YEAR, Species, STRATUM, EPU, SEASON, sex))
 
 #Multi-model dataset:
 readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   
