@@ -26,17 +26,15 @@ gis.dir  <- "gis"
 #Explore different ways of aggregating Relative Condition:
 #Creating Average Relative Condition and Average Stomach Fullness by tow, species, sex
   #For use in multi-model dataset:
-AvgTowCond <- cond.epu %>% group_by(CRUISE6, STRATUM, STATION, TOW, Species, sex) %>% 
-  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowRelCondSD=(sd(RelCond)))
-# %>%
-#   distinct(AvgTowRelCond, .keep_all = T)
+#AvgTowCond <- cond.epu %>% group_by(CRUISE6, STRATUM, STATION, TOW, Species, sex) %>% 
+#  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowRelCondSD=(sd(RelCond)))
 
-#CreatAvgStrataConding Average Relative Condition by strata, species, sex
-#AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-#  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
-#         AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
-#        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)))
-#%>% distinct(AvgRelCondStrata, .keep_all = T)
+#Creating Average Relative Condition by strata, species, sex
+AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
+         AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
+        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) 
+#        %>%  distinct(AvgRelCondStrata, .keep_all = T))
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
 #Couldn't run mechanisms model because data too sparse:
@@ -65,7 +63,7 @@ AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::rename(YEAR=Year) %>%
 
 AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
 
-CondAvgTemp <- dplyr::left_join(AvgTowCond, AvgTemp, by=c("YEAR", "EPU"))
+CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
@@ -127,35 +125,37 @@ AvgStom <- dplyr::left_join(CondZoo, stom.data.strata, by = c('YEAR', 'SEASON', 
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
   #Lagged stomach index by strata for Condition GAM:
- # A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
- # B <- unique(A)
- # C <- B %>% dplyr::mutate(YEARstom= YEAR)
- # D <- C %>% dplyr::ungroup()
- # E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
- # Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
- # AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
- # AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
- #    select('YEAR', 'CRUISE6', 'STRATUM', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'SEASON','Species', 'sex',
- #         'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
- #          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
- #          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
- #          'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
+ A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
+ B <- unique(A)
+ C <- B %>% dplyr::mutate(YEARstom= YEAR)
+ D <- C %>% dplyr::ungroup()
+ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
+ Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+ AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
+ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
+    select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'sex',
+         'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
+          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
+          'ZooplBiomassAnomaly', 'AvgStomFullStratalag') %>%
+   distinct()
 
+ 
 #Lagged stomach index by tow for multi-model dataset:
-A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, SEASON, sex, AvgStomFullStrata)
-B <- unique(A)
-C <- B %>% dplyr::mutate(YEARstom= YEAR)
-D <- C %>% dplyr::ungroup()
-E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
-Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
-
-AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
-         'EXPCATCHWT', 'EXPCATCHNUM', 
-         'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-        'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
-AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
+# A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, SEASON, sex, AvgStomFullStrata)
+# B <- unique(A)
+# C <- B %>% dplyr::mutate(YEARstom= YEAR)
+# D <- C %>% dplyr::ungroup()
+# E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
+# Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+# AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
+# 
+# AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "STRATUM", "EPU", "sex")) %>%
+#   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
+#          'EXPCATCHWT', 'EXPCATCHNUM', 
+#          'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+#         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
+# AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
 
 #check merge rows by counting distinct rows:
 DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, STATION, TOW, EPU, SEASON, sex))
