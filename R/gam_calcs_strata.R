@@ -173,10 +173,11 @@ readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndice
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-CondClean <- AvgStomStrataLag %>% dplyr::filter(
+CondClean <- AvgStomStrataLag 
+#%>% dplyr::filter(
   #(is.na(AvgStomFullStrata) | !(Species == "American Plaice" & AvgStomFullStrata >0.3)),
    #                                     (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
-                                        (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
+ #                                       (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
 
 
 #--------------------------------------------------------------------------------
@@ -250,9 +251,10 @@ datalist[[sp]] <- dl
 #Single variable output:
 #   filename <- here::here(out.dir,paste0(sp,"_StomFullStrata_AvgCondStrata.jpg"))
 #Full model output:
-
  filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
-   jpeg(filename)
+#Mechanism model:
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
+    jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
    dev.off()
@@ -272,6 +274,9 @@ AllSPP = do.call(rbind, datalist)
 
 #Full model output:
 readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+
+#Mechanisms model:
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 
 #Single variable output:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrata.csv"))   
