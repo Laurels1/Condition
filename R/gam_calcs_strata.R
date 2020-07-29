@@ -104,19 +104,41 @@ AvgStomFullEPU <- stomdata %>% dplyr::filter(season == "FALL") %>%
   group_by(year, EPU, Species, pdsex) %>% 
   mutate(AvgStomFullEPU=(mean(stom_full)))
 
+#Test for GAMs analysis to see if spring stomach fullness predicts fall condition:
+#Creating Average Spring Stomach Fullness by year, STRATUM, species, sex
+AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
+  group_by(year, STRATUM, Species, pdsex) %>% 
+  mutate(AvgStomFullSpringStrata=(mean(stom_full)))
+
 # change stomach data variables to merge with condition data: 
 stom.data.EPU <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
   distinct(YEAR, EPU, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, EPU, Species, SEASON, SEX, AvgStomFullEPU)
 
+#Fall stomach data by strata:
 stom.data.strata <- AvgStomFullStrata %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
   distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullStrata)
 
+#Spring stomach data by strata as test for lagging in GAM:
+stom.spring.strata <- AvgStomFullSpringStrata %>% dplyr::mutate(YEAR = year, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
+  distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEX, AvgStomFullSpringStrata)
+
+
 stom.data.strata$SEX <- as.factor(stom.data.strata$SEX) 
+stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX) 
 
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
   #merge by strata for Condition GAM and multi-model dataset:
 AvgStom <- dplyr::left_join(CondZoo, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
+
+#spring stomach fullness merge by strata for Condition GAM lag:
+AvgStomSpr <- dplyr::left_join(CondZoo, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
+select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
+       'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+       'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
+       'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CopepodSmallLarge',
+       'ZooplBiomassAnomaly', 'AvgStomFullSpringStrata') %>%
+  distinct()
 
 #Old code for stomach data not from allfh:
 #AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(AvgStomFullStrata, na.rm=TRUE))
@@ -158,11 +180,11 @@ AvgStom <- dplyr::left_join(CondZoo, stom.data.strata, by = c('YEAR', 'SEASON', 
 # AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
 
 #check merge rows by counting distinct rows:
-DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, STATION, TOW, EPU, SEASON, sex))
-DistRowsStomlag <- nrow(dplyr::distinct(Stomlag, YEAR, Species, STRATUM, EPU, SEASON, sex))
+#DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, STATION, TOW, EPU, SEASON, sex))
+#DistRowsStomlag <- nrow(dplyr::distinct(Stomlag, YEAR, Species, STRATUM, EPU, SEASON, sex))
 
 #Multi-model dataset:
-readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   
+#readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   
 
 
 ######End code before GAM analyses#####
@@ -173,7 +195,8 @@ readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndice
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-CondClean <- AvgStomStrataLag 
+#CondClean <- AvgStomStrataLag
+ CondClean <- AvgStomSpr
 #%>% dplyr::filter(
   #(is.na(AvgStomFullStrata) | !(Species == "American Plaice" & AvgStomFullStrata >0.3)),
    #                                     (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
@@ -203,6 +226,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
+form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullSpringStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
 #form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
@@ -211,7 +235,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
 #Eplains highest deviance:
-  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Mechanisms model:
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 
@@ -236,9 +260,9 @@ dl=data.frame(SumCondGAM)
 #Full Model with reasonable mechanisms relating to condition changes:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #Model with highest deviance explained:
-GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #single variable runs
-#GAMnames=c('Species', 'AvgStomFullLag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'AvgStomFullSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 
 #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
@@ -249,9 +273,9 @@ datalist[[sp]] <- dl
 #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
 
 #Single variable output:
-#   filename <- here::here(out.dir,paste0(sp,"_StomFullStrata_AvgCondStrata.jpg"))
+   filename <- here::here(out.dir,paste0(sp,"_StomFullSpringStrata_AvgCondStrata.jpg"))
 #Full model output:
- filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
+# filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
 #Mechanism model:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
     jpeg(filename)
@@ -273,12 +297,12 @@ datalist[[sp]] <- dl
 AllSPP = do.call(rbind, datalist)
 
 #Full model output:
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 
 #Mechanisms model:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 
 #Single variable output:
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrata.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullSpringStrata.csv"))   
 
 

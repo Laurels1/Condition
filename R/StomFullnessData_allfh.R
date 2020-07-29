@@ -120,5 +120,10 @@ AvgStomFullStrata <- stom %>% dplyr::filter(season == "FALL") %>%
   group_by(year, STRATUM, Species, pdsex) %>% 
   mutate(AvgStomFullStrata=(mean(stom_full)))
 
+#Creating Average Spring Stomach Fullness by year, STRATUM, species, sex
+AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
+  group_by(year, STRATUM, Species, pdsex) %>% 
+  mutate(AvgStomFullSpringStrata=(mean(stom_full)))
+
 #Data for 2019 SOE stomach fullness index:
 #readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2019.csv"))
