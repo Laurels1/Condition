@@ -330,7 +330,7 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_
    dev.off()
   
     
-  plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
+#  plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
  
    
 #gam.check (run model checks including checking smoothing basis dimensions)
