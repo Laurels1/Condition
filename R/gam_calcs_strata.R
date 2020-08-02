@@ -186,7 +186,59 @@ select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
 #Multi-model dataset:
 #readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   
 
+#------------------------------------------------------------------------------------ 
+#Add stock assessment data from Stock SMART: https://www.fisheries.noaa.gov/resource/tool-app/stock-smart
+ load(here::here("data","stockAssessmentData.Rdata"))
+ #View(stockAssessmentData)
+ 
+ StockAssDat <- stockAssessmentData %>%
+   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
+                          'Thorny skate',
+                          'Atlantic herring',
+                          'Silver hake',
+                         'Atlantic cod',
+                          'Haddock',
+                          'Pollock',
+                          'White hake',
+                          'Red hake',
+                          'Spotted hake',
+                          'American plaice',
+                          'Summer flounder',
+                          'Fourspot',
+                          'Yellowtail flounder',
+                          'Winter flounder',
+                          'Witch flounder',
+                          'Windowpane',
+                          'Atlantic mackerel',
+                          'Butterfish',
+                          'Bluefish',
+                          'Black sea bass',
+                          'Weakfish',
+                          'Acadian redfish',
+                          'Sea raven',
+                          'Ocean pout',
+                          'Goosefish')) %>%
+             filter(Region %in% c('Atlantic',
+                                  'Gulf of Maine / Georges Bank',
+                                  'Northwestern Atlantic Coast',
+                                  'Gulf of Maine',
+                                  'Gulf of Maine / Cape Hatteras',
+                                  'Mid',
+                                  'Atlantic Coast',
+                                 'Gulf of Maine / Northern Georges Bank',
+                                 'Southern Georges Bank / Mid',
+                                 'Georges Bank',
+                                 'Georges Bank / Southern New England',
+                                 'Southern New England / Mid',
+                                 'Cape Cod / Gulf of Maine'))
 
+ AssDat <- StockAssDat %>%
+   select(Species, Region, Year, Value, Metric) %>%
+   spread(Metric, Value) %>%
+   dplyr::mutate(YEAR = Year)
+ 
+ CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'YEAR'))
+ 
 ######End code before GAM analyses#####
 
 
@@ -195,7 +247,7 @@ select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000
-CondClean <- AvgStomStrataLag 
+CondClean <- CondStockAss 
 
  #Remove Bluefish since not enough spring stomach samples
 #  CondClean <- AvgStomSpr%>%
@@ -245,11 +297,12 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Mechanisms model:
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-
+  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10) +s(Abundance, k=10) +s(Fmort, k=10), data=condSPP)
+  
 #Mechanism models selecting Expcatwt/Expcatnum, AvgStomFullStratalag/AvgStomFullSpringStrata, AvgTempSpring/AvgTempSummer, CopepodSmallLarge/ZooplBiomassAnomaly based on lowest p-values and if both zero, highest deviance explained:
 #For Smooth dogfish, cod, summer flounder:
-   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 
 
 
@@ -274,8 +327,10 @@ dl=data.frame(SumCondGAM)
 #Full Model with reasonable mechanisms relating to condition changes:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'Total Biomass', 'Fmort', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+
 #For Smooth dogfish, cod, summer flounder:
-GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Copepod Small/Large', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Copepod Small/Large', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 #Model with highest deviance explained:
 #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -321,8 +376,10 @@ datalist[[sp]] <- dl
 #Mechanism model:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_SummerTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_Biom_F_AvgCondStrata.jpg"))
+
 #For Smooth dogfish, cod, summer flounder:
-filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
 
     jpeg(filename)
    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
@@ -334,11 +391,11 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_
  
    
 #gam.check (run model checks including checking smoothing basis dimensions)
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.txt")))
    
-   mgcv::gam.check(condGAM) 
+#   mgcv::gam.check(condGAM) 
    
-   sink()
+#   sink()
 }
 
 AllSPP = do.call(rbind, datalist)
@@ -349,8 +406,10 @@ AllSPP = do.call(rbind, datalist)
 #Mechanisms model:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_SummerTemp_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_Biom_F_ZooplBiomassAnomaly.csv"))   
+
 #For Smooth dogfish, cod, summer flounder:
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg.csv"))   
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_CopepodSmLrg.csv"))   
 
 #Single variable output:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullSpringStrata.csv"))   
