@@ -87,6 +87,11 @@ Zoop <- ZoopBio %>% dplyr::rename(YEAR=Year)
  
 CondZoo <- dplyr::left_join(CondCal, Zoop, by = c("YEAR", "EPU"))
 
+#Bring in total copepods (as millions of individuals) from NEFSCZooplankton_v3_6b_v2018.xls:
+TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
+
+TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
+
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
 #This brings in stomach fullness data from allfh database (from StomFullnessData_allfh.R):
@@ -129,10 +134,10 @@ stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
   #merge by strata for Condition GAM and multi-model dataset:
-AvgStom <- dplyr::left_join(CondZoo, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
+AvgStom <- dplyr::left_join(TotCop, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #spring stomach fullness merge by strata for Condition GAM lag:
-AvgStomSpr <- dplyr::left_join(CondZoo, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
+AvgStomSpr <- dplyr::left_join(TotCop, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
 select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
        'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
        'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
@@ -159,7 +164,7 @@ select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
           'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
           'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
-          'ZooplBiomassAnomaly', 'AvgStomFullStratalag') %>%
+          'ZooplBiomassAnomaly', 'TotalCopepodsMillions', 'AvgStomFullStratalag') %>%
    distinct()
 
  
@@ -272,7 +277,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #CondClean <- CondClean %>% dplyr::filter(Species!="Sea Raven")
 
  
-#If using total biomass (Abundance) or Fmort in GAMs, remove species lacking data: 
+####If using total biomass (Abundance) or Fmort in GAMs, remove species lacking data: 
  CondClean <- CondStockAss %>%
    filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
                          'Thorny skate',
@@ -320,7 +325,8 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullSpringStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
+form.cond <- formula(AvgRelCondStrata ~ s(TotalCopepodsMillions, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
@@ -400,12 +406,13 @@ dl=data.frame(SumCondGAM)
 #single variable runs
 #GAMnames=c('Species', 'AvgStomFullSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-GAMnames=c('Species', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'AvgTempWinter', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'ZooplBiomassAnomaly', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 # GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 # GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 # GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -423,12 +430,13 @@ datalist[[sp]] <- dl
 #Single variable output:
 #   filename <- here::here(out.dir,paste0(sp,"_StomFullSpringStrata_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"_YEAR_AvgCondStrata.jpg"))
-   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring_AvgCondStrata.jpg"))
+#   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"_AvgTempFall_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter_AvgCondStrata.jpg"))
 #    filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
 #    filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge_AvgCondStrata.jpg"))
+filename <- here::here(out.dir,paste0(sp,"_TotalCopepods_AvgCondStrata.jpg"))
     # filename <- here::here(out.dir,paste0(sp,"_BottomTempStrata_AvgCondStrata.jpg"))
     # filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
 #    filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
@@ -483,12 +491,13 @@ AllSPP = do.call(rbind, datalist)
 #Single variable output:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullSpringStrata.csv"))   
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Year_AvgCondStrata.csv"))     
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring_AvgCondStrata.csv"))   
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring_AvgCondStrata.csv"))   
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer_AvgCondStrata.csv"))     
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall_AvgCondStrata.csv"))       
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter_AvgCondStrata.csv"))   
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly_AvgCondStrata.csv"))   
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))  
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata_AvgCondStrata.csv")) 
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata.csv"))
