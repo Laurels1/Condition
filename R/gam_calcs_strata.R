@@ -33,8 +33,9 @@ gis.dir  <- "gis"
 AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
          AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
-        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) 
-#        %>%  distinct(AvgRelCondStrata, .keep_all = T))
+        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)) %>% 
+         distinct(AvgRelCondStrata, .keep_all = T))
+#Stomach data doesn't merge into condition data without distinct statement??
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
 #Couldn't run mechanisms model because data too sparse:
@@ -258,14 +259,16 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 
 #---------------------------------------------------------------------------------
 #allfh data includes a better audit of food habits data and eliminates the need for these removals:
-#Removed outlier where American Plaice stom_full >0.3, 
-#Removed 4 outliers where Butterfish STOM_VOLUME >10,
-#Removed 1 outlier where spotted hake EXPCATCHNUM >5000
+
  
  #Remove Bluefish since not enough spring stomach samples
 #  CondClean <- AvgStomSpr%>%
 #   dplyr::filter(!(Species == "Bluefish"))
-#%>% dplyr::filter(
+
+#Removed outlier where American Plaice stom_full >0.3, 
+#Removed 4 outliers where Butterfish STOM_VOLUME >10,
+#Removed 1 outlier where spotted hake EXPCATCHNUM >5000 
+ #%>% dplyr::filter(
   #(is.na(AvgStomFullStrata) | !(Species == "American Plaice" & AvgStomFullStrata >0.3)),
    #                                     (is.na(STOM_VOLUME) | !(Species == "Butterfish" & STOM_VOLUME >10)),
  #                                       (is.na(EXPCATCHNUM) | !(Species == "Spotted Hake" & EXPCATCHNUM >5000)))
@@ -276,29 +279,31 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #remove Sea Raven for LON/LAT runs since not enough data:
 #CondClean <- CondClean %>% dplyr::filter(Species!="Sea Raven")
 
+#For condition data with stomach fullness lagged 1 year data: 
+ CondClean <- CondStockAss
  
 ####If using total biomass (Abundance) or Fmort in GAMs, remove species lacking data: 
- CondClean <- CondStockAss %>%
-   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
-                         'Thorny skate',
-                         'Silver hake',
-                         'Atlantic cod',
-                         'Haddock',
-                         'Pollock',
-                         'White hake',
-                         'Red hake',
-                         'American plaice',
-                         'Summer flounder',
-                         'Yellowtail flounder',
-                         'Winter flounder',
-                         'Windowpane',
-                         'Atlantic mackerel',
-                         'Butterfish',
-                         'Bluefish',
-                         'Black sea bass',
-                         'Acadian redfish',
-                         'Ocean pout',
-                         'Goosefish')) 
+ # CondClean <- CondStockAss %>%
+ #   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
+ #                         'Thorny skate',
+ #                         'Silver hake',
+ #                         'Atlantic cod',
+ #                         'Haddock',
+ #                         'Pollock',
+ #                         'White hake',
+ #                         'Red hake',
+ #                         'American plaice',
+ #                         'Summer flounder',
+ #                         'Yellowtail flounder',
+ #                         'Winter flounder',
+ #                         'Windowpane',
+ #                         'Atlantic mackerel',
+ #                         'Butterfish',
+ #                         'Bluefish',
+ #                         'Black sea bass',
+ #                         'Acadian redfish',
+ #                         'Ocean pout',
+ #                         'Goosefish')) 
  
 spp <- unique(CondClean$Species)
 datalist = list()
@@ -307,7 +312,7 @@ for(sp in spp) {
 condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-#condSPP <- CondClean %>% dplyr::filter(Species=='Goosefish') %>% mutate(sp='Goosefish')
+#condSPP <- CondClean %>% dplyr::filter(Species=='Smooth dogfish') %>% mutate(sp='Smooth dogfish')
 
 #Full model
 #   form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
