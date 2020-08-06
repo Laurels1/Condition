@@ -256,6 +256,12 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'YEAR'))
  
+#------------------------------------------------------------------------------------
+ #Weight at age coefficients from Kevin's GLM output: pt tab of glm_out_GrowthCovariates_species.xls
+ WAA <- readr::read_csv(here::here("data","GrowthCovariates_15species.csv"))
+ #Don't join on sex since F is changed to FALSE when importing csv into R:
+ CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEASON'))
+ 
 ######End code before GAM analyses#####
 
 #---------------------------------------------------------------------------------
@@ -281,7 +287,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #CondClean <- CondClean %>% dplyr::filter(Species!="Sea Raven")
 
 #For condition data with stomach fullness lagged 1 year data: 
- CondClean <- CondStockAss
+ CondClean <- CondWAAcoeff
  
 ####If using total biomass (Abundance) or Fmort from StockSMART in GAMs, remove species lacking data: 
  # CondClean <- CondStockAss %>%
@@ -307,7 +313,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
  #                         'Goosefish')) 
  
  #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in mechanism run:
- CondClean <- CondStockAss %>%
+ CondClean <- CondWAAcoeff %>%
       filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
    'Thorny skate',
   'Atlantic herring',
@@ -334,6 +340,24 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
  'Sea raven',
  'Ocean pout',
  'Goosefish'))
+ 
+ #only select species with age data if using weight at age coefficients:
+ CondClean <- CondWAAcoeff %>%
+   filter(Species %in% c('Atlantic herring',
+                         'Silver hake',
+                         'Atlantic cod',
+                         'Haddock',
+                         'Pollock',
+                         'White hake',
+                         'American plaice',
+                         'Summer flounder',
+                         'Yellowtail flounder',
+                         'Winter flounder',
+                         'Witch flounder',
+                         'Atlantic mackerel',
+                         'Butterfish',
+                         'Black sea bass',
+                         'Scup'))
  
 spp <- unique(CondClean$Species)
 datalist = list()
