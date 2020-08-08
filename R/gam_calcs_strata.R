@@ -313,56 +313,55 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
  #                         'Ocean pout',
  #                         'Goosefish')) 
  
- #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
- CondClean <- CondWAAcoeff %>%
-      filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
-   'Thorny skate',
-  'Atlantic herring',
- 'Silver hake',
- 'Atlantic cod',
- 'Haddock',
- 'Pollock',
- 'White hake',
- 'Red hake',
- 'Spotted hake',
- 'American plaice',
- 'Summer flounder',
- 'Fourspot',
- 'Yellowtail flounder',
- 'Winter flounder',
- 'Witch flounder',
- 'Windowpane',
- 'Atlantic mackerel',
- 'Butterfish',
- 'Bluefish',
- 'Black sea bass',
- 'Weakfish',
- 'Acadian redfish',
- 'Sea raven',
- 'Ocean pout',
- 'Goosefish'))
+ # #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
+ #'  CondClean <- CondWAAcoeff %>%      filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
+ #'   'Thorny skate',
+ #' #  'Atlantic herring',
+ #' 'Silver hake',
+ #' #'Atlantic cod',
+ #' 'Haddock',
+ #' 'Pollock',
+ #' 'White hake',
+ #' 'Red hake',
+ #' 'Spotted hake',
+ #' 'American plaice',
+ #' 'Summer flounder',
+ #' 'Fourspot',
+ #' # 'Yellowtail flounder',
+ #' 'Winter flounder',
+ #' 'Witch flounder',
+ #' # 'Windowpane',
+ #' # 'Atlantic mackerel',
+ #' 'Butterfish',
+ #' 'Bluefish',
+ #' 'Black sea bass',
+ #' 'Weakfish',
+ #' 'Acadian redfish',
+ #' 'Sea raven',
+ #' 'Ocean pout',
+ #' 'Goosefish'))
  
  #only select species with age data if using weight at age coefficients:
  #If not using na.gam.replace (can't use with stomach data), remove species with missing coefficient data: 
  #(silver hake, white hake, mackerel, butterfish, black sea bass, scup)
  #Remove 1992 fall since no coefficient data:
- CondClean <- CondWAAcoeff %>%
-   filter(Species %in% c('Atlantic herring',
-                        'Silver hake',
-                         'Atlantic cod',
-                         'Haddock',
-                         'Pollock',
-                     'White hake',
-                         'American plaice',
-                         'Summer flounder',
-                        'Atlantic mackerel',
-                       'Butterfish',
-                     'Black sea bass',
-                      'Scup',                         
-                         'Yellowtail flounder',
-                         'Winter flounder',
-                         'Witch flounder'),
-   YEAR > 1992)
+ # CondClean <- CondWAAcoeff %>%
+ #   filter(Species %in% c('Atlantic herring',
+ #                        'Silver hake',
+ #                         'Atlantic cod',
+ #                         'Haddock',
+ #                         'Pollock',
+ #                     'White hake',
+ #                         'American plaice',
+ #                         'Summer flounder',
+ #                        'Atlantic mackerel',
+ #                       'Butterfish',
+ #                     'Black sea bass',
+ #                      'Scup',                         
+ #                         'Yellowtail flounder',
+ #                         'Winter flounder',
+ #                         'Witch flounder'),
+ #  YEAR > 1992)
  
 spp <- unique(CondClean$Species)
 datalist = list()
@@ -371,7 +370,7 @@ for(sp in spp) {
 condSPP <- CondClean %>% dplyr::filter(Species==sp)
   
 #turn on for testing a single species outside of loop:
-condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='Atlantic cod')
+#condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='Atlantic cod')
 
 #Full model
 #   form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
@@ -501,7 +500,7 @@ condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='A
 #Remove stomach fullness for yellowtail:
 #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Remove stomach fullness for mackerel:
-#    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
     
 #-----------------------------
     ####For weight at age coefficients instead of condition GAMs:
@@ -544,16 +543,16 @@ condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='A
     #Remove stomach fullness for yellowtail:
     #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
     #Remove stomach fullness for mackerel:
-   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
+ #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
     
     
 
                         #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
                         #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
-  
+
+#na.gam.replace works if not including stomach data:  
    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, select=T)
-                        #na.gam.replace works if not including stomach data:
-#                        , na.action = na.gam.replace)
+    #na.action = na.gam.replace)
   
 #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
 #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
@@ -804,12 +803,12 @@ datalist[[sp]] <- dl
 #Remove stomach fullness for yellowtail:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
 #Remove stomach fullness for mackerel:
-#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
+filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
 
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
 #Remove stomach fullness for mackerel:
-filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 
 
@@ -825,8 +824,10 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalBiomass_Spri
  
    
 #gam.check (run model checks including checking smoothing basis dimensions)
-  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-#sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_Cod_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
+#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+     #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
+#sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
 
 mgcv::gam.check(condGAM)
 
@@ -931,12 +932,12 @@ AllSPP = do.call(rbind, datalist)
 #Remove stomach fullness for yellowtail:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
 #Remove stomach fullness for mackerel:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
 
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
 #Remove stomach fullness for mackerel:
-readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
+#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
 
 
