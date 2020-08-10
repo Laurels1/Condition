@@ -433,7 +433,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
 ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
 #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-#      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
 ##goosefish:
 #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
 ##Little skate:
@@ -500,7 +500,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #Remove stomach fullness for yellowtail:
 #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
 #Remove stomach fullness for mackerel:
-    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
     
 #-----------------------------
     ####For weight at age coefficients instead of condition GAMs:
@@ -640,6 +640,7 @@ dl=data.frame(SumCondGAM)
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 ##Acadian redfish:
@@ -660,7 +661,7 @@ dl=data.frame(SumCondGAM)
 #Remove stomach fullness for yellowtail:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #Remove stomach fullness for mackerel:
-GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 
 #Model with highest deviance explained:
@@ -783,6 +784,7 @@ datalist[[sp]] <- dl
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
 
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
 ##Acadian redfish:
@@ -803,7 +805,7 @@ datalist[[sp]] <- dl
 #Remove stomach fullness for yellowtail:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
 #Remove stomach fullness for mackerel:
-filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
 
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
@@ -824,8 +826,9 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_To
  
    
 #gam.check (run model checks including checking smoothing basis dimensions)
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
+   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
+   #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
      #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
 #sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
 
@@ -912,6 +915,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
 
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
 ##Acadian redfish:
@@ -932,7 +936,7 @@ AllSPP = do.call(rbind, datalist)
 #Remove stomach fullness for yellowtail:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
 #Remove stomach fullness for mackerel:
-readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
+#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
 
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
