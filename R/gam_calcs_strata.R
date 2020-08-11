@@ -343,26 +343,26 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
  
  #only select species with age data if using weight at age coefficients:
  #If not using na.gam.replace (can't use with stomach data), remove species with missing coefficient data: 
- #(silver hake, white hake, mackerel, butterfish, black sea bass, scup)
+ #(Atlantic herring, cod, silver hake, white hake, mackerel, butterfish, black sea bass, scup, YT)
  #Remove 1992 fall since no coefficient data:
- # CondClean <- CondWAAcoeff %>%
- #   filter(Species %in% c('Atlantic herring',
- #                        'Silver hake',
- #                         'Atlantic cod',
- #                         'Haddock',
- #                         'Pollock',
- #                     'White hake',
- #                         'American plaice',
- #                         'Summer flounder',
- #                        'Atlantic mackerel',
- #                       'Butterfish',
- #                     'Black sea bass',
- #                      'Scup',                         
- #                         'Yellowtail flounder',
- #                         'Winter flounder',
- #                         'Witch flounder'),
- #  YEAR > 1992)
- 
+ CondClean <- CondWAAcoeff %>%
+   filter(Species %in% c(#'Atlantic herring',
+#                        'Silver hake',
+#                         'Atlantic cod',
+                         'Haddock',
+                         'Pollock',
+#                     'White hake',
+                         'American plaice',
+                         'Summer flounder',
+#                        'Atlantic mackerel',
+#                       'Butterfish',
+#                     'Black sea bass',
+#                      'Scup',
+#                         'Yellowtail flounder',
+                         'Winter flounder',
+                         'Witch flounder'),
+  YEAR > 1992)
+
 spp <- unique(CondClean$Species)
 datalist = list()
 
@@ -433,7 +433,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
 ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
 #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
 ##goosefish:
 #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
 ##Little skate:
@@ -532,7 +532,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
     
     ##For Smooth dogfish:
     #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-#  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
     ##goosefish:
     #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
     
@@ -543,7 +543,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
     #Remove stomach fullness for yellowtail:
     #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
     #Remove stomach fullness for mackerel:
- #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
+#   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
     
     
 
@@ -552,7 +552,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
 
 #na.gam.replace works if not including stomach data:  
    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, select=T)
-    #na.action = na.gam.replace)
+   #, na.action = na.gam.replace)
   
 #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
 #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
@@ -640,7 +640,7 @@ dl=data.frame(SumCondGAM)
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 ##Acadian redfish:
@@ -652,7 +652,7 @@ GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankt
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 ##goosefish:
-#GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 #Removed stomach fullness for herring:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -784,7 +784,7 @@ datalist[[sp]] <- dl
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
 
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
 ##Acadian redfish:
@@ -796,7 +796,7 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplB
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 ##goosefish:
-#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 
 #Remove stomach fullness for herring:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.jpg"))
@@ -816,8 +816,8 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplB
 
     jpeg(filename)
 #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
-#    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+#   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
       plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
    dev.off()
   
@@ -827,10 +827,10 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplB
    
 #gam.check (run model checks including checking smoothing basis dimensions)
 #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
    #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
      #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-#sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
 
 mgcv::gam.check(condGAM)
 
@@ -915,7 +915,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
+#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
 
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
 ##Acadian redfish:
@@ -942,7 +942,7 @@ readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_Zoo
 ####For weight at age coefficients instead of condition GAMs:
 #Remove stomach fullness for mackerel:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
 
 
 #Single variable output:
