@@ -273,6 +273,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #  CondClean <- AvgStomSpr%>%
 #   dplyr::filter(!(Species == "Bluefish"))
 
+###Remove outliers for GAM runs based on individual fish samples:
 #Removed outlier where American Plaice stom_full >0.3, 
 #Removed 4 outliers where Butterfish STOM_VOLUME >10,
 #Removed 1 outlier where spotted hake EXPCATCHNUM >5000 
@@ -345,24 +346,37 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
  #If not using na.gam.replace (can't use with stomach data), remove species with missing coefficient data: 
  #(Atlantic herring, cod, silver hake, white hake, mackerel, butterfish, black sea bass, scup, YT)
  #Remove 1992 fall since no coefficient data:
- CondClean <- CondWAAcoeff %>%
-   filter(Species %in% c(#'Atlantic herring',
-#                        'Silver hake',
-#                         'Atlantic cod',
-                         'Haddock',
-                         'Pollock',
-#                     'White hake',
-                         'American plaice',
-                         'Summer flounder',
-#                        'Atlantic mackerel',
-#                       'Butterfish',
-#                     'Black sea bass',
-#                      'Scup',
-#                         'Yellowtail flounder',
-                         'Winter flounder',
-                         'Witch flounder'),
-  YEAR > 1992)
+#  CondClean <- CondWAAcoeff %>%
+#    filter(Species %in% c(#'Atlantic herring',
+# #                        'Silver hake',
+# #                         'Atlantic cod',
+#                          'Haddock',
+#                          'Pollock',
+# #                     'White hake',
+#                          'American plaice',
+#                          'Summer flounder',
+# #                        'Atlantic mackerel',
+# #                       'Butterfish',
+# #                     'Black sea bass',
+# #                      'Scup',
+# #                         'Yellowtail flounder',
+#                          'Winter flounder',
+#                          'Witch flounder'),
+#   YEAR > 1992)
 
+ ###Filter out outliers for GAMs from strata averaged data:
+ #remove TotalCopepodsMillions >10000
+ #remove spiny dogfish with AvgExpcatchwtStrata >1500
+ #remove yellowtail with AvgExpcatchnumStrata > 600
+ CondCleanTotCop <- CondClean %>%
+   dplyr::filter((is.na(TotalCopepodsMillions) | TotalCopepodsMillions < 10000))
+ 
+CondCleanSpDogWt <- CondCleanTotCop %>%
+          dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
+
+CondClean <- CondCleanYTnum %>%
+           dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Yellowtail flounder" & AvgExpcatchnumStrata >600)))
+ 
 spp <- unique(CondClean$Species)
 datalist = list()
 
@@ -379,8 +393,8 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
  # form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHWT, k=10), data=condSPP)
- # form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
-# form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
+# form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
+ form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
 # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
@@ -532,7 +546,7 @@ condSPP <- CondClean %>% dplyr::filter(Species==sp)
     
     ##For Smooth dogfish:
     #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
     ##goosefish:
     #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
     
@@ -652,7 +666,7 @@ dl=data.frame(SumCondGAM)
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 ##goosefish:
-GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
 #Removed stomach fullness for herring:
 #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -680,7 +694,7 @@ GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFu
 #GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 # GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 # GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-# GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+ GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
@@ -703,8 +717,8 @@ datalist[[sp]] <- dl
 #    filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods_AvgCondStrata.jpg"))
     # filename <- here::here(out.dir,paste0(sp,"_BottomTempStrata_AvgCondStrata.jpg"))
-    # filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
-#    filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
+#     filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
+    filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Fproxy_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_TotalBiomass_AvgCondStrata.jpg"))
 
@@ -796,7 +810,7 @@ datalist[[sp]] <- dl
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 ##goosefish:
-filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
 
 #Remove stomach fullness for herring:
 #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.jpg"))
@@ -830,8 +844,11 @@ filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFu
 #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
    #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
      #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
-
+#sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods_AvgCondStrata.txt")))
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass_AvgCondStrata.txt")))
+   sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalAbundance_AvgCondStrata.txt")))
+   
 mgcv::gam.check(condGAM)
 
 sink()
@@ -942,7 +959,7 @@ AllSPP = do.call(rbind, datalist)
 ####For weight at age coefficients instead of condition GAMs:
 #Remove stomach fullness for mackerel:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
-readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
 
 
 #Single variable output:
@@ -957,7 +974,7 @@ readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_Sum
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata_AvgCondStrata.csv")) 
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata.csv"))
+ readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata.csv"))
 
