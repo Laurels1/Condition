@@ -147,7 +147,6 @@ mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
 
 #Calculate relative condition:
-#need to add in case when fall is missing, use seasonless
 cond <- dplyr::mutate(mergeindwt, 
                predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
                RelCond = INDWT/predwt*100)
@@ -179,14 +178,15 @@ data.table::setnames(cond.epu, 'newstrata', 'EPU')
 #condno <- filter(cond.epu, is.na(SEX))
 
 #summarize condition as annual average:
-
+#calculate single standard deviation of relative condition for each species
 condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
 names(condstdev)[ncol(condstdev)] = 'condSD'
 
-cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
+#cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
+#Remove fish that are 0.001 kg or less
 condClean <- subset(cond.epu, cond.epu$INDWT > 0.001)
 
-
+#Remove relative conditons that are outside of 1 standard deviation
 condsd <- merge(condClean, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
 cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond > (100-condsd$condSD))
 #cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
@@ -199,8 +199,6 @@ cond.epu <- cond.epu %>% dplyr::mutate(sex = SEX)
 #recoding SEX (1,2) to sex (M, F)
 cond.epu$sex[cond.epu$SEX==1] <- 'M'
 cond.epu$sex[cond.epu$SEX==2] <- 'F'
-
-
 
 #Tried to use LOGGED_SPECIES_NAME for species names, but doesn't exist before 2001 and too many version of names
 #Names for SVSPP codes '013','015','023','026','028','032','072','073','074','075','076','077','078','102','103','104','105','106','107','108','121','131','135','141','143','145','155','164','193','197':
@@ -244,14 +242,13 @@ condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>% 
   dplyr::filter(n >= 20)
 
-
 #Summarize annually by EPU
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
   dplyr::filter(n >= 20)
 
-#Output for socio-economic models:
+#Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU) 
@@ -260,6 +257,16 @@ condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU)
 
 condEPUlen <- condNSppEPUlen 
 readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2019_EPU_length.csv"))
+
+#Output for socio-economic models (by year):
+annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+#condN <- dplyr::filter(annualcondEPU, nCond>=3)
+condNSppYear <- annualcondYear %>% dplyr::add_count(Species) 
+#%>% 
+#  dplyr::filter(n >= 20)
+
+condYear <- condNSppYear
+readr::write_csv(condYear, here::here(out.dir,"RelCond2019_Year.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())

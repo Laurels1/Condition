@@ -33,8 +33,8 @@ gis.dir  <- "gis"
 AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
          AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
-        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)))
-#         distinct(AvgRelCondStrata, .keep_all = T))
+        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
+distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
 #Couldn't run mechanisms model because data too sparse:
@@ -374,9 +374,9 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 CondCleanSpDogWt <- CondCleanTotCop %>%
           dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
 
-CondClean <- CondCleanYTnum %>%
-           dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Yellowtail flounder" & AvgExpcatchnumStrata >600)))
- 
+CondClean <- CondCleanSpDogWt %>%
+           dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
+
 spp <- unique(CondClean$Species)
 datalist = list()
 
