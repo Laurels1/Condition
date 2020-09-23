@@ -65,6 +65,10 @@ AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringForma
 
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
+#----------------------------------------------------------------------------------
+#Bring in GLORYS bottom temperature data by NEFSC survey strata
+GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
+
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
 load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
