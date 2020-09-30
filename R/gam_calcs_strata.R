@@ -69,37 +69,19 @@ CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 #Bring in GLORYS bottom temperature data by NEFSC survey strata
 GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
 
-GLORYSformat <- GLORYSdata %>% dplyr::rename(STRATUM = STRATA) %>% 
-  separate(date, c('YEAR', 'MONTH', 'DAY'), sep='-')
+GLORYSformat <- GLORYSdata %>% 
+  separate(date, c('Year2', 'MONTH', 'DAY'), sep='-') 
 
-GLORYSseason <- dplyr::mutate(GLORYSformat, ifelse(season.name=='winter', GLORYSwinter=weighted.mean,
-                                                   ifelse(season.name=='spring', GLORYSspring=weighted.mean,
-                                                   ifelse(season.name=='summer', GLORYSsummer=weighted.mean,
-                                                    ifelse(season.name=='fall', GLORYSfall=weighted.mean, NA)))))
-# 
-# GLORYSseason <- GLORYSformat %>%
-#           ifelse(season.name=='winter', dplyr::mutate(GLORYSwinter=weighted.mean),
-#           ifelse(season.name == 'spring', dplyr::mutate(GLORYSspring=weighted.mean),
-#           ifelse(season.name == 'summer', dplyr::mutate(GLORYSsummer=weighted.mean),
-#           ifelse(season.name == 'fall', dplyr::mutate(GLORYSfall=weighted.mean), 'NA'))))
+GLORYSseason <- GLORYSformat %>% group_by(Year2, STRATA) %>% 
+  dplyr::mutate(YEAR=as.numeric(Year2), STRATUM = as.factor(paste0('0',STRATA)), 
+        GLORYSwinter=ifelse(season==1,(weighted.mean), NA), GLORYSspring=ifelse(season==2,(weighted.mean), NA),
+         GLORYSsummer=ifelse(season==3,(weighted.mean), NA), GLORYSfall=ifelse(season==4,(weighted.mean), NA))
 
-#if_else not working:
-# GLORYSseason <- GLORYSformat %>%
-#   filter(if_else(season.name=='winter', mutate(GLORYSformat, GLORYSwinter=weighted.mean)),
-#          if_else(season.name == 'spring', mutate(GLORYSformat, GLORYSspring=weighted.mean)),
-#          if_else(season.name == 'summer', mutate(FLOARYSformat, GLORYSsummer=weighted.mean)),
-#          if_else(season.name == 'fall', mutate(GLORYSformat, GLORYSfall=weighted.mean)), NA)
+GLORYS2 <- GLORYSseason %>% group_by(YEAR, STRATUM) %>% 
+  summarize(GLORYSwinter=mean(GLORYSwinter, na.rm=T), GLORYSspring=mean(GLORYSspring, na.rm=T),
+            GLORYSsummer=mean(GLORYSsummer, na.rm=T),GLORYSfall=mean(GLORYSfall, na.rm=T))
 
-#GLORYSseason <- ifelse(GLORYSformat$season.name=='winter', mutate(GLORYSformat$GLORYSwinter=GLORYSformat$weighted.mean, NA))
-
-#Creates column with season name but doesn't allow for merge with fall data:
-#  mutate(GLORYSwinter = filter(season.name=='winter', weighted.mean)
-#        if_else(season.name=='spring', 'SPRING',
-#        if_else(season.name=='summer', 'SUMMER',
-#        if_else(season.name=='fall', 'FALL', 'NA')))))
-
-#This only brings in fall GLORYS data
-CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYSformat, by=c("YEAR", "EPU"))
+CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYS2, by=c('YEAR', 'STRATUM'))
 
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
