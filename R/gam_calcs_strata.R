@@ -69,6 +69,38 @@ CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 #Bring in GLORYS bottom temperature data by NEFSC survey strata
 GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
 
+GLORYSformat <- GLORYSdata %>% dplyr::rename(STRATUM = STRATA) %>% 
+  separate(date, c('YEAR', 'MONTH', 'DAY'), sep='-')
+
+GLORYSseason <- dplyr::mutate(GLORYSformat, ifelse(season.name=='winter', GLORYSwinter=weighted.mean,
+                                                   ifelse(season.name=='spring', GLORYSspring=weighted.mean,
+                                                   ifelse(season.name=='summer', GLORYSsummer=weighted.mean,
+                                                    ifelse(season.name=='fall', GLORYSfall=weighted.mean, NA)))))
+# 
+# GLORYSseason <- GLORYSformat %>%
+#           ifelse(season.name=='winter', dplyr::mutate(GLORYSwinter=weighted.mean),
+#           ifelse(season.name == 'spring', dplyr::mutate(GLORYSspring=weighted.mean),
+#           ifelse(season.name == 'summer', dplyr::mutate(GLORYSsummer=weighted.mean),
+#           ifelse(season.name == 'fall', dplyr::mutate(GLORYSfall=weighted.mean), 'NA'))))
+
+#if_else not working:
+# GLORYSseason <- GLORYSformat %>%
+#   filter(if_else(season.name=='winter', mutate(GLORYSformat, GLORYSwinter=weighted.mean)),
+#          if_else(season.name == 'spring', mutate(GLORYSformat, GLORYSspring=weighted.mean)),
+#          if_else(season.name == 'summer', mutate(FLOARYSformat, GLORYSsummer=weighted.mean)),
+#          if_else(season.name == 'fall', mutate(GLORYSformat, GLORYSfall=weighted.mean)), NA)
+
+#GLORYSseason <- ifelse(GLORYSformat$season.name=='winter', mutate(GLORYSformat$GLORYSwinter=GLORYSformat$weighted.mean, NA))
+
+#Creates column with season name but doesn't allow for merge with fall data:
+#  mutate(GLORYSwinter = filter(season.name=='winter', weighted.mean)
+#        if_else(season.name=='spring', 'SPRING',
+#        if_else(season.name=='summer', 'SUMMER',
+#        if_else(season.name=='fall', 'FALL', 'NA')))))
+
+#This only brings in fall GLORYS data
+CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYSformat, by=c("YEAR", "EPU"))
+
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
 load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
