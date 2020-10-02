@@ -96,7 +96,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% select(YEAR, SLI.gbk, 
          if_else(CalEPU=='SLI.mab', 'MAB',
          if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
-CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
+CondCal <- dplyr::left_join(CondGLORYS, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Bring in total zooplankton biomass 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
