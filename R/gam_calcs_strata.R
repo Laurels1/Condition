@@ -18,6 +18,27 @@ data.dir <- "data"
 
 gis.dir  <- "gis"
 
+#--------------------------------------------------------------
+#Set up data structure of condition data for GAMs:
+
+#Spatial aggregation for input data:
+#by strata:
+
+#by EPU:
+
+#Filter data to include StockSmart stock biomass and abundance data:
+
+
+#Spatial aggregation for GAM runs:
+#by shelf:
+
+#by stock (fall BTS stock designations from StockStrataFall.csv):
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+
+#GAM runs by sex:
+
+
+
 #-------------------------------------------------------------
 #Not working currently to source, but reminder to run these files first:
 #source("R/StomFullnessData_allfh.R")
@@ -83,6 +104,13 @@ GLORYS2 <- GLORYSseason %>% group_by(YEAR, STRATUM) %>%
 
 CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYS2, by=c('YEAR', 'STRATUM'))
 
+#Trying to determine why 1/3 of Condition data doesn't have corresponding GLORYS data:
+  #Occurs across all years and strata
+GLORYSna <- CondGLORYS %>% filter(is.na(GLORYSwinter)) 
+GLORYSna_not <- CondGLORYS %>% filter(!is.na(GLORYSwinter)) 
+GLORYSnaStratum <- GLORYSna_not[!duplicated(GLORYSna_not[,'STRATUM']),]
+GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
+
 #--------------------------------------------------------------------------------
 #Bringing in ratio of small to large copepods
 load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
@@ -109,6 +137,11 @@ CondZoo <- dplyr::left_join(CondCal, Zoop, by = c("YEAR", "EPU"))
 TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
 
 TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
+
+#--------------------------------------------------------------------------------
+#Bloom time and magnitude data
+Bloom <- readr::read_csv(here::here("data","Bloom_out_all2020.csv"))
+
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before

@@ -73,14 +73,20 @@ library(magrittr)
   #If not pulling from SVDBS, load NEFSC survey data:
   #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
   #or if that doesn't work:
-survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
+#Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
+  #survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
+#Survdat data with indwt and sex from Union_FSCS_SVBIO:  
+  data <- readRDS(here::here(data.dir, "survdatBio.rds"))
+  
 #   survey 
 #   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
 # }
   
  
-
-fall <- survey[survey$SEASON == 'FALL',]
+  #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
+#fall <- survey[survey$SEASON == 'FALL',]
+  fall <- data$survdat[data$survdat$SEASON =='FALL',]
+  
 #------------------------------------------------------------------------------
 
 #reading in condition lw paramteters for tidyverse:
