@@ -85,7 +85,12 @@ library(magrittr)
  
   #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
 #fall <- survey[survey$SEASON == 'FALL',]
-  fall <- data$survdat[data$survdat$SEASON =='FALL',]
+  fallOrig <- data$survdat[data$survdat$SEASON =='FALL',]
+  
+#reassign SEX for red hake in 1980-1981:
+  fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
+                              ifelse(SEX=='F', '2',
+                                     ifelse(SEX=='f', '2', SEX)))))
   
 #------------------------------------------------------------------------------
 
@@ -101,12 +106,12 @@ LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 
 #using tidyverse to recode sex:
 LWpar <- dplyr::mutate(LWparams,
-                SEX = SEXMF,
-                SVSPP = LW_SVSPP)
+                SEX = as.character(SEXMF),
+                SVSPP = as.character(LW_SVSPP))
 
-LWpar$SEX[LWpar$SEXMF=='M'] <- 1
-LWpar$SEX[LWpar$SEXMF=='F'] <- 2
-LWpar$SEX[is.na(LWpar$SEXMF)] <- 0
+LWpar$SEX[LWpar$SEXMF=='M'] <- '1'
+LWpar$SEX[LWpar$SEXMF=='F'] <- '2'
+LWpar$SEX[is.na(LWpar$SEXMF)] <- '0'
 
 #view(LWparams)
 #Use seasonal L-W parameters when available
@@ -133,12 +138,13 @@ LWpar$COEFFICIENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
 #cbind(LWpar$COEFFICIENT_SPRING,LWpar$COEFFICIENT_SPRING_COMPL,LWpar$SEASONLESS_COEFFICIENT)
 
 #merge with tidyr:
-LWparInt <- transform(LWpar, SEX = as.integer(SEX))
+#LWparInt <- transform(LWpar, SEX = as.integer(SEX))
+LWparInt <- LWpar
 summary(LWparInt)
 summary(fall)
-mergedata <- merge(fall, LWparInt, all.fall=T, all.LWparInt = F)
+#mergedata <- merge(fall, LWparInt, all.fall=T, all.LWparInt = F)
 #left_join gave NAs for some scup and BSB L-W params
-#mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
+mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
 
 #checking for missing complete L-W params
 nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
