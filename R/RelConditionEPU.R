@@ -85,12 +85,12 @@ library(magrittr)
  
   #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
 #fall <- survey[survey$SEASON == 'FALL',]
-  fallOrig <- data$survdat[data$survdat$SEASON =='FALL',]
+  fall <- data$survdat[data$survdat$SEASON =='FALL',]
   
-#reassign SEX for red hake in 1980-1981:
-  fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
-                              ifelse(SEX=='F', '2',
-                                     ifelse(SEX=='f', '2', SEX)))))
+#SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
+  # fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
+  #                             ifelse(SEX=='F', '2',
+  #                                    ifelse(SEX=='f', '2', SEX)))))
   
 #------------------------------------------------------------------------------
 
@@ -105,9 +105,11 @@ LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 #Standardize syntax of Condition L-W data for merge with survey data:
 
 #using tidyverse to recode sex:
-LWpar <- dplyr::mutate(LWparams,
-                SEX = as.character(SEXMF),
-                SVSPP = as.character(LW_SVSPP))
+LWpar1 <- dplyr::mutate(LWparams,
+                SEX = as.character(SEXMF))
+LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
+                if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
+                if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
 
 LWpar$SEX[LWpar$SEXMF=='M'] <- '1'
 LWpar$SEX[LWpar$SEXMF=='F'] <- '2'
@@ -146,7 +148,7 @@ summary(fall)
 #left_join gave NAs for some scup and BSB L-W params
 mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
 
-#checking for missing complete L-W params
+#checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
 unique(nocompl$SVSPP)
 unique(nocompl$YEAR)
@@ -156,10 +158,14 @@ mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<75)
 mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0)
 mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
 mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
+#over 143,000 missing Indwt:
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
+#79,177 records don't have LW parameters:
+mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
 
 #Calculate relative condition:
-cond <- dplyr::mutate(mergeindwt, 
+###Not sure why RelCond is missing for species like red hake (SVSPP = 077):
+cond <- dplyr::mutate(mergeLW, 
                predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
                RelCond = INDWT/predwt*100)
 
@@ -177,10 +183,12 @@ cond <- dplyr::mutate(mergeindwt,
 
 strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
-data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
-data.table::setnames(cond,"BEGLON","LON")
-cond <- cond %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
+#Needed in direct data pull but not in Survdat:
+#data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
+#data.table::setnames(cond,"BEGLON","LON")
+#cond <- cond %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
 
+###Not sure why 38,653 records fewer (lost ~11%) after poststrata line:
 cond.epu <- Survdat::poststrat(as.data.table(cond), strata)
 data.table::setnames(cond.epu, 'newstrata', 'EPU')
 #check if scup exists, doesn't because LWparams only have unsexed 
@@ -217,36 +225,36 @@ cond.epu$sex[cond.epu$SEX==2] <- 'F'
 cond.epu <- cond.epu %>% dplyr::mutate(Species = SVSPP)
 
 #Renamed Species names to match Stock SMART names for merge:
-cond.epu$Species[cond.epu$SVSPP==013] <- 'Smooth dogfish'
-cond.epu$Species[cond.epu$SVSPP==015] <- 'Spiny dogfish'
-cond.epu$Species[cond.epu$SVSPP==023] <- 'Winter skate'
-cond.epu$Species[cond.epu$SVSPP==026] <- 'Little skate'
-cond.epu$Species[cond.epu$SVSPP==028] <- 'Thorny skate'
-cond.epu$Species[cond.epu$SVSPP==032] <- 'Atlantic herring'
-cond.epu$Species[cond.epu$SVSPP==072] <- 'Silver hake'
-cond.epu$Species[cond.epu$SVSPP==073] <- 'Atlantic cod'
-cond.epu$Species[cond.epu$SVSPP==074] <- 'Haddock'
-cond.epu$Species[cond.epu$SVSPP==075] <- 'Pollock'
-cond.epu$Species[cond.epu$SVSPP==076] <- 'White hake'
-cond.epu$Species[cond.epu$SVSPP==077] <- 'Red hake'
-cond.epu$Species[cond.epu$SVSPP==078] <- 'Spotted hake'
-cond.epu$Species[cond.epu$SVSPP==102] <- 'American plaice'
-cond.epu$Species[cond.epu$SVSPP==103] <- 'Summer flounder'
-cond.epu$Species[cond.epu$SVSPP==104] <- 'Fourspot'
-cond.epu$Species[cond.epu$SVSPP==105] <- 'Yellowtail flounder'
-cond.epu$Species[cond.epu$SVSPP==106] <- 'Winter flounder'
-cond.epu$Species[cond.epu$SVSPP==107] <- 'Witch flounder'
-cond.epu$Species[cond.epu$SVSPP==108] <- 'Windowpane'
-cond.epu$Species[cond.epu$SVSPP==121] <- 'Atlantic mackerel'
-cond.epu$Species[cond.epu$SVSPP==131] <- 'Butterfish'
-cond.epu$Species[cond.epu$SVSPP==135] <- 'Bluefish'
-cond.epu$Species[cond.epu$SVSPP==141] <- 'Black sea bass'
-cond.epu$Species[cond.epu$SVSPP==143] <- 'Scup'
-cond.epu$Species[cond.epu$SVSPP==145] <- 'Weakfish'
-cond.epu$Species[cond.epu$SVSPP==155] <- 'Acadian redfish'
-cond.epu$Species[cond.epu$SVSPP==164] <- 'Sea raven'
-cond.epu$Species[cond.epu$SVSPP==193] <- 'Ocean pout'
-cond.epu$Species[cond.epu$SVSPP==197] <- 'Goosefish'
+cond.epu$Species[cond.epu$SVSPP=='013'] <- 'Smooth dogfish'
+cond.epu$Species[cond.epu$SVSPP=='015'] <- 'Spiny dogfish'
+cond.epu$Species[cond.epu$SVSPP=='023'] <- 'Winter skate'
+cond.epu$Species[cond.epu$SVSPP=='026'] <- 'Little skate'
+cond.epu$Species[cond.epu$SVSPP=='028'] <- 'Thorny skate'
+cond.epu$Species[cond.epu$SVSPP=='032'] <- 'Atlantic herring'
+cond.epu$Species[cond.epu$SVSPP=='072'] <- 'Silver hake'
+cond.epu$Species[cond.epu$SVSPP=='073'] <- 'Atlantic cod'
+cond.epu$Species[cond.epu$SVSPP=='074'] <- 'Haddock'
+cond.epu$Species[cond.epu$SVSPP=='075'] <- 'Pollock'
+cond.epu$Species[cond.epu$SVSPP=='076'] <- 'White hake'
+cond.epu$Species[cond.epu$SVSPP=='077'] <- 'Red hake'
+cond.epu$Species[cond.epu$SVSPP=='078'] <- 'Spotted hake'
+cond.epu$Species[cond.epu$SVSPP=='102'] <- 'American plaice'
+cond.epu$Species[cond.epu$SVSPP=='103'] <- 'Summer flounder'
+cond.epu$Species[cond.epu$SVSPP=='104'] <- 'Fourspot'
+cond.epu$Species[cond.epu$SVSPP=='105'] <- 'Yellowtail flounder'
+cond.epu$Species[cond.epu$SVSPP=='106'] <- 'Winter flounder'
+cond.epu$Species[cond.epu$SVSPP=='107'] <- 'Witch flounder'
+cond.epu$Species[cond.epu$SVSPP=='108'] <- 'Windowpane'
+cond.epu$Species[cond.epu$SVSPP=='121'] <- 'Atlantic mackerel'
+cond.epu$Species[cond.epu$SVSPP=='131'] <- 'Butterfish'
+cond.epu$Species[cond.epu$SVSPP=='135'] <- 'Bluefish'
+cond.epu$Species[cond.epu$SVSPP=='141'] <- 'Black sea bass'
+cond.epu$Species[cond.epu$SVSPP=='143'] <- 'Scup'
+cond.epu$Species[cond.epu$SVSPP=='145'] <- 'Weakfish'
+cond.epu$Species[cond.epu$SVSPP=='155'] <- 'Acadian redfish'
+cond.epu$Species[cond.epu$SVSPP=='164'] <- 'Sea raven'
+cond.epu$Species[cond.epu$SVSPP=='193'] <- 'Ocean pout'
+cond.epu$Species[cond.epu$SVSPP=='197'] <- 'Goosefish'
 
 #Summarize annually and filter based on count of condition data by species
 annualcond <- cond.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
@@ -268,7 +276,7 @@ condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU)
 #  dplyr::filter(n >= 20)
 
 condEPUlen <- condNSppEPUlen 
-readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2019_EPU_length.csv"))
+readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2020_EPU_length.csv"))
 
 #Output for socio-economic models (by year):
 annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
@@ -278,7 +286,7 @@ condNSppYear <- annualcondYear %>% dplyr::add_count(Species)
 #  dplyr::filter(n >= 20)
 
 condYear <- condNSppYear
-readr::write_csv(condYear, here::here(out.dir,"RelCond2019_Year.csv"))
+readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
