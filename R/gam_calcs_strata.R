@@ -50,12 +50,22 @@ StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 #AvgTowCond <- cond.epu %>% group_by(CRUISE6, STRATUM, STATION, TOW, Species, sex) %>% 
 #  mutate(AvgTowRelCond=(mean(RelCond)), AvgTowRelCondSD=(sd(RelCond)))
 
+#For direct data pull (used in 2019 SOE and 2019 AFS GAMs):
 #Creating Average Relative Condition by strata, species, sex
-AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
-         AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
-        AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
-distinct(AvgRelCondStrata, .keep_all = T)
+# AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+#   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(EXPCATCHWT)),
+#          AvgExpcatchnumStrata= (mean(EXPCATCHNUM)), AvgLatStrata = (mean(LAT)), 
+#         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
+# distinct(AvgRelCondStrata, .keep_all = T)
+
+#Using Survdat:
+#Creating Average Relative Condition by strata, species, sex
+ AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
+          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
+          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
+ distinct(AvgRelCondStrata, .keep_all = T)
+
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
 #Couldn't run mechanisms model because data too sparse:
@@ -70,16 +80,16 @@ AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2020
 AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2020.csv"))
 AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2020.csv"))
 
-AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::rename(YEAR=Year) %>%
+AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
   gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::rename(YEAR=Year) %>%
+AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
   gather(EPU, AvgTempSummer, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempFallFormat <- AvgTempFallData %>% dplyr::rename(YEAR=Year) %>%
+AvgTempFallFormat <- AvgTempFallData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
   gather(EPU, AvgTempFall, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::rename(YEAR=Year) %>%
+AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
   gather(EPU, AvgTempWinter, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
@@ -94,7 +104,7 @@ GLORYSformat <- GLORYSdata %>%
   separate(date, c('Year2', 'MONTH', 'DAY'), sep='-') 
 
 GLORYSseason <- GLORYSformat %>% group_by(Year2, STRATA) %>% 
-  dplyr::mutate(YEAR=as.numeric(Year2), STRATUM = as.factor(paste0('0',STRATA)), 
+  dplyr::mutate(YEAR=as.character(Year2), STRATUM = as.factor(paste0('0',STRATA)), 
         GLORYSwinter=ifelse(season==1,(weighted.mean), NA), GLORYSspring=ifelse(season==2,(weighted.mean), NA),
          GLORYSsummer=ifelse(season==3,(weighted.mean), NA), GLORYSfall=ifelse(season==4,(weighted.mean), NA))
 
@@ -104,7 +114,7 @@ GLORYS2 <- GLORYSseason %>% group_by(YEAR, STRATUM) %>%
 
 CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYS2, by=c('YEAR', 'STRATUM'))
 
-#Trying to determine why 1/3 of Condition data doesn't have corresponding GLORYS data:
+#Trying to determine why 27% of Condition data doesn't have corresponding GLORYS data:
   #Occurs across all years and strata
 GLORYSna <- CondGLORYS %>% filter(is.na(GLORYSwinter)) 
 GLORYSna_not <- CondGLORYS %>% filter(!is.na(GLORYSwinter)) 
