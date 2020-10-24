@@ -75,7 +75,7 @@ library(magrittr)
   #or if that doesn't work:
 #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
   #survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
-#Survdat data with indwt and sex from Union_FSCS_SVBIO:  
+#Survdat data with indwt and sex from Union_FSCS_SVBIO (https://github.com/NOAA-EDAB/survdat):   
   data <- readRDS(here::here(data.dir, "survdatBio.rds"))
   
 #   survey 
