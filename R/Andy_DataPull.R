@@ -30,7 +30,11 @@ qry <- c(
   (b.station=s.station) and
   (p.svspp=b.svspp) and
   (p.tow=b.tow) and
-  (b.tow=s.tow) ;"
+  (b.tow=s.tow) and
+  purpose_code = 10 and
+ (SHG <= 136 and cruise6 <= 200900)
+
+        or (TOGA <= 1324 and cruise6 > 200900) ;"
 )
 # this will take some time
 laurel <- DBI::dbGetQuery(channel, qry)
