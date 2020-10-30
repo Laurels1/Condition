@@ -5,11 +5,13 @@
 #'Note: survdat is still in dev so you'll probably need to install again at a later date
 #'
 
+data.dir <- "data"
+
 remotes::install_github("NOAA-EDAB/survdat")
 
 library(magrittr)
 # connect to the database (use VPN)
-channel <- dbutils::connect_to_database("sole","lcol") #is that your username?
+channel <- dbutils::connect_to_database("sole","lcol")
 # either pull the data using your query (I included s.svvessel to the query)
 qry <- c(
   "select b.cruise6,b.stratum,b.tow,b.station, s.svvessel,
@@ -46,6 +48,11 @@ data <- laurel %>% dplyr::rename(ABUNDANCE = EXPCATCHNUM,BIOMASS=EXPCATCHWT)
 #apply conversion factors
 newdata <- survdat:::apply_conversion_factors(channel,data.table::as.data.table(data))
 
+#RSD save not working:
+#SurveyData <- saveRDS(here::here(data.dir, newdata$survdat), file = 'SurveyData.rsd')
+#Save SurveyData as csv:
+readr::write_csv(newdata$survdat, here::here(data.dir,"SurveyData.csv"))
+
 # filter dogfish for early years
-newdata$survdat %>% dplyr::filter(YEAR < 2001, SVSPP =="015") %>% dplyr::distinct(YEAR)
+#newdata$survdat %>% dplyr::filter(YEAR < 2001, SVSPP =="015") %>% dplyr::distinct(YEAR)
 

@@ -76,17 +76,23 @@ library(magrittr)
 #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
   #survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
 #Survdat data with indwt and sex from Union_FSCS_SVBIO (https://github.com/NOAA-EDAB/survdat):   
-  data <- readRDS(here::here(data.dir, "survdatBio.rds"))
-  
+  #Currently missing smooth and spiny dogfish prior to 2001
+#  data <- readRDS(here::here(data.dir, "survdatBio.rds"))
+
+#Data pull used in AFS 2019 GAM analyes, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
+  #RDS file isn't working:
+  #    data <- readRDS(here::here(data.dir, "SurveyData.rds"))
+  #CSV from Andy_DataPull.R:
+  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
+   
 #   survey 
 #   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
 # }
   
  
-  #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
-#fall <- survey[survey$SEASON == 'FALL',]
-  fall <- data$survdat[data$survdat$SEASON =='FALL',]
-  
+fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
+                                                       LAT = BEGLAT, LON = BEGLON)
+   
 #SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
   # fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
   #                             ifelse(SEX=='F', '2',
@@ -158,9 +164,9 @@ mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<75)
 mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0)
 mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
 mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
-#over 143,000 missing Indwt:
+#over 176,000 missing Indwt:
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
-#79,177 records don't have LW parameters:
+#91,606 records don't have LW parameters:
 mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
 
 #Calculate relative condition:
@@ -188,7 +194,7 @@ strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 #data.table::setnames(cond,"BEGLON","LON")
 #cond <- cond %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
 
-###Not sure why 38,653 records fewer (lost ~11%) after poststrata line:
+###Not sure why 41,511 records fewer (lost ~11%) after poststrata line:
 cond.epu <- Survdat::poststrat(as.data.table(cond), strata)
 data.table::setnames(cond.epu, 'newstrata', 'EPU')
 #check if scup exists, doesn't because LWparams only have unsexed 
