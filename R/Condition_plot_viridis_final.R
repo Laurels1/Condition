@@ -10,7 +10,7 @@ out.dir="output"
 #No data available for 2020 due to Covid-19
 #Removed MAB values in 2017 due to low sampling coverage:
 annualCondition <- condGOM %>% 
-    dplyr::filter(!(EPU == "MAB" & YEAR == 2017))
+    dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
 
 speciesNames <- annualCondition %>%
     dplyr::filter(sex == "F") %>%
@@ -47,10 +47,10 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     scale_fill_manual(values=vir) +
     guides(fill = guide_legend(reverse = TRUE)) +
     #works if don't need to pad final year for missing data:
-#    scale_x_discrete(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
+ #  scale_x_discrete(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
     #Pads final year of missing data but drops labels:
-     scale_x_discrete(breaks=round(seq(min(1990), max(2021), by = 5)),
-                       limits=c(1991:2021), labels=round(seq(min(1990), max(2021), by = 5))) +
+      scale_x_discrete(breaks=round(seq(min(1991), max(2020), by = 5)),
+                     limits=c(1991:2020), labels=round(seq(min(1991), max(2020), by = 5))) +
         theme(legend.position = "right", legend.box = "vertical", legend.title = element_blank(), 
           axis.title = element_blank(), axis.text.x = element_text(size = 10),
           axis.text.y = element_text(size = 10), panel.grid.major = element_blank(),
