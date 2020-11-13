@@ -39,14 +39,14 @@ library(magrittr)
 
 #Turn off the function when running outside of function to test new code
 #RelConditionEPU <- function(pullNewData=F,out.dir="output") {
-  # create output directory if it doesnt exist
+# create output directory if it doesnt exist
 #  if (!dir.exists(out.dir)) dir.create(out.dir)
-  
-#Turn this on when running outside of function
- out.dir="output"
 
-  data.dir <- "data"
-  gis.dir  <- "gis"
+#Turn this on when running outside of function
+out.dir="output"
+
+data.dir <- "data"
+gis.dir  <- "gis"
 
 
 #-------------------------------------------------------------------------------
@@ -69,35 +69,35 @@ library(magrittr)
 #   saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
 # #  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
 # } else {
-  # Otherwise, load data below:
-  #If not pulling from SVDBS, load NEFSC survey data:
-  #load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
-  #or if that doesn't work:
+# Otherwise, load data below:
+#If not pulling from SVDBS, load NEFSC survey data:
+#load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
+#or if that doesn't work:
 #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
-  #survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
+#survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
 #Survdat data with indwt and sex from Union_FSCS_SVBIO (https://github.com/NOAA-EDAB/survdat):   
-  #Currently missing smooth and spiny dogfish prior to 2001
+#Currently missing smooth and spiny dogfish prior to 2001
 #  data <- readRDS(here::here(data.dir, "survdatBio.rds"))
 
 #Data pull used in AFS 2019 GAM analyes, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
-  #RDS file isn't working:
-  #    data <- readRDS(here::here(data.dir, "SurveyData.rds"))
-  #CSV from Andy_DataPull.R:
-  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
-   
+#RDS file isn't working:
+survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
+#CSV from Andy_DataPull.R:
+#  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
+
 #   survey 
 #   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
 # }
-  
- 
+
+
 fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
                                                        LAT = BEGLAT, LON = BEGLON)
-   
+
 #SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
-  # fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
-  #                             ifelse(SEX=='F', '2',
-  #                                    ifelse(SEX=='f', '2', SEX)))))
-  
+# fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
+#                             ifelse(SEX=='F', '2',
+#                                    ifelse(SEX=='f', '2', SEX)))))
+
 #------------------------------------------------------------------------------
 
 #reading in condition lw paramteters for tidyverse:
@@ -112,10 +112,10 @@ LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 
 #using tidyverse to recode sex:
 LWpar1 <- dplyr::mutate(LWparams,
-                SEX = as.character(SEXMF))
+                        SEX = as.character(SEXMF))
 LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
-                if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
-                if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
+                                           if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
+                                                   if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
 
 LWpar$SEX[LWpar$SEXMF=='M'] <- '1'
 LWpar$SEX[LWpar$SEXMF=='F'] <- '2'
@@ -172,8 +172,8 @@ mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
 #Calculate relative condition:
 ###Not sure why RelCond is missing for species like red hake (SVSPP = 077):
 cond <- dplyr::mutate(mergeLW, 
-               predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
-               RelCond = INDWT/predwt*100)
+                      predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
+                      RelCond = INDWT/predwt*100)
 
 #check where condition is missing
 #nocond <- filter(cond, is.na(RelCond))
@@ -268,7 +268,7 @@ condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>% 
   dplyr::filter(n >= 20)
 
-#Summarize annually by EPU
+#Summarize annually by EPU (use for SOE plots)
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
@@ -292,6 +292,10 @@ condNSppYear <- annualcondYear %>% dplyr::add_count(Species)
 #  dplyr::filter(n >= 20)
 
 condYear <- condNSppYear
+readr::write_csv(condYear, here::here(out.dir,"RelCond2020_YearEcon.csv"))
+
+####For 2021 SOE: 
+condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
 readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
 
 #Summarize annually by Strata
@@ -303,22 +307,22 @@ condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>%
 
 
 #View(annualcond)
-#condFormat <- tidyr::gather(condN, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
-#condFormat <- tidyr::spread(condN, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
+#condFormat <- tidyr::gather(condNSppEPU, key= c("Species", "EPU", "sex"), value = "MeanCond", -YEAR)
+#condFormat <- tidyr::spread(condNSppEPU, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
 
 #Outputing condition data by EPU:
 # #readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
-# 
-# #condSS <- condNSpp %>% dplyr::filter(EPU == "SS")
+#
+condSS <- condNSppEPU %>% dplyr::filter(EPU == "SS")
 # #readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
-# 
-# #condGOM <- condNSpp %>% dplyr::filter(EPU == "GOM")
+#
+condGOM <- condNSppEPU %>% dplyr::filter(EPU == "GOM")
 # #readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
-# 
-# #condGB <- condNSpp %>% dplyr::filter(EPU == "GB")
+#
+condGB <- condNSppEPU %>% dplyr::filter(EPU == "GB")
 # #readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
-# # 
-# # condMAB <- condNSpp %>% dplyr::filter(EPU == "MAB")
+# #
+condMAB <- condNSppEPU %>% dplyr::filter(EPU == "MAB")
 # # readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
 
 

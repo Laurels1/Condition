@@ -5,7 +5,7 @@ library(readr)
 library(data.table)
 library(rgdal)
 library(devtools)
-devtools::install_github('slucey/RSurvey/Survdat', )
+#devtools::install_github('slucey/RSurvey/Survdat', )
 library(Survdat)
 
 out.dir = "output"
