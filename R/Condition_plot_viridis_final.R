@@ -46,9 +46,11 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     theme_bw() +
     scale_fill_manual(values=vir) +
     guides(fill = guide_legend(reverse = TRUE)) +
+    #works if don't need to pad final year for missing data:
 #    scale_x_discrete(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
-    scale_x_discrete(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5)),
-                     limits=c(1991:2021), labels=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
+    #Pads final year of missing data but drops labels:
+     scale_x_discrete(breaks=round(seq(min(1990), max(2021), by = 5)),
+                       limits=c(1991:2021), labels=round(seq(min(1990), max(2021), by = 5))) +
         theme(legend.position = "right", legend.box = "vertical", legend.title = element_blank(), 
           axis.title = element_blank(), axis.text.x = element_text(size = 10),
           axis.text.y = element_text(size = 10), panel.grid.major = element_blank(),
