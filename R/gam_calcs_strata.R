@@ -34,8 +34,13 @@ gis.dir  <- "gis"
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
 StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
-#Stocks <- StockStrata %>% filter()
-# elseif((SVSPP==131, StockName== "Butterfish", mutate(Stock=))
+
+StockStrata$SVSPP <- as.character(as.numeric(StockStrata$SVSPP))
+
+StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% mutate(STRATUM = Strata, SVSPP= as.character(SVSPP)) %>%
+  select(!Strata)
+
+CondStock <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
 
 #GAM runs by sex:
 
@@ -67,6 +72,7 @@ AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), YEAR=as.character(YEAR)) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
+
 
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
