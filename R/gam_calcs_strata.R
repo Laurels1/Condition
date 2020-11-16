@@ -34,6 +34,8 @@ gis.dir  <- "gis"
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
 StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+#Stocks <- StockStrata %>% filter()
+# elseif((SVSPP==131, StockName== "Butterfish", mutate(Stock=))
 
 #GAM runs by sex:
 
