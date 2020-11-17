@@ -35,12 +35,17 @@ gis.dir  <- "gis"
 #by stock (fall BTS stock designations from StockStrataFall.csv):
 StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-StockStrata$SVSPP <- as.character(as.numeric(StockStrata$SVSPP))
-
-StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% mutate(STRATUM = Strata, SVSPP= as.character(SVSPP)) %>%
+StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = Strata) %>% 
+  dplyr::mutate(SVSPP = if_else(SVSPP<100, as.character(paste0('0',SVSPP)),
+                 if_else(SVSPP>=100, as.character(SVSPP), 'NA'))) %>%
   select(!Strata)
 
-CondStock <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
+CondStockjoin <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
+
+CondStock <- CondStockjoin %>% mutate(YEAR = as.numeric(as.character(YEAR)))
+
+#Samples without stock area designations (strata where species were sampled but aren't included in stock area definition):
+CondStockMissing <- CondStock %>% filter(is.na(Stock))
 
 #GAM runs by sex:
 
@@ -67,10 +72,10 @@ CondStock <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
 
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex
-AvgStrataCond <- cond.epu %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+AvgStrataCond <- CondStock %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
-         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), YEAR=as.character(YEAR)) %>%
+         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 
@@ -88,16 +93,16 @@ AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2020
 AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2020.csv"))
 AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2020.csv"))
 
-AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
+AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
+AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempSummer, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempFallFormat <- AvgTempFallData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
+AvgTempFallFormat <- AvgTempFallData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempFall, c(GB, GOM,SS, MAB), na.rm=F)
 
-AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::mutate(YEAR=as.character(Year)) %>%
+AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempWinter, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
@@ -105,7 +110,7 @@ AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringForma
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #----------------------------------------------------------------------------------
-#Bring in GLORYS bottom temperature data by NEFSC survey strata
+#Bring in GLORYS bottom temperature data by NEFSC survey strata (mismatch of some strata currently)
 GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
 
 GLORYSformat <- GLORYSdata %>% 
@@ -138,14 +143,15 @@ load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
 Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
-CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>% 
+CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% 
+  select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>% 
   gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
   mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
                        if_else(CalEPU=='SLI.gom', 'GOM',
                                if_else(CalEPU=='SLI.mab', 'MAB',
                                        if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
-CondCal <- dplyr::left_join(CondGLORYS, CalfinFormat, by=c("YEAR", "EPU"))
+CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Bring in total zooplankton biomass 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
@@ -1046,7 +1052,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata_AvgCondStrata.csv")) 
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata_2020.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata.csv"))
 
