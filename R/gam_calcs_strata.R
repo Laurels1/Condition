@@ -216,7 +216,7 @@ AvgStom <- dplyr::left_join(TotCop, stom.data.strata, by = c('YEAR', 'SEASON', '
 
 #spring stomach fullness merge by strata for Condition GAM lag:
 AvgStomSpr <- dplyr::left_join(TotCop, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
-  select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex',
+  select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex','StockName', 'Stock', 'Survey',
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CopepodSmallLarge',
@@ -238,7 +238,7 @@ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStrata
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'sex',
+  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'sex', 'StockName', 'Stock', 'Survey',
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
@@ -457,6 +457,9 @@ CondClean <- CondCleanSpDogWt %>%
 
 spp <- unique(CondClean$Species)
 datalist = list()
+
+#Run GAMS by species and stock:
+SppStock <- unique(CondClean$Species, CondClean$Stock)
 
 for(sp in spp) {
   condSPP <- CondClean %>% dplyr::filter(Species==sp)
