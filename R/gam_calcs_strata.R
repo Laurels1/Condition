@@ -316,14 +316,43 @@ StockAssDat <- stockAssessmentData %>%
                        'Southern New England / Mid',
                        'Cape Cod / Gulf of Maine'))
 
+#Find unique stocks to merge with condition data:
+#stocks <- StockAssDat %>% select(Species, Region)
+#stocksunique <- unique(stocks)
+#View(stocksunique)
+
+#Reformat StockSmart Regions to merge with Stock from stockStrataFall.csv:
+      StockAssDat$Stock[StockAssDat$Region=='Atlantic'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species %in% c(
+        'Acadian redfish', 'American plaice', 'Pollock', 'White hake')] <- 'Unit' 
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species == 'Windowpane'] <- 'N'
+      StockAssDat$Stock[StockAssDat$Region=='Northwestern Atlantic Coast'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species == 'Thorny skate'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Mid'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Atlantic Coast'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Northern Georges Bank'] <- 'N'
+      StockAssDat$Stock[StockAssDat$Region=='Southern Georges Bank / Mid'] <- 'S'
+      StockAssDat$Stock[StockAssDat$Region=='Georges Bank' & StockAssDat$Species %in% c(
+        'Atlantic cod', 'Haddock', 'Yellowtail flounder', 'Winter flounder')] <- 'GB'
+      StockAssDat$Stock[StockAssDat$Region=='Georges Bank / Southern New England'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c(
+        'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
+      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
+     StockAssDat$Stock[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
+
 AssDat <- StockAssDat %>%
-  select(Species, Region, Year, Value, Metric) %>%
+  select(Species, Region, Stock, Year, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
-  #Sum total biomass (Abundance) across stocks for GAMs:
-  group_by(Species, YEAR) %>%
-  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
-#Catch/biomass as index of Fmort for Goosefish for GAMs:
+  #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of stock:
+#  group_by(Species, YEAR) %>%
+#  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
+  #If by stock:
+  dplyr::mutate(TotalBiomass = Abundance)
+
+  #Catch/biomass as index of Fmort for Goosefish for GAMs:
 #Not working: FproxyDat <- AssDat %>%
 #Not working:      dplyr::mutate(Fproxy = (Catch/Abundance)) %>%
 #Not working:     replace_na(AssDat$Fmort = AssDat$Fproxy)  
@@ -331,7 +360,7 @@ AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
 AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort) 
 
 #Using Average stomach fullness lagged 1 year:
-CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'YEAR'))
+CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'Stock', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'YEAR'))
 
