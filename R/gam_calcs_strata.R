@@ -114,10 +114,10 @@ CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
 
 GLORYSformat <- GLORYSdata %>% 
-  separate(date, c('Year2', 'MONTH', 'DAY'), sep='-') 
+  separate(date, c('Year2', 'MONTH', 'DAY'), sep='-')
 
 GLORYSseason <- GLORYSformat %>% group_by(Year2, STRATA) %>% 
-  dplyr::mutate(YEAR=as.character(Year2), STRATUM = as.character(paste0('0',STRATA)), 
+  dplyr::mutate(YEAR=as.numeric(Year2), STRATUM = as.character(paste0('0',STRATA)), 
                 GLORYSwinter=ifelse(season==1,(weighted.mean), NA), GLORYSspring=ifelse(season==2,(weighted.mean), NA),
                 GLORYSsummer=ifelse(season==3,(weighted.mean), NA), GLORYSfall=ifelse(season==4,(weighted.mean), NA))
 
