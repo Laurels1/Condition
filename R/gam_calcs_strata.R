@@ -419,7 +419,7 @@ CondClean <- CondWAAcoeff
 #                         'Black sea bass',
 #                         'Acadian redfish',
 #                         'Ocean pout',
-#                         'Goosefish')) 
+#                         'Goosefish'))
 
 # #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
 #'  CondClean <- CondWAAcoeff %>%      filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
@@ -487,8 +487,8 @@ CondClean <- CondCleanSpDogWt %>%
 spp <- unique(CondClean$Species)
 datalist = list()
 
-#Run GAMS by species and stock:
-SppStock <- unique(CondClean$Species, CondClean$Stock)
+#Run GAMS by species and stock (not working):
+#SppStock <- unique(CondClean$Species, CondClean$Stock)
 
 for(sp in spp) {
   condSPP <- CondClean %>% dplyr::filter(Species==sp)
@@ -503,8 +503,8 @@ for(sp in spp) {
   # form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
   # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10), data=condSPP)
   #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHWT, k=10), data=condSPP)
-  # form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
+  form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
+  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
   #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
   #  form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
   # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
@@ -520,6 +520,8 @@ for(sp in spp) {
   #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
   #form.cond <- formula(AvgRelCondStrata ~ s(Fproxy, k=10), data=condSPP)
   #form.cond <- formula(AvgRelCondStrata ~ s(Abundance, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(TotalBiomass, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(Fproxy, k=10), data=condSPP)
   
   
   #Eplains highest deviance:
@@ -803,11 +805,11 @@ for(sp in spp) {
   #GAMnames=c('Species', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   # GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  # GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+   GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #  GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #  GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
+ #  GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+ #  GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
   #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
   names(dl)=GAMnames
@@ -828,9 +830,13 @@ for(sp in spp) {
   #   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods_AvgCondStrata.jpg"))
   # filename <- here::here(out.dir,paste0(sp,"_BottomTempStrata_AvgCondStrata.jpg"))
   #     filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
-  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
+#  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
   #filename <- here::here(out.dir,paste0(sp,"_Fproxy_AvgCondStrata.jpg"))
   #filename <- here::here(out.dir,paste0(sp,"_TotalBiomass_AvgCondStrata.jpg"))
+#  filename <- here::here(out.dir,paste0(sp,"_TotalBiomass2020_AvgCondStrata.jpg"))
+#  filename <- here::here(out.dir,paste0(sp,"_Fproxy2020_AvgCondStrata.jpg"))
+  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata2020_AvgCondStrata.jpg"))
+  
   
   #Full model output:
   # filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
@@ -957,8 +963,11 @@ for(sp in spp) {
   #sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods_AvgCondStrata.txt")))
   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass_AvgCondStrata.txt")))
-  sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalAbundance_AvgCondStrata.txt")))
-  
+#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalAbundance_AvgCondStrata.txt")))
+  # sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalBiomass2020_AvgCondStrata.txt")))
+#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Fproxy2020_AvgCondStrata.txt")))
+  sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass2020_AvgCondStrata.txt")))
+    
   mgcv::gam.check(condGAM)
   
   sink()
@@ -1084,7 +1093,10 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata_AvgCondStrata.csv")) 
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata_2020.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata.csv"))
 
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata_2020.csv"))
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata_2020.csv"))
+ readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata_2020.csv"))
