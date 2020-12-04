@@ -275,6 +275,9 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
 load(here::here("data","stockAssessmentData.Rdata"))
 #View(stockAssessmentData)
 
+#Currently American plaice, cod, herring, goosefish, GOM winter flounder, GB YT have <20 years for Fproxy
+  #Currently American plaice, cod, herring, goosefish, Northern silver hake, Northern windowpane, GOM winter flounder, GB YT have <20 years for Total Biomass
+
 StockAssDat <- stockAssessmentData %>%
   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
                         'Thorny skate',
@@ -354,11 +357,11 @@ AssDat <- StockAssDat %>%
   dplyr::mutate(TotalBiomass = Abundance)
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
-#Not working: FproxyDat <- AssDat %>%
-#Not working:      dplyr::mutate(Fproxy = (Catch/Abundance)) %>%
-#Not working:     replace_na(AssDat$Fmort = AssDat$Fproxy)  
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
 AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort) 
+
+#Output Stock Assessment data as csv (examined missing data as .xls:
+#readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 
 #Using Average stomach fullness lagged 1 year:
 CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'Stock', 'YEAR'))
@@ -515,9 +518,9 @@ for(sp in spp) {
  #  form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
 #  form.cond <- formula(AvgRelCondStrata ~ s(TotalCopepodsMillions, k=10), data=condSPP)
 #    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
-    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
+#    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
+#    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
   #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
   #form.cond <- formula(AvgRelCondStrata ~ s(Fproxy, k=10), data=condSPP)
   #form.cond <- formula(AvgRelCondStrata ~ s(Abundance, k=10), data=condSPP)
@@ -628,6 +631,10 @@ for(sp in spp) {
   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   #Remove stomach fullness for mackerel:
   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+  
+  #With Fproxy and Total Biomass:
+  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+  
   
   #-----------------------------
   ####For weight at age coefficients instead of condition GAMs:
@@ -789,9 +796,11 @@ for(sp in spp) {
   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #Remove stomach fullness for mackerel:
   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  
-  #Model with highest deviance explained:
+
+    #With Fproxy and Total Biomass:
+  GAMnames=c('Species', 'Bottom Temp Strata', 'AvgExpcatchwtStrata', 'Total Biomass', 'Fproxy', 'CopepodSmallLarge', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+ 
+   #Model with highest deviance explained:
   #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
@@ -799,9 +808,9 @@ for(sp in spp) {
   #GAMnames=c('Species', 'AvgStomFullSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #GAMnames=c('Species', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  GAMnames=c('Species', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'AvgTempWinter', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  GAMnames=c('Species', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  GAMnames=c('Species', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  GAMnames=c('Species', 'AvgTempWinter', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   #GAMnames=c('Species', 'ZooplBiomassAnomaly', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -842,9 +851,9 @@ for(sp in spp) {
   #     filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge2020_AvgCondStrata.jpg"))
 #     filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
  #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring2020_AvgCondStrata.jpg"))
-       filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer2020_AvgCondStrata.jpg"))
-     #   filename <- here::here(out.dir,paste0(sp,"_AvgTempFall2020_AvgCondStrata.jpg"))
-     #   filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter2020_AvgCondStrata.jpg"))
+ #      filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer2020_AvgCondStrata.jpg"))
+ #       filename <- here::here(out.dir,paste0(sp,"_AvgTempFall2020_AvgCondStrata.jpg"))
+ #       filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter2020_AvgCondStrata.jpg"))
   
   
   #Full model output:
@@ -946,6 +955,9 @@ for(sp in spp) {
   #Remove stomach fullness for mackerel:
   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
   
+  #With Fproxy and Total Biomass:      
+  filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.jpg"))
+  
   #-----------------------------
   ####For weight at age coefficients instead of condition GAMs:
   #Remove stomach fullness for mackerel:
@@ -981,10 +993,13 @@ for(sp in spp) {
 #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_CopepodSmallLarge2020_AvgCondStrata.txt")))
 #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_ZooplanktonAnomaly2020_AvgCondStrata.txt")))
   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_SpringTempAnom2020_AvgCondStrata.txt")))
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_SummerTempAnom2020_AvgCondStrata.txt")))
+ #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_SummerTempAnom2020_AvgCondStrata.txt")))
   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_FallTempAnom2020_AvgCondStrata.txt")))
   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_WinterTempAnom2020_AvgCondStrata.txt")))
-    
+   
+  #With Fproxy and Total Biomass:
+  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
+   
   mgcv::gam.check(condGAM)
   
   sink()
@@ -1091,6 +1106,9 @@ AllSPP = do.call(rbind, datalist)
 #Remove stomach fullness for mackerel:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
 
+#With Fproxy and Total Biomass:
+readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.csv"))  
+
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
 #Remove stomach fullness for mackerel:
@@ -1122,6 +1140,6 @@ AllSPP = do.call(rbind, datalist)
 # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly2020_AvgCondStrata.csv")) 
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring2020_AvgCondStrata.csv"))   
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
+#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall2020_AvgCondStrata.csv"))       
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter2020_AvgCondStrata.csv"))   
