@@ -272,7 +272,8 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
 
 #------------------------------------------------------------------------------------ 
 #Add stock assessment data from Stock SMART: https://www.fisheries.noaa.gov/resource/tool-app/stock-smart
-load(here::here("data","stockAssessmentData.Rdata"))
+#load(here::here("data","stockAssessmentData.Rdata"))
+load(here::here("data","stockAssessmentData.rda"))
 #View(stockAssessmentData)
 
 #Currently American plaice, cod, herring, goosefish, GOM winter flounder, GB YT have <20 years for Fproxy
@@ -346,7 +347,14 @@ StockAssDat <- stockAssessmentData %>%
       StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
      StockAssDat$Stock[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
-AssDat <- StockAssDat %>%
+#From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment:    
+     StockAssYear <- StockAssDat %>%
+       group_by(Species, Region, Stock, Year, Metric) %>%
+       arrange(-AssessmentYear) %>%
+       slice(1) %>%
+       ungroup()
+     
+AssDat <- StockAssYear %>%
   select(Species, Region, Stock, Year, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
@@ -403,27 +411,34 @@ CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEA
 CondClean <- CondWAAcoeff
 
 ####If using total biomass (Abundance) or Fmort from StockSMART in GAMs, remove species lacking data: 
-# CondClean <- CondStockAss %>%
-#   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
-#                         'Thorny skate',
-#                         'Silver hake',
-#                         'Atlantic cod',
-#                         'Haddock',
-#                         'Pollock',
-#                         'White hake',
-#                         'Red hake',
-#                         'American plaice',
-#                         'Summer flounder',
-#                         'Yellowtail flounder',
-#                         'Winter flounder',
-#                         'Windowpane',
-#                         'Atlantic mackerel',
-#                         'Butterfish',
-#                         'Bluefish',
-#                         'Black sea bass',
-#                         'Acadian redfish',
-#                         'Ocean pout',
-#                         'Goosefish'))
+CondClean <- CondWAAcoeff %>%
+  filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
+                        'Thorny skate',
+                        #                    'Atlantic herring',
+                      #                      'Silver hake',
+                        #                    'Atlantic cod',
+                        'Haddock',
+                        'Pollock',
+                        'White hake',
+                        'Red hake',
+                 ##       'Spotted hake',
+                        #                     'American plaice',
+                        'Summer flounder',
+              ##          'Fourspot',
+                        'Yellowtail flounder',
+                        'Winter flounder',
+              #          'Witch flounder',
+             #           'Windowpane',
+                        'Atlantic mackerel',
+                        'Butterfish',
+                        'Bluefish',
+                        'Black sea bass',
+            #            'Scup',
+             ##           'Weakfish',
+                        'Acadian redfish',
+               ##        'Sea raven',
+                        'Ocean pout'))
+  #                    'Goosefish')) 
 
 # #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
 #'  CondClean <- CondWAAcoeff %>%      filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
