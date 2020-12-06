@@ -276,8 +276,8 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
 load(here::here("data","stockAssessmentData.rda"))
 #View(stockAssessmentData)
 
-#Currently American plaice, cod, herring, goosefish, GOM winter flounder, GB YT have <20 years for Fproxy
-  #Currently American plaice, cod, herring, goosefish, Northern silver hake, Northern windowpane, GOM winter flounder, GB YT have <20 years for Total Biomass
+#2019 goosefish assessment has too few years to use, also 2019 assessment of GOM cod, 2018 assessment of herring,
+#Also 2019 assessment of GB haddock, 2017 assessment of GOM winter flounder, 2019 assessment of GB YT
 
 StockAssDat <- stockAssessmentData %>%
   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
@@ -347,15 +347,23 @@ StockAssDat <- stockAssessmentData %>%
       StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
      StockAssDat$Stock[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
-#From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment:    
-     StockAssYear <- StockAssDat %>%
-       group_by(Species, Region, Stock, Year, Metric) %>%
-       arrange(-AssessmentYear) %>%
-       slice(1) %>%
-       ungroup()
+#From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment for each year and metric:    
+     # StockAssYear <- StockAssDat %>%
+     #   group_by(Species, Region, Stock, Year, Metric) %>%
+     #   arrange(-AssessmentYear) %>%
+     #   slice(1) %>%
+     #   ungroup()
      
+#From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
+  maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('Species'=StockAssDat$Species, 'Region'=StockAssDat$Region),max)
+  names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear'
+ maxAssyr$keep='y'      
+ 
+ say=merge(StockAssDat, maxAssyr, by=c('Species', 'Region', 'AssessmentYear'), all.x=T)
+ StockAssYear= subset(say, say$keep=='y')       
+ 
 AssDat <- StockAssYear %>%
-  select(Species, Region, Stock, Year, Value, Metric) %>%
+  select(Species, Region, Stock, Year, AssessmentYear, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
   #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of stock:
@@ -415,25 +423,25 @@ CondClean <- CondWAAcoeff %>%
   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
                         'Thorny skate',
                         #                    'Atlantic herring',
-                      #                      'Silver hake',
-                        #                    'Atlantic cod',
+                                            'Silver hake',
+                                            'Atlantic cod',
                         'Haddock',
                         'Pollock',
                         'White hake',
                         'Red hake',
                  ##       'Spotted hake',
-                        #                     'American plaice',
+                        'American plaice',
                         'Summer flounder',
               ##          'Fourspot',
                         'Yellowtail flounder',
                         'Winter flounder',
-              #          'Witch flounder',
-             #           'Windowpane',
+                        'Witch flounder',
+                        'Windowpane',
                         'Atlantic mackerel',
                         'Butterfish',
                         'Bluefish',
                         'Black sea bass',
-            #            'Scup',
+                        'Scup',
              ##           'Weakfish',
                         'Acadian redfish',
                ##        'Sea raven',
@@ -557,7 +565,7 @@ for(sp in spp) {
   ##For Smooth dogfish:
   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   ##cod full mechanisms (would have to remove AvgStomFullStratalag to run for cod Deviance Explained = 0.91):
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   ##cod (previous run Deviance Explained = 0.125, can't get to run for cod now!):
   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   ##summer flounder and red hake:
@@ -648,7 +656,7 @@ for(sp in spp) {
   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   
   #With Fproxy and Total Biomass:
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+ # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
   
   
   #-----------------------------
@@ -726,7 +734,7 @@ for(sp in spp) {
   #For Smooth dogfish:
   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   ##cod (have to remove AvgStomFullStratalag to run for cod):
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+  GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   ##summer flounder and red hake:
   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   ## Spiny dogfish, silver hake:
@@ -813,7 +821,7 @@ for(sp in spp) {
   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 
     #With Fproxy and Total Biomass:
-  GAMnames=c('Species', 'Bottom Temp Strata', 'AvgExpcatchwtStrata', 'Total Biomass', 'Fproxy', 'CopepodSmallLarge', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+ # GAMnames=c('Species', 'Bottom Temp Strata', 'AvgExpcatchwtStrata', 'Total Biomass', 'Fproxy', 'CopepodSmallLarge', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
  
    #Model with highest deviance explained:
   #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
@@ -884,7 +892,7 @@ for(sp in spp) {
   #For Smooth dogfish:
   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.jpg"))
   ##cod (have to remove AvgStomFullStratalag to run for cod):
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
+  filename <- here::here(out.dir,paste0(sp,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
   ##summer flounder and red hake:
   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
   ## Spiny dogfish, silver hake:
@@ -971,7 +979,7 @@ for(sp in spp) {
   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
   
   #With Fproxy and Total Biomass:      
-  filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.jpg"))
+ # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.jpg"))
   
   #-----------------------------
   ####For weight at age coefficients instead of condition GAMs:
@@ -1013,7 +1021,7 @@ for(sp in spp) {
   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_WinterTempAnom2020_AvgCondStrata.txt")))
    
   #With Fproxy and Total Biomass:
-  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
+#  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
    
   mgcv::gam.check(condGAM)
   
@@ -1035,7 +1043,7 @@ AllSPP = do.call(rbind, datalist)
 #For Smooth dogfish:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.csv"))
 ##cod (have to remove AvgStomFullStratalag to run for cod):
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
 ##summer flounder and red hake:
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
 ## Spiny dogfish, silver hake:
@@ -1122,7 +1130,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
 
 #With Fproxy and Total Biomass:
-readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.csv"))  
+#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.csv"))  
 
 #-----------------------------
 ####For weight at age coefficients instead of condition GAMs:
