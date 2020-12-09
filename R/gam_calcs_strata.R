@@ -529,32 +529,37 @@ EnvirVariables <- CondClean %>%
 #Correlation matrix:
 EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 
-EnvVar.cor.test <- function(EnvirVariables, ...) {
-  EnVar <- as.matrix(EnvirVariables)
-  n <- ncol(EnVar)
-  p.EnVar<- matrix(NA, n, n)
-  diag(p.EnVar) <- 0
+# mat : is a matrix of data
+# ... : further arguments to pass to the native R cor.test function
+cor.mtest <- function(mat, ...) {
+  mat <- as.matrix(mat)
+  n <- ncol(mat)
+  p.mat<- matrix(NA, n, n)
+  diag(p.mat) <- 0
   for (i in 1:(n - 1)) {
     for (j in (i + 1):n) {
-      tmp <- cor.test(EnVar[, i], EnVar[, j], ...)
-      p.EnVar[i, j] <- p.EnVar[j, i] <- tmp$p.value
+      tmp <- cor.test(mat[, i], mat[, j], ...)
+      p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
     }
   }
-  colnames(p.EnVar) <- rownames(p.EnVar) <- colnames(EnVar)
-  p.EnVar
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
 }
 # matrix of the p-value of the correlation
-p.EnVar <- EnvVar.cor.test(EnvirVariables)
+p.mat <- cor.mtest(EnvirVariables)
 head(p.EnVar[, 1:5])
 
-corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust", 
+#Plot correlation matrix with ellipses showing neg or positive trend, not plotting indices that have p>0.001 significance:
+ CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables.png")
+ png(CorrPlotEnVar, type = "cairo")
+ corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust", 
   #       addCoef.col = "black", # Add coefficient of correlation
-         tl.col="black", tl.srt=45, #Text label color and rotation
+         tl.col="black", tl.srt=45, tl.cex=0.75, #Text label color and rotation
          # Combine with significance
-         p.EnVar = p.EnVar, sig.level = 0.01, insig = "blank", 
+         p.mat = p.mat, sig.level = 0.001, insig = "blank", 
          # hide correlation coefficient on the principal diagonal
          diag=FALSE )
-
+dev.off()
 
 spp <- unique(CondClean$Species)
 datalist = list()
@@ -762,8 +767,10 @@ for(sp in spp) {
   #                                              "YEAR" =~1+YEAR))
   
   GAMstats <- summary(condGAM)
+    
+  AIC(condGAM)
   
-  SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
+  SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n, GAMstats$AIC))
   
   dl=data.frame(SumCondGAM)
   #Full model output:
@@ -887,8 +894,8 @@ for(sp in spp) {
 #   GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
  #  GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
 #  GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#    GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-   GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+    GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
   #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
   names(dl)=GAMnames
