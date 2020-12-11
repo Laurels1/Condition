@@ -524,7 +524,13 @@ EnvirVariables <- CondClean %>%
   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
                 'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass')
+                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass') %>%
+  dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+                'Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
+                'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+                'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
+                'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
+                'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass')
 
 #Correlation matrix:
 EnVarCor <- cor(EnvirVariables, use = "complete.obs")
@@ -562,11 +568,11 @@ cor.mtest <- function(mat, ...) {
 }
 # matrix of the p-value of the correlation
 p.mat <- cor.mtest(EnvirVariables)
-head(p.EnVar[, 1:5])
+#head(p.mat[, 1:5])
 
 #Plot correlation matrix with ellipses showing neg or positive trend, not plotting indices that have p>0.001 significance:
  CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables.png")
- png(CorrPlotEnVar, type = "cairo")
+ png(CorrPlotEnVar, type = "cairo", width = 420, height = 420)
  corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust", 
   #       addCoef.col = "black", # Add coefficient of correlation
          tl.col="black", tl.srt=45, tl.cex=0.75, #Text label color and rotation
@@ -725,7 +731,9 @@ for(sp in spp) {
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
   
   #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
+ #Same as above without shrinkage smoothers:
+  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
   
   
   #-----------------------------
@@ -777,8 +785,10 @@ for(sp in spp) {
   
   #na.gam.replace works if not including stomach data:  
   #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
-  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
-  
+#  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
+ #Without null space penalization:
+   condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+    
   #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
   #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
   #                                              "LON, LAT" =~1+LON,LAT +s(LON,LAT),
@@ -1060,7 +1070,7 @@ for(sp in spp) {
  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempSpring_AvgCondStrata.jpg"))
   
   #Fproxy and Total Biomass removing variables correlated >0.3:
-  filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
+  filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
   
   #-----------------------------
   ####For weight at age coefficients instead of condition GAMs:
@@ -1107,7 +1117,7 @@ for(sp in spp) {
 #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
 #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_TotalBiomass_Fproxy_CopepodSmallLarge_SpringTemp2020_AvgCondStrata.txt")))
 
-  sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
+  sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
   
   
     mgcv::gam.check(condGAM)
@@ -1221,7 +1231,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_TotalBiomass_Fproxy_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
 
 #Fproxy and Total Biomass removing variables correlated >0.3:
-readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
+readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
 
 
 #-----------------------------
