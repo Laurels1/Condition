@@ -5,12 +5,18 @@
 #'
 
 #install.packages("corrplot")
+#install.packages("car")
+#install.packages("mgcv.helper")
+#devtools::install_github("samclifford/mgcv.helper")
 
 library(mgcv)
 library(gam)
 library(dplyr)
 library(readr)
 library(corrplot)
+#library(car)
+#Not sure why not installing mgcv.helper:
+library(mgcv.helper)
 
 #in Nov. 2020 changed data pull to only include representative tows
 #turn off function while changing code
@@ -396,7 +402,6 @@ WAA <- readr::read_csv(here::here("data","GrowthCovariates_15species.csv"))
 CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEASON'))
 #AvgStomSpring doesn't include SEASON so don't join to WAA
 
-######End code before GAM analyses#####
 
 #---------------------------------------------------------------------------------
 #allfh data includes a better audit of food habits data and eliminates the need for these removals:
@@ -517,6 +522,15 @@ CondCleanSpDogWt <- CondCleanTotCop %>%
 CondClean <- CondCleanSpDogWt %>%
   dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
 
+#####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
+GOMhadd <- CondClean %>% 
+  dplyr::arrange(Stock) %>%
+  dplyr::filter(Species == 'Haddock') %>%
+  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'Stock', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
+
+#Output haddock condition:
+readr::write_csv(GOMhadd, here::here(out.dir,"FallStrata_RelCond_haddock.csv"))
+
 #Test for colinearity of environmental data:
 # select variables:
 EnvirVariables <- CondClean %>%
@@ -526,7 +540,7 @@ EnvirVariables <- CondClean %>%
                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
                 'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
-                'Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
+                'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
                 'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
@@ -573,11 +587,11 @@ p.mat <- cor.mtest(EnvirVariables)
 #Plot correlation matrix with ellipses showing neg or positive trend, not plotting indices that have p>0.001 significance:
  CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables.png")
  png(CorrPlotEnVar, type = "cairo", width = 420, height = 420)
- corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust", 
+ corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust",
   #       addCoef.col = "black", # Add coefficient of correlation
          tl.col="black", tl.srt=45, tl.cex=0.75, #Text label color and rotation
          # Combine with significance
-         p.mat = p.mat, sig.level = 0.001, insig = "blank", 
+         p.mat = p.mat, sig.level = 0.001, insig = "blank",
          # hide correlation coefficient on the principal diagonal
          diag=FALSE )
 dev.off()
@@ -585,11 +599,68 @@ dev.off()
 spp <- unique(CondClean$Species)
 datalist = list()
 
+
+######End code before GAM analyses#####
+
 #Run GAMS by species and stock (not working):
 #SppStock <- unique(CondClean$Species, CondClean$Stock)
 
 for(sp in spp) {
   condSPP <- CondClean %>% dplyr::filter(Species==sp)
+  
+  #set up for 2020 data with only representative tows, using variables with <0.3 covariance:
+ 
+  #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
+  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
+  #Same as above without shrinkage smoothers:
+   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
+  
+   #na.gam.replace works if not including stomach data:  
+   #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
+   #  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
+   #Without null space penalization:
+   condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+   
+   GAMstats <- summary(condGAM)
+   #Trying to add in AIC but wasn't included in the output: 
+   #AIC(condGAM)
+   
+   SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
+   
+   dl=data.frame(SumCondGAM)
+   
+   #Fproxy and Total Biomass removing variables correlated >0.3:
+   GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
+              'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+   
+   #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
+   names(dl)=GAMnames
+   datalist[[sp]] <- dl
+  
+   filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
+   
+   jpeg(filename)
+   #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
+   par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+   #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+   plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
+   dev.off()
+   
+   sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
+   
+   mgcv::gam.check(condGAM)
+   mgcv.helper::vif.gam(condGAM)
+      
+   sink()
+
+}
+
+AllSPP = do.call(rbind, datalist)
+
+readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
+
+   
+   
   
   #turn on for testing a single species outside of loop:
   #condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='Atlantic cod')
@@ -733,7 +804,7 @@ for(sp in spp) {
   #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
 #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
  #Same as above without shrinkage smoothers:
-  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
+#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
   
   
   #-----------------------------
@@ -787,20 +858,20 @@ for(sp in spp) {
   #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
 #  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
  #Without null space penalization:
-   condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+#   condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
     
   #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
   #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
   #                                              "LON, LAT" =~1+LON,LAT +s(LON,LAT),
   #                                              "YEAR" =~1+YEAR))
   
-  GAMstats <- summary(condGAM)
-   #Trying to add in AIC but wasn't included in the output: 
-  #AIC(condGAM)
-  
-  SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
-  
-  dl=data.frame(SumCondGAM)
+  # GAMstats <- summary(condGAM)
+  #  #Trying to add in AIC but wasn't included in the output: 
+  # #AIC(condGAM)
+  # 
+  # SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
+  # 
+  # dl=data.frame(SumCondGAM)
   #Full model output:
   #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
@@ -905,8 +976,8 @@ for(sp in spp) {
 #  GAMnames=c('Species', 'Bottom Temp Strata', 'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
   #Fproxy and Total Biomass removing variables correlated >0.3:
-  GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
-             'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+  # GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
+  #            'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
   
    #Model with highest deviance explained:
@@ -931,9 +1002,9 @@ for(sp in spp) {
 #   GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
   
   #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
-  names(dl)=GAMnames
-  datalist[[sp]] <- dl
-  
+  # names(dl)=GAMnames
+  # datalist[[sp]] <- dl
+  # 
   #Use for testing plot with single species
   #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
   
@@ -1070,7 +1141,7 @@ for(sp in spp) {
  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempSpring_AvgCondStrata.jpg"))
   
   #Fproxy and Total Biomass removing variables correlated >0.3:
-  filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
+  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
   
   #-----------------------------
   ####For weight at age coefficients instead of condition GAMs:
@@ -1079,12 +1150,12 @@ for(sp in spp) {
   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
   
   
-  jpeg(filename)
-  #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
-  par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-  #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-  plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
-  dev.off()
+  # jpeg(filename)
+  # #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
+  # par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+  # #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+  # plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
+  # dev.off()
   
   
   #  plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
@@ -1117,15 +1188,15 @@ for(sp in spp) {
 #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
 #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_TotalBiomass_Fproxy_CopepodSmallLarge_SpringTemp2020_AvgCondStrata.txt")))
 
-  sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
-  
-  
-    mgcv::gam.check(condGAM)
-  
-  sink()
-}
-
-AllSPP = do.call(rbind, datalist)
+#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
+#   
+#   
+#     mgcv::gam.check(condGAM)
+#   
+#   sink()
+# }
+# 
+# AllSPP = do.call(rbind, datalist)
 
 #Full model output:
 #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
@@ -1231,7 +1302,7 @@ AllSPP = do.call(rbind, datalist)
 #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_TotalBiomass_Fproxy_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
 
 #Fproxy and Total Biomass removing variables correlated >0.3:
-readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
+# readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
 
 
 #-----------------------------
