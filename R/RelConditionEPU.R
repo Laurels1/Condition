@@ -90,7 +90,10 @@ survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
 # }
 
 
-fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
+#fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
+#                                                       LAT = BEGLAT, LON = BEGLON)
+
+spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
                                                        LAT = BEGLAT, LON = BEGLON)
 
 #SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
@@ -149,10 +152,11 @@ LWpar$COEFFICIENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
 #LWparInt <- transform(LWpar, SEX = as.integer(SEX))
 LWparInt <- LWpar
 summary(LWparInt)
-summary(fall)
+#summary(fall)
 #mergedata <- merge(fall, LWparInt, all.fall=T, all.LWparInt = F)
 #left_join gave NAs for some scup and BSB L-W params
-mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
+#mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
+mergedata <- left_join(spring, LWparInt, by= c('SVSPP', 'SEX'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))

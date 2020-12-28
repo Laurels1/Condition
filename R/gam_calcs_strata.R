@@ -529,7 +529,7 @@ GOMhadd <- CondClean %>%
   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'Stock', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
 
 #Output haddock condition:
-readr::write_csv(GOMhadd, here::here(out.dir,"FallStrata_RelCond_haddock.csv"))
+#readr::write_csv(GOMhadd, here::here(out.dir,"FallStrata_RelCond_haddock.csv"))
 
 #Test for colinearity of environmental data:
 # select variables:
