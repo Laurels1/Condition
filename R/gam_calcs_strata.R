@@ -43,7 +43,9 @@ gis.dir  <- "gis"
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = Strata) %>% 
   dplyr::mutate(SVSPP = if_else(SVSPP<100, as.character(paste0('0',SVSPP)),

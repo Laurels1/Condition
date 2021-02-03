@@ -103,15 +103,22 @@ spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX)
 
 #------------------------------------------------------------------------------
 
-#reading in condition lw paramteters for tidyverse:
-LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
+#reading in condition lw paramteters from Michael Martin (survey L-W for sampling error messages) for tidyverse:
+#LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 
+#Wigley et al. 2003 L-W parameters:
+LWparams <- readr::read_csv(here::here(data.dir, "tech_memo_parameters_table_format.csv"))
 
 #head(LWparams)
 #View(LWparams)
 #head(fall)
 
 #Standardize syntax of Condition L-W data for merge with survey data:
+#remove ? and replace with negative from error saving .xlsx as .csv
+LWparams1 <- dplyr::mutate(LWparams,
+                           lna1 = substr(ln_a, 2, nchar(ln_a)),
+                           lna = as.numeric(lna1)*-1)
+
 
 #using tidyverse to recode sex:
 LWpar1 <- dplyr::mutate(LWparams,
@@ -159,9 +166,9 @@ summary(LWparInt)
 mergedata <- left_join(spring, LWparInt, by= c('SVSPP', 'SEX'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
-nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
-unique(nocompl$SVSPP)
-unique(nocompl$YEAR)
+# nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
+# unique(nocompl$SVSPP)
+# unique(nocompl$YEAR)
 
 #filters out values without losing rows with NAs:
 mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<75)
@@ -171,13 +178,18 @@ mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
 #over 176,000 missing Indwt:
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
 #91,606 records don't have LW parameters:
-mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
+#mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
+mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_SPRING_COMPL))
 
 #Calculate relative condition:
 ###Not sure why RelCond is missing for species like red hake (SVSPP = 077):
+# cond <- dplyr::mutate(mergeLW, 
+#                       predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
+#                       RelCond = INDWT/predwt*100)
 cond <- dplyr::mutate(mergeLW, 
-                      predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
+                      predwt = (exp(COEFFICIENT_SPRING_COMPL))*LENGTH**EXPONENT_SPRING_COMPL,
                       RelCond = INDWT/predwt*100)
+
 
 #check where condition is missing
 #nocond <- filter(cond, is.na(RelCond))
