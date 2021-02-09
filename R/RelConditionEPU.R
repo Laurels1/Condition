@@ -103,33 +103,21 @@ spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX)
 
 #------------------------------------------------------------------------------
 
+#####THIS SECTION FOR Martin LW params:
 #reading in condition lw paramteters from Michael Martin (survey L-W for sampling error messages) for tidyverse:
 #LWparams <- readr::read_csv(here::here(data.dir, "lw_parameters_Condition.csv"))
 
-#Wigley et al. 2003 L-W parameters:
-LWparams <- readr::read_csv(here::here(data.dir, "tech_memo_parameters_table_format.csv"))
-
-#head(LWparams)
-#View(LWparams)
-#head(fall)
-
-#Standardize syntax of Condition L-W data for merge with survey data:
-#remove ? and replace with negative from error saving .xlsx as .csv
-LWparams1 <- dplyr::mutate(LWparams,
-                           lna1 = substr(ln_a, 2, nchar(ln_a)),
-                           lna = as.numeric(lna1)*-1)
-
-
+#Coding 
 #using tidyverse to recode sex:
-LWpar1 <- dplyr::mutate(LWparams,
-                        SEX = as.character(SEXMF))
-LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
-                                           if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
-                                                   if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
-
-LWpar$SEX[LWpar$SEXMF=='M'] <- '1'
-LWpar$SEX[LWpar$SEXMF=='F'] <- '2'
-LWpar$SEX[is.na(LWpar$SEXMF)] <- '0'
+# LWpar1 <- dplyr::mutate(LWparams,
+#                         SEX = as.character(SEXMF))
+# LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
+#                                            if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
+#                                                    if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
+# 
+# LWpar$SEX[LWpar$SEXMF=='M'] <- '1'
+# LWpar$SEX[LWpar$SEXMF=='F'] <- '2'
+# LWpar$SEX[is.na(LWpar$SEXMF)] <- '0'
 
 #view(LWparams)
 #Use seasonal L-W parameters when available
@@ -162,6 +150,33 @@ summary(LWparInt)
 #summary(fall)
 #mergedata <- merge(fall, LWparInt, all.fall=T, all.LWparInt = F)
 #left_join gave NAs for some scup and BSB L-W params
+
+#Wigley et al. 2003 L-W parameters:
+LWparams <- readr::read_csv(here::here(data.dir, "tech_memo_parameters_table_format.csv"))
+
+#head(LWparams)
+#View(LWparams)
+#head(fall)
+
+#Standardize syntax of Condition L-W data for merge with survey data:
+#remove ? and replace with negative from error saving .xlsx as .csv
+LWparams1 <- dplyr::mutate(LWparams,
+                           lna1 = substr(ln_a, 2, nchar(ln_a)),
+                           lna = as.numeric(lna1)*-1)
+
+#format SVSPP, sex etc to merge with surdat data:
+LWpar1 <- LWparams1 %>% dplyr::mutate(SEX = if_else(Gender == 'Male', as.character(1),
+                              if_else(Gender == 'Female', as.character(2),
+                              if_else(Gender == 'Combined', as.character(0), 'NA'))))
+
+#For some reason 00 isn't being added to the front of SVSPP with <10, but sandbar shark and roughtail sting ray aren't in condition analyses now:                                 
+LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
+                                           if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
+                                                   if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
+
+#Parse data by season:
+
+
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
 mergedata <- left_join(spring, LWparInt, by= c('SVSPP', 'SEX'))
 

@@ -1,4 +1,4 @@
-SpeciesName,SVSPP,Season,Gender,N,ln_a,SEa,b,SEb,SE_estimate,r2
+SpeciesName,LW_SVSPP,Season,Gender,N,ln_a,SEa,b,SEb,SE_estimate,r2
 Sand tiger ,12,Autumn,Combined,15,?13.4887,1.0581,3.2927,0.1984,0.1169,0.9549
 Chain dogfish,14,Win/Aut,Combined,80,?12.9053,0.2401,3.1282,0.0667,0.149,0.9658
 Chain dogfish,14,Win/Aut,Male,55,?12.2155 ,0.3924,2.9322,0.1077,0.1498,0.9332

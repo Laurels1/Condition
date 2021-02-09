@@ -179,7 +179,7 @@ TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 
 #--------------------------------------------------------------------------------
 #Bloom time and magnitude data
-Bloom <- readr::read_csv(here::here("data","Bloom_out_all2020.csv"))
+Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
 
 
 #-------------------------------------------------------------------------------- 
