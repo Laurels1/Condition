@@ -123,30 +123,30 @@ spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX)
 #Use seasonal L-W parameters when available
 
 #this works to fill EXPONENT_FALL_COMP with SEASONLESS_EXPONENT if NA, otherwise use EXPONENT_FALL (but only if brought in as a data frame, not as a data table)
-ind <- is.na(LWpar$EXPONENT_FALL)
-LWpar$EXPONENT_FALL_COMPL <- LWpar$EXPONENT_FALL
-LWpar$EXPONENT_FALL_COMPL[ind]<-LWpar$SEASONLESS_EXPONENT[ind]
-#cbind(LWpar$EXPONENT_FALL,LWpar$EXPONENT_FALL_COMPL,LWpar$SEASONLESS_EXPONENT)
+# ind <- is.na(LWpar$EXPONENT_FALL)
+# LWpar$EXPONENT_FALL_COMPL <- LWpar$EXPONENT_FALL
+# LWpar$EXPONENT_FALL_COMPL[ind]<-LWpar$SEASONLESS_EXPONENT[ind]
+# #cbind(LWpar$EXPONENT_FALL,LWpar$EXPONENT_FALL_COMPL,LWpar$SEASONLESS_EXPONENT)
 
-ind <- is.na(LWpar$EXPONENT_SPRING)
-LWpar$EXPONENT_SPRING_COMPL <- LWpar$EXPONENT_SPRING
-LWpar$EXPONENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_EXPONENT[ind]
-#cbind(LWpar$EXPONENT_SPRING,LWpar$EXPONENT_SPRING_COMPL,LWpar$SEASONLESS_EXPONENT)
+# ind <- is.na(LWpar$EXPONENT_SPRING)
+# LWpar$EXPONENT_SPRING_COMPL <- LWpar$EXPONENT_SPRING
+# LWpar$EXPONENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_EXPONENT[ind]
+# #cbind(LWpar$EXPONENT_SPRING,LWpar$EXPONENT_SPRING_COMPL,LWpar$SEASONLESS_EXPONENT)
 
-ind <- is.na(LWpar$COEFFICIENT_FALL)
-LWpar$COEFFICIENT_FALL_COMPL <- LWpar$COEFFICIENT_FALL
-LWpar$COEFFICIENT_FALL_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
-#cbind(LWpar$COEFFICIENT_FALL,LWpar$COEFFICIENT_FALL_COMPL,LWpar$SEASONLESS_COEFFICIENT)
+# ind <- is.na(LWpar$COEFFICIENT_FALL)
+# LWpar$COEFFICIENT_FALL_COMPL <- LWpar$COEFFICIENT_FALL
+# LWpar$COEFFICIENT_FALL_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
+# #cbind(LWpar$COEFFICIENT_FALL,LWpar$COEFFICIENT_FALL_COMPL,LWpar$SEASONLESS_COEFFICIENT)
 
-ind <- is.na(LWpar$COEFFICIENT_SPRING)
-LWpar$COEFFICIENT_SPRING_COMPL <- LWpar$COEFFICIENT_SPRING
-LWpar$COEFFICIENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
-#cbind(LWpar$COEFFICIENT_SPRING,LWpar$COEFFICIENT_SPRING_COMPL,LWpar$SEASONLESS_COEFFICIENT)
+# ind <- is.na(LWpar$COEFFICIENT_SPRING)
+# LWpar$COEFFICIENT_SPRING_COMPL <- LWpar$COEFFICIENT_SPRING
+# LWpar$COEFFICIENT_SPRING_COMPL[ind]<-LWpar$SEASONLESS_COEFFICIENT[ind]
+# #cbind(LWpar$COEFFICIENT_SPRING,LWpar$COEFFICIENT_SPRING_COMPL,LWpar$SEASONLESS_COEFFICIENT)
 
 #merge with tidyr:
 #LWparInt <- transform(LWpar, SEX = as.integer(SEX))
-LWparInt <- LWpar
-summary(LWparInt)
+# LWparInt <- LWpar
+# summary(LWparInt)
 #summary(fall)
 #mergedata <- merge(fall, LWparInt, all.fall=T, all.LWparInt = F)
 #left_join gave NAs for some scup and BSB L-W params
@@ -164,13 +164,25 @@ LWparams1 <- dplyr::mutate(LWparams,
                            lna1 = substr(ln_a, 2, nchar(ln_a)),
                            lna = as.numeric(lna1)*-1)
 
-#format SVSPP, sex etc to merge with surdat data:
-LWpar1 <- LWparams1 %>% dplyr::mutate(SEX = if_else(Gender == 'Male', as.character(1),
-                              if_else(Gender == 'Female', as.character(2),
-                              if_else(Gender == 'Combined', as.character(0), 'NA'))))
+#Add rows to assign SEX when Gender == Combined in Wigley et al ref:
+LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
+  slice(rep(1:n(), each=3)) %>%
+  mutate(SEX = as.character(rep(0:2, length.out = n())))
 
+#Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
+LWpar_sexed <- LWparams1 %>% dplyr::filter(Gender %in% c('Male', 'Female')) %>%
+  dplyr::mutate(SEX = if_else(Gender == 'Male', as.character(1),
+                      if_else(Gender == 'Female', as.character(2),'NA')))
+
+#*********Need to remove sex>0 for species in LWpar_sex that are also in LWpar_sexed
+
+
+
+LWpar_sex2 <- bind_rows(LWpar_sexed, LWpar_sex) 
+  
+  
 #For some reason 00 isn't being added to the front of SVSPP with <10, but sandbar shark and roughtail sting ray aren't in condition analyses now:                                 
-LWpar_spp <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
+LWpar_spp <- LWpar_sex2 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
                                            if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
                                                    if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
 
@@ -183,9 +195,8 @@ LWpar <- LWpar_spp %>% mutate(SEASON = if_else(Season == 'Autumn', as.character(
                                            if_else(Season == 'Win/Spr', as.character('SPRING'),
                                            if_else(Season == 'Spring', as.character('SPRING'), 'NA')))))))
 
-
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(spring, LWpar, by= c('SVSPP', 'SEX'))
+mergedata <- left_join(spring, LWpar, by= c('SEASON', 'SVSPP', 'SEX'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
