@@ -170,15 +170,22 @@ LWpar1 <- LWparams1 %>% dplyr::mutate(SEX = if_else(Gender == 'Male', as.charact
                               if_else(Gender == 'Combined', as.character(0), 'NA'))))
 
 #For some reason 00 isn't being added to the front of SVSPP with <10, but sandbar shark and roughtail sting ray aren't in condition analyses now:                                 
-LWpar <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
+LWpar_spp <- LWpar1 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
                                            if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
                                                    if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
 
 #Parse data by season:
+LWpar <- LWpar_spp %>% mutate(SEASON = if_else(Season == 'Autumn', as.character('FALL'),
+                                           if_else(Season == 'Win/Aut', as.character('FALL'),
+#*****If using spring data, change Spr/Aut, Wint/Spr/Aut to SPRING:                                                   
+                                           if_else(Season == 'Spr/Aut', as.character('FALL'),
+                                           if_else(Season == 'Win/Spr/Aut', as.character('FALL'),        
+                                           if_else(Season == 'Win/Spr', as.character('SPRING'),
+                                           if_else(Season == 'Spring', as.character('SPRING'), 'NA')))))))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(spring, LWparInt, by= c('SVSPP', 'SEX'))
+mergedata <- left_join(spring, LWpar, by= c('SVSPP', 'SEX'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
