@@ -82,6 +82,16 @@ gis.dir  <- "gis"
 #Data pull used in AFS 2019 GAM analyes, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
 #RDS file isn't working:
 survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
+
+#Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021):
+####Can't install survdat package:
+remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE)
+
+channel <- dbutils::connect_to_database(server="servername",uid="yourUsername")
+survey <- get_survdat_data(channel, getBio = F)
+
+swept_area <- calc_swept_area()
+
 #CSV from Andy_DataPull.R:
 #  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
 
