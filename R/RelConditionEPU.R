@@ -22,7 +22,10 @@
 #Required packages
 #library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
-library(Survdat)
+#library(Survdat)
+#Modified survdat with corrected Bigelow conversions (build_vignettes not working):
+#remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE)
+library(survdat)
 library(data.table)
 # library(graphics)
 # library(grDevices)
@@ -81,13 +84,33 @@ gis.dir  <- "gis"
 
 #Data pull used in AFS 2019 GAM analyes, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
 #RDS file isn't working:
-survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
+#survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
 
-#Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021):
-####Can't install survdat package:
-remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE)
+#Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021 from remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE):
+#vonnect_to_database didn't work because dbutils doesn't work with R v. 4.0.4:
+#channel <- dbutils::connect_to_database(server="servername",uid="yourUsername")
+library(DBI)
+library(rstudioapi)
+con <- DBI::dbConnect(odbc::odbc(),
+                      "sole",
+                      UID    = rstudioapi::askForPassword("Database user"),
+                      PWD    = rstudioapi::askForPassword("Database password"),
+                      Port   = 1526)
 
-channel <- dbutils::connect_to_database(server="servername",uid="yourUsername")
+require(survdat)
+survdat.= get_survdat_data(con, conversion.factor=T)
+
+
+survdat=as.data.frame(survdat.[['survdat']])
+
+
+#keep survdat object
+save(survdat, file='survdat.RData')
+
+#DISCONNECT
+dbDisconnect(con)
+
+
 survey <- get_survdat_data(channel, getBio = F)
 
 swept_area <- calc_swept_area()
