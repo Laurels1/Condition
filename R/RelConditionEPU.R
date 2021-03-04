@@ -36,6 +36,7 @@ library(tidyverse)
 #library(gapminder)
 library(rgdal)
 library(RODBC)
+remotes::install_github("andybeet/dbutils")
 #library(gam)
 library(magrittr)
 #library(readr)
@@ -87,33 +88,39 @@ gis.dir  <- "gis"
 #survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
 
 #Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021 from remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE):
-#vonnect_to_database didn't work because dbutils doesn't work with R v. 4.0.4:
-#channel <- dbutils::connect_to_database(server="servername",uid="yourUsername")
-library(DBI)
-library(rstudioapi)
-con <- DBI::dbConnect(odbc::odbc(),
-                      "sole",
-                      UID    = rstudioapi::askForPassword("Database user"),
-                      PWD    = rstudioapi::askForPassword("Database password"),
-                      Port   = 1526)
+# library(DBI)
+# library(rstudioapi)
+#Brian connected this way:
+# con <- DBI::dbConnect(odbc::odbc(),
+#                       "sole",
+#                       UID    = rstudioapi::askForPassword("Database user"),
+#                       PWD    = rstudioapi::askForPassword("Database password"),
+#                       Port   = 1526)
+# 
+# require(survdat)
+# survdat. <- get_survdat_data(con, conversion.factor=T, getBio=T)
+# 
+# 
+# survdat=as.data.frame(survdat.[['survdat']])
+# 
+# 
+# #keep survdat object
+# save(survdat, file='survdat.RData')
+# 
+# #DISCONNECT
+# dbDisconnect(con)
+###End of Brian's method of connecting###
 
-require(survdat)
-survdat.= get_survdat_data(con, conversion.factor=T)
 
-
-survdat=as.data.frame(survdat.[['survdat']])
-
-
-#keep survdat object
-save(survdat, file='survdat.RData')
-
-#DISCONNECT
-dbDisconnect(con)
-
-
+#From survdat helfile:
+#In survdat package, have to install dbutils from Andy's github at top:
+channel <- dbutils::connect_to_database(server="sole",uid="lcol")
 survey <- get_survdat_data(channel, getBio = F)
 
-swept_area <- calc_swept_area()
+survdat=as.data.frame(survey[['survdat']])
+
+#for total swept-area biomass estimates (not currently used in condition GAMS):
+#swept_area <- calc_swept_area(survey)
 
 #CSV from Andy_DataPull.R:
 #  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
@@ -123,11 +130,13 @@ swept_area <- calc_swept_area()
 # }
 
 
-#fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
-#                                                       LAT = BEGLAT, LON = BEGLON)
-
-spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
+#fall survey to be used for most species:
+fall <- survdat %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
                                                        LAT = BEGLAT, LON = BEGLON)
+
+#Spring survey data to be used for herring, mackerel and OP:
+#spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
+#                                                       LAT = BEGLAT, LON = BEGLON)
 
 #SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
 # fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
