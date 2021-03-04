@@ -114,7 +114,8 @@ gis.dir  <- "gis"
 
 #From survdat helfile:
 #In survdat package, have to install dbutils from Andy's github at top:
-channel <- dbutils::connect_to_database(server="sole",uid="lcol")
+#copy into console and fill in server and uid:
+#channel <- dbutils::connect_to_database(server="",uid="")
 survey <- get_survdat_data(channel, getBio = F)
 
 survdat=as.data.frame(survey[['survdat']])
