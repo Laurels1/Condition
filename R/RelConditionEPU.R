@@ -118,7 +118,7 @@ gis.dir  <- "gis"
 #channel <- dbutils::connect_to_database(server="",uid="")
 survey <- get_survdat_data(channel, getBio = F)
 
-survdat=as.data.frame(survey[['survdat']])
+survbio=as.data.frame(survey[['survdat']])
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
