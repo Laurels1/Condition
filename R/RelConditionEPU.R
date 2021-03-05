@@ -116,9 +116,12 @@ gis.dir  <- "gis"
 #In survdat package, have to install dbutils from Andy's github at top:
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
-survey <- get_survdat_data(channel, getBio = F)
+survey <- get_survdat_data(channel, getBio = T)
 
 survbio=as.data.frame(survey[['survdat']])
+
+#save survbio object as RData data doesn't need to be pulled each time:
+ save(survbio, file='survbio.RData')
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
