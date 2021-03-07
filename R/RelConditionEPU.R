@@ -88,40 +88,21 @@ gis.dir  <- "gis"
 #survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
 
 #Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021 from remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE):
-# library(DBI)
-# library(rstudioapi)
-#Brian connected this way:
-# con <- DBI::dbConnect(odbc::odbc(),
-#                       "sole",
-#                       UID    = rstudioapi::askForPassword("Database user"),
-#                       PWD    = rstudioapi::askForPassword("Database password"),
-#                       Port   = 1526)
-# 
-# require(survdat)
-# survdat. <- get_survdat_data(con, conversion.factor=T, getBio=T)
-# 
-# 
-# survdat=as.data.frame(survdat.[['survdat']])
-# 
-# 
-# #keep survdat object
-# save(survdat, file='survdat.RData')
-# 
-# #DISCONNECT
-# dbDisconnect(con)
-###End of Brian's method of connecting###
 
-
-#From survdat helfile:
+###From survdat helfile (pull data once using lines below, then turn off and load(survbio) for future use:
 #In survdat package, have to install dbutils from Andy's github at top:
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
-survey <- get_survdat_data(channel, getBio = T)
 
-survbio=as.data.frame(survey[['survdat']])
+#survey <- get_survdat_data(channel, getBio = T)
+
+#survbio=as.data.frame(survey[['survdat']])
 
 #save survbio object as RData data doesn't need to be pulled each time:
- save(survbio, file='survbio.RData')
+# save(survbio, file='survbio.RData')
+###end data pull
+ 
+ survbio <- load("survbio.Rdata")
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
@@ -134,9 +115,13 @@ survbio=as.data.frame(survey[['survdat']])
 # }
 
 
+#pulling directly from SVDBS:
 #fall survey to be used for most species:
-fall <- survdat %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
-                                                       LAT = BEGLAT, LON = BEGLON)
+#fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
+ #                                                      LAT = BEGLAT, LON = BEGLON)
+
+#Using survdat data:
+fall <- survbio %>% filter(SEASON == 'FALL') 
 
 #Spring survey data to be used for herring, mackerel and OP:
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
