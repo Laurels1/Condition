@@ -36,7 +36,8 @@ library(tidyverse)
 #library(gapminder)
 library(rgdal)
 library(RODBC)
-remotes::install_github("andybeet/dbutils")
+#dowload dbutils to pull survdat data:
+#remotes::install_github("andybeet/dbutils")
 #library(gam)
 library(magrittr)
 #library(readr)
@@ -102,7 +103,7 @@ gis.dir  <- "gis"
 # save(survbio, file='survbio.RData')
 ###end data pull
  
- survbio <- load("survbio.Rdata")
+load("survbio.Rdata")
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
@@ -195,6 +196,24 @@ LWparams1 <- dplyr::mutate(LWparams,
                            lna1 = substr(ln_a, 2, nchar(ln_a)),
                            lna = as.numeric(lna1)*-1)
 
+#Parse data by season:
+LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.character('FALL'),
+                                      if_else(Season == 'Win/Aut', as.character('FALL'),
+    #*****If using spring data, change Spr/Aut, Wint/Spr/Aut to SPRING:                                                   
+                                      if_else(Season == 'Spr/Aut', as.character('FALL'),
+                                      if_else(Season == 'Win/Spr/Aut', as.character('FALL'),        
+                                      if_else(Season == 'Win/Spr', as.character('SPRING'),
+                                      if_else(Season == 'Spring', as.character('SPRING'), 
+                                      if_else(Season == 'Winter', as.character('WINTER'),'NA'))))))))
+
+LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
+
+#By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
+###need to do if statement of if Gender is male or female, parse combined:
+
+LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::mutate(SEX = )
+
+
 #Add rows to assign SEX when Gender == Combined in Wigley et al ref:
 LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
   slice(rep(1:n(), each=3)) %>%
@@ -217,14 +236,6 @@ LWpar_spp <- LWpar_sex2 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(pa
                                            if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
                                                    if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
 
-#Parse data by season:
-LWpar <- LWpar_spp %>% mutate(SEASON = if_else(Season == 'Autumn', as.character('FALL'),
-                                           if_else(Season == 'Win/Aut', as.character('FALL'),
-#*****If using spring data, change Spr/Aut, Wint/Spr/Aut to SPRING:                                                   
-                                           if_else(Season == 'Spr/Aut', as.character('FALL'),
-                                           if_else(Season == 'Win/Spr/Aut', as.character('FALL'),        
-                                           if_else(Season == 'Win/Spr', as.character('SPRING'),
-                                           if_else(Season == 'Spring', as.character('SPRING'), 'NA')))))))
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
 mergedata <- left_join(spring, LWpar, by= c('SEASON', 'SVSPP', 'SEX'))
