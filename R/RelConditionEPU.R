@@ -124,6 +124,9 @@ load("survbio.Rdata")
 #Using survdat data:
 fall <- survbio %>% filter(SEASON == 'FALL') 
 
+#about 1/4 of fish with indwt have sex = 0:
+#fall_indwt <- fall %>% filter(!is.na(INDWT))
+
 #Spring survey data to be used for herring, mackerel and OP:
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
@@ -209,9 +212,12 @@ LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.cha
 LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
 
 #By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
-###need to do if statement of if Gender is male or female, parse combined:
+###need to do if statement: if Gender== Combined and there are no Gender == male or female, parse combined:
 
-LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::mutate(SEX = )
+#assigns SEX correctly, but Combined still needs to be parsed into 3 categories when no male/female
+#LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::mutate(SEX = if_else(Gender != 'Male' | Gender != 'Female', as.character(rep(0:2, length.out = n())), 'NA'))
+LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% if_else(Gender != 'Male' & Gender != 'Female', dplyr::slice(rep(1:n(), each=3)), )
+                                                          %>% dplyr::mutate(SEX = as.character(rep(0:2, length.out = n()))), 'NA')
 
 
 #Add rows to assign SEX when Gender == Combined in Wigley et al ref:
