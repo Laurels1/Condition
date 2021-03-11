@@ -216,8 +216,8 @@ LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
 
 #assigns SEX correctly, but Combined still needs to be parsed into 3 categories when no male/female
 #LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::mutate(SEX = if_else(Gender != 'Male' | Gender != 'Female', as.character(rep(0:2, length.out = n())), 'NA'))
-LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% if_else(Gender != 'Male' & Gender != 'Female', dplyr::slice(rep(1:n(), each=3)), )
-                                                          %>% dplyr::mutate(SEX = as.character(rep(0:2, length.out = n()))), 'NA')
+
+Nsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::summarize(n())
 
 
 #Add rows to assign SEX when Gender == Combined in Wigley et al ref:
