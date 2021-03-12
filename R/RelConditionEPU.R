@@ -122,8 +122,10 @@ load("survbio.Rdata")
  #                                                      LAT = BEGLAT, LON = BEGLON)
 
 #Using survdat data:
-fall <- survbio %>% filter(SEASON == 'FALL') 
-
+fall <- survbio %>% filter(SEASON == 'FALL') %>% 
+#####Need to change SEX == NA to SEX == 0
+  
+  
 #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
@@ -212,39 +214,49 @@ LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.cha
 LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
 
 #By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
-###need to do if statement: if Gender== Combined and there are no Gender == male or female, parse combined:
+# Rob's code
+LWfall_orig <- LWfall
+LWfall <- LWfall[-c(1:nrow(LWfall)),]
+speciesList <- unique(LWfall_orig$SpeciesName)
+numSpecies <- length(speciesList)
+for (spp in 1:numSpecies) {
+  sppTibble <- filter(LWfall_orig,SpeciesName == speciesList[spp])
+  if (nrow(sppTibble) == 1) {
+    LWfall <- rbind(LWfall,sppTibble)
+    newRow <- sppTibble[1,]
+    newRow$Gender <- "Male"
+    LWfall <- rbind(LWfall,newRow)
+    newRow <- sppTibble[1,]
+    newRow$Gender <- "Female"
+    LWfall <- rbind(LWfall,newRow)
+  } else if (nrow(sppTibble) == 3) {
+    LWfall <- rbind(LWfall,sppTibble)
+  }
+}
 
-#assigns SEX correctly, but Combined still needs to be parsed into 3 categories when no male/female
-#LWsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::mutate(SEX = if_else(Gender != 'Male' | Gender != 'Female', as.character(rep(0:2, length.out = n())), 'NA'))
-
-Nsex <- LWfall %>% dplyr::group_by(LW_SVSPP) %>% dplyr::summarize(n())
-
-
-#Add rows to assign SEX when Gender == Combined in Wigley et al ref:
-LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
-  slice(rep(1:n(), each=3)) %>%
-  mutate(SEX = as.character(rep(0:2, length.out = n())))
+#Add rows to assign SEX when Gender == Combined in Wigley et al ref (didn't work):
+# LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
+#   slice(rep(1:n(), each=3)) %>%
+#   mutate(SEX = as.character(rep(0:2, length.out = n())))
 
 #Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
-LWpar_sexed <- LWparams1 %>% dplyr::filter(Gender %in% c('Male', 'Female')) %>%
-  dplyr::mutate(SEX = if_else(Gender == 'Male', as.character(1),
-                      if_else(Gender == 'Female', as.character(2),'NA')))
+LWpar_sexed <- LWfall %>% 
+  dplyr::mutate(SEX = if_else(Gender == 'Combined', as.character(0),
+                      if_else(Gender == 'Male', as.character(1),
+                      if_else(Gender == 'Female', as.character(2),'NA'))))
 
-#*********Need to remove sex>0 for species in LWpar_sex that are also in LWpar_sexed
-
-
-
-LWpar_sex2 <- bind_rows(LWpar_sexed, LWpar_sex) 
+#Duplicate Combined for sex=0 and sex=4 (Trans) for BSB:
+LWpar_BSB <- LWpar_sexed %>% dplyr::filter(LW_SVSPP == 141, Gender == 'Combined') %>%
+     slice(1) %>%
+    mutate(SEX = as.character(4))
   
+LWpar_sex <- dplyr::bind_rows(LWpar_sexed, LWpar_BSB)
   
-#For some reason 00 isn't being added to the front of SVSPP with <10, but sandbar shark and roughtail sting ray aren't in condition analyses now:                                 
-LWpar_spp <- LWpar_sex2 %>% mutate(SVSPP = if_else(LW_SVSPP<100, as.character(paste0('0',LW_SVSPP)),
-                                           if_else(LW_SVSPP<10, as.character(paste0('00',LW_SVSPP)),
-                                                   if_else(LW_SVSPP>=100, as.character(LW_SVSPP), 'NA'))))
+LWpar_spp <- LWpar_sex %>% mutate(SVSPP = as.numeric(LW_SVSPP))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(spring, LWpar, by= c('SEASON', 'SVSPP', 'SEX'))
+mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'SEX'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
