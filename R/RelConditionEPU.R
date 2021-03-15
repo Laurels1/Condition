@@ -121,9 +121,8 @@ load("survbio.Rdata")
 #fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
  #                                                      LAT = BEGLAT, LON = BEGLON)
 
-#Using survdat data:
-fall <- survbio %>% filter(SEASON == 'FALL') %>% 
-#####Need to change SEX == NA to SEX == 0
+#Using survdat data (chance SEX== NA to sex == 0)
+fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
   
   
 #about 1/4 of fish with indwt have sex = 0:
@@ -241,14 +240,15 @@ for (spp in 1:numSpecies) {
 
 #Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
 LWpar_sexed <- LWfall %>% 
-  dplyr::mutate(SEX = if_else(Gender == 'Combined', as.character(0),
+  dplyr::mutate(sex = if_else(Gender == 'Combined', as.character(0),
+                      if_else(Gender == 'Unsexed', as.character(0),
                       if_else(Gender == 'Male', as.character(1),
-                      if_else(Gender == 'Female', as.character(2),'NA'))))
+                      if_else(Gender == 'Female', as.character(2),'NA')))))
 
 #Duplicate Combined for sex=0 and sex=4 (Trans) for BSB:
 LWpar_BSB <- LWpar_sexed %>% dplyr::filter(LW_SVSPP == 141, Gender == 'Combined') %>%
      slice(1) %>%
-    mutate(SEX = as.character(4))
+    mutate(sex = as.character(4))
   
 LWpar_sex <- dplyr::bind_rows(LWpar_sexed, LWpar_BSB)
   
@@ -256,7 +256,7 @@ LWpar_spp <- LWpar_sex %>% mutate(SVSPP = as.numeric(LW_SVSPP))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'SEX'))
+mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
