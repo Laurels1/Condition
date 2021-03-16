@@ -99,7 +99,7 @@ gis.dir  <- "gis"
 
 #survbio=as.data.frame(survey[['survdat']])
 
-#save survbio object as RData data doesn't need to be pulled each time:
+#save survbio object so RData data doesn't need to be pulled each time:
 # save(survbio, file='survbio.RData')
 ###end data pull
  
@@ -123,7 +123,6 @@ load("survbio.Rdata")
 
 #Using survdat data (chance SEX== NA to sex == 0)
 fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-  
   
 #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
@@ -264,7 +263,7 @@ mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 # unique(nocompl$YEAR)
 
 #filters out values without losing rows with NAs:
-mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<75)
+mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<900)
 mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0)
 mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
 mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
@@ -272,7 +271,7 @@ mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
 #91,606 records don't have LW parameters:
 #mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_FALL_COMPL))
-mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_SPRING_COMPL))
+mergeLW <- dplyr::filter(mergeindwt, !is.na(lna))
 
 #Calculate relative condition:
 ###Not sure why RelCond is missing for species like red hake (SVSPP = 077):
@@ -280,7 +279,7 @@ mergeLW <- dplyr::filter(mergeindwt, !is.na(EXPONENT_SPRING_COMPL))
 #                       predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
 #                       RelCond = INDWT/predwt*100)
 cond <- dplyr::mutate(mergeLW, 
-                      predwt = (exp(COEFFICIENT_SPRING_COMPL))*LENGTH**EXPONENT_SPRING_COMPL,
+                      predwt = (exp(lna))*LENGTH^b,
                       RelCond = INDWT/predwt*100)
 
 
@@ -288,7 +287,6 @@ cond <- dplyr::mutate(mergeLW,
 #nocond <- filter(cond, is.na(RelCond))
 #unique(nocond$SVSPP)
 #unique(nocond$YEAR)
-#Scup (143) and black sea bass (141) have missing condition, but have seasonless coefficients and exponents.
 
 #unique(cond$YEAR)
 
@@ -296,7 +294,11 @@ cond <- dplyr::mutate(mergeLW,
 #Grab strata
 #load(file.path(data.dir, 'Survdat.RData'))
 
-strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
+#strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
+
+#For survdat package:
+strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
+                      quiet = T)
 
 #Needed in direct data pull but not in Survdat:
 #data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
@@ -304,10 +306,16 @@ strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 #cond <- cond %>% dplyr::filter(!is.na(LAT)) # remove all NA's 
 
 ###Not sure why 41,511 records fewer (lost ~11%) after poststrata line:
-cond.epu <- Survdat::poststrat(as.data.table(cond), strata)
-data.table::setnames(cond.epu, 'newstrata', 'EPU')
+#cond.epu <- survdat::poststrat(as.data.table(cond), strata)
+#data.table::setnames(cond.epu, 'newstrata', 'EPU')
 #check if scup exists, doesn't because LWparams only have unsexed 
 #sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
+
+#Paring by EPU using corrected conversions in survdat package:
+cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU')
+
+##Not working:
+data.table::setnames(cond.epu, 'newstrata', 'EPU')
 
 #View(cond.epu)
 #condno <- filter(cond.epu, is.na(SEX))
@@ -326,14 +334,15 @@ condsd <- merge(condClean, condstdev, by='SVSPP', all.cond.epu=T, all.condClean 
 cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond > (100-condsd$condSD))
 #cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
 
-cond.epu <- cond.sd %>% dplyr::filter(is.na(SEX) | SEX != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
-cond.epu <- cond.epu %>% dplyr::filter(is.na(SEX) | SEX != 4)
+#cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
+cond.epu <- cond.epu %>% dplyr::filter(is.na(sex) | sex != 4)
 
-cond.epu <- cond.epu %>% dplyr::mutate(sex = SEX)
+cond.epu <- cond.epu %>% dplyr::mutate(sexMF = sex)
 
 #recoding SEX (1,2) to sex (M, F)
-cond.epu$sex[cond.epu$SEX==1] <- 'M'
-cond.epu$sex[cond.epu$SEX==2] <- 'F'
+cond.epu$sex[cond.epu$sexMF==1] <- 'M'
+cond.epu$sex[cond.epu$sexMF==2] <- 'F'
+cond.epu$sex[cond.epu$sexMF==0] <- 'U'
 
 #Tried to use LOGGED_SPECIES_NAME for species names, but doesn't exist before 2001 and too many version of names
 #Names for SVSPP codes '013','015','023','026','028','032','072','073','074','075','076','077','078','102','103','104','105','106','107','108','121','131','135','141','143','145','155','164','193','197':
@@ -372,15 +381,15 @@ cond.epu$Species[cond.epu$SVSPP=='193'] <- 'Ocean pout'
 cond.epu$Species[cond.epu$SVSPP=='197'] <- 'Goosefish'
 
 #Summarize annually and filter based on count of condition data by species
-annualcond <- cond.epu %>% dplyr::group_by(Species, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu %>% dplyr::group_by(Species, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
-condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sex) %>% 
+condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sexMF) %>% 
   dplyr::filter(n >= 20)
 
 #Summarize annually by EPU (use for SOE plots)
-annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3)
-condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sex) %>% 
+condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sexMF) %>% 
   dplyr::filter(n >= 20)
 
 #Output for socio-economic models (by EPU and length):
@@ -408,9 +417,9 @@ condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
 readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
 
 #Summarize annually by Strata
-annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sex, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondStrata, nCond>=3)
-condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sex) %>% 
+condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>% 
   dplyr::filter(n >= 20)
 #Format output to be read into plotting function:
 
