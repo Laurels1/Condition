@@ -312,10 +312,7 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 #sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
 
 #Paring by EPU using corrected conversions in survdat package:
-cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU')
-
-##Not working:
-data.table::setnames(cond.epu, 'newstrata', 'EPU')
+cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
 #View(cond.epu)
 #condno <- filter(cond.epu, is.na(SEX))
@@ -349,19 +346,19 @@ cond.epu$sex[cond.epu$sexMF==0] <- 'U'
 cond.epu <- cond.epu %>% dplyr::mutate(Species = SVSPP)
 
 #Renamed Species names to match Stock SMART names for merge:
-cond.epu$Species[cond.epu$SVSPP=='013'] <- 'Smooth dogfish'
-cond.epu$Species[cond.epu$SVSPP=='015'] <- 'Spiny dogfish'
-cond.epu$Species[cond.epu$SVSPP=='023'] <- 'Winter skate'
-cond.epu$Species[cond.epu$SVSPP=='026'] <- 'Little skate'
-cond.epu$Species[cond.epu$SVSPP=='028'] <- 'Thorny skate'
-cond.epu$Species[cond.epu$SVSPP=='032'] <- 'Atlantic herring'
-cond.epu$Species[cond.epu$SVSPP=='072'] <- 'Silver hake'
-cond.epu$Species[cond.epu$SVSPP=='073'] <- 'Atlantic cod'
-cond.epu$Species[cond.epu$SVSPP=='074'] <- 'Haddock'
-cond.epu$Species[cond.epu$SVSPP=='075'] <- 'Pollock'
-cond.epu$Species[cond.epu$SVSPP=='076'] <- 'White hake'
-cond.epu$Species[cond.epu$SVSPP=='077'] <- 'Red hake'
-cond.epu$Species[cond.epu$SVSPP=='078'] <- 'Spotted hake'
+cond.epu$Species[cond.epu$SVSPP=='13'] <- 'Smooth dogfish'
+cond.epu$Species[cond.epu$SVSPP=='15'] <- 'Spiny dogfish'
+cond.epu$Species[cond.epu$SVSPP=='23'] <- 'Winter skate'
+cond.epu$Species[cond.epu$SVSPP=='26'] <- 'Little skate'
+cond.epu$Species[cond.epu$SVSPP=='28'] <- 'Thorny skate'
+cond.epu$Species[cond.epu$SVSPP=='32'] <- 'Atlantic herring'
+cond.epu$Species[cond.epu$SVSPP=='72'] <- 'Silver hake'
+cond.epu$Species[cond.epu$SVSPP=='73'] <- 'Atlantic cod'
+cond.epu$Species[cond.epu$SVSPP=='74'] <- 'Haddock'
+cond.epu$Species[cond.epu$SVSPP=='75'] <- 'Pollock'
+cond.epu$Species[cond.epu$SVSPP=='76'] <- 'White hake'
+cond.epu$Species[cond.epu$SVSPP=='77'] <- 'Red hake'
+cond.epu$Species[cond.epu$SVSPP=='78'] <- 'Spotted hake'
 cond.epu$Species[cond.epu$SVSPP=='102'] <- 'American plaice'
 cond.epu$Species[cond.epu$SVSPP=='103'] <- 'Summer flounder'
 cond.epu$Species[cond.epu$SVSPP=='104'] <- 'Fourspot'
