@@ -378,6 +378,8 @@ cond.epu$Species[cond.epu$SVSPP=='193'] <- 'Ocean pout'
 cond.epu$Species[cond.epu$SVSPP=='197'] <- 'Goosefish'
 
 #Summarize annually and filter based on count of condition data by species
+#2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
+  #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
 annualcond <- cond.epu %>% dplyr::group_by(Species, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sexMF) %>% 
