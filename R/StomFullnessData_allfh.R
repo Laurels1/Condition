@@ -6,7 +6,7 @@ library(data.table)
 library(rgdal)
 library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
-library(Survdat)
+library(survdat)
 
 out.dir = "output"
 data.dir <- "data"
@@ -46,11 +46,14 @@ x <- x[!is.na(x$LON),]
 #head(x)
 
 #Grab EPU
-EPUstrata <- readOGR(gis.dir, 'EPU')
+#EPUstrata <- readOGR(gis.dir, 'EPU')
+#EPU using survdat package:
+strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
+                      quiet = T)
 
 #Post stratify data if necessary
-fh.epu <- poststrat(x, EPUstrata)
-setnames(fh.epu, 'newstrata', 'EPU')
+fh.epu <- survdat::post_strat(x, strata, areaDescription = 'EPU', na.keep = TRUE)
+#setnames(fh.epu, 'newstrata', 'EPU')
 
 #head(fh.epu)
 
@@ -85,6 +88,19 @@ fh.epu$Species[fh.epu$svspp==155] <- 'Acadian redfish'
 fh.epu$Species[fh.epu$svspp==164] <- 'Sea raven'
 fh.epu$Species[fh.epu$svspp==193] <- 'Ocean pout'
 fh.epu$Species[fh.epu$svspp==197] <- 'Goosefish'
+fh.epu$Species[fh.epu$SVSPP=='84'] <- 'Cusk'
+fh.epu$Species[fh.epu$SVSPP=='69'] <- 'Offshore hake'
+fh.epu$Species[fh.epu$SVSPP=='4'] <- 'Roughtail stingray'
+fh.epu$Species[fh.epu$SVSPP=='375'] <- 'Spiny butterfly ray'
+fh.epu$Species[fh.epu$SVSPP=='27'] <- 'Smooth skate'
+fh.epu$Species[fh.epu$SVSPP=='25'] <- 'Rosette skate'
+fh.epu$Species[fh.epu$SVSPP=='24'] <- 'Clearnose skate'
+fh.epu$Species[fh.epu$SVSPP=='22'] <- 'Barndoor skate'
+fh.epu$Species[fh.epu$SVSPP=='19'] <- 'Bullnose ray'
+fh.epu$Species[fh.epu$SVSPP=='18'] <- 'Bluntnose stingray'
+fh.epu$Species[fh.epu$SVSPP=='163'] <- 'Longhorn sculpin'
+fh.epu$Species[fh.epu$SVSPP=='156'] <- 'Blackbelly rosefish'
+fh.epu$Species[fh.epu$SVSPP=='136'] <- 'Atlantic croaker'
 
 #Feeding guilds by planktivore/benthivore/piscivore? Varies by size of predator.
 
