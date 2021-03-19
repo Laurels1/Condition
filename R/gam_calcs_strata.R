@@ -15,7 +15,8 @@ library(dplyr)
 library(readr)
 library(corrplot)
 #library(car)
-#Not sure why not installing mgcv.helper:
+#install.packages("remotes")
+#remotes::install_github("samclifford/mgcv.helper")
 library(mgcv.helper)
 
 #in Nov. 2020 changed data pull to only include representative tows
@@ -43,21 +44,16 @@ gis.dir  <- "gis"
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
-StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = Strata) %>% 
-  dplyr::mutate(SVSPP = if_else(SVSPP<100, as.character(paste0('0',SVSPP)),
-                 if_else(SVSPP>=100, as.character(SVSPP), 'NA'))) %>%
-  select(!Strata)
+StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata)) 
 
 CondStockjoin <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
 
-CondStock <- CondStockjoin %>% mutate(YEAR = as.numeric(as.character(YEAR)))
-
 #Samples without stock area designations (strata where species were sampled but aren't included in stock area definition):
-CondStockMissing <- CondStock %>% filter(is.na(Stock))
+CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 
 #GAM runs by sex:
 
