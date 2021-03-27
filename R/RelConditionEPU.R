@@ -90,7 +90,7 @@ gis.dir  <- "gis"
 
 #Data from Survdat updated to fix Bigelow conversion issues (Feb. 2021 from remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE):
 
-###From survdat helfile (pull data once using lines below, then turn off and load(survbio) for future use:
+###From survdat helpfile (pull data once using lines below, then turn off and load(survbio) for future use:
 #In survdat package, have to install dbutils from Andy's github at top:
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
@@ -102,6 +102,16 @@ gis.dir  <- "gis"
 #save survbio object so RData data doesn't need to be pulled each time:
 # save(survbio, file='survbio.RData')
 ###end data pull
+
+#Pull data for NRHA:
+#survey <- get_survdat_data(channel, all.season = T)
+
+#survbio=as.data.frame(survey[['survdat']])
+
+#save survbio object so RData data doesn't need to be pulled each time:
+# save(survbio, file='survbio_NRHA.RData')
+###end data pull
+
  
 load("survbio.Rdata")
 

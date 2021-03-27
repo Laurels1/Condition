@@ -80,7 +80,7 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex
-AvgStrataCond <- CondStock %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+AvgStrataCond <- CondStockjoin %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
