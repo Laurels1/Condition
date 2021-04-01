@@ -180,6 +180,10 @@ TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 #Bloom time and magnitude data
 Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
 
+#Use Range Magnitude and Range Duration
+#YEAR gives fall bloom from the year before:
+Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
+
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
