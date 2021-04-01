@@ -184,6 +184,8 @@ Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
 #YEAR gives fall bloom from the year before:
 Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 
+#merge with condition data:
+FallBloomCond <- dplyr::left_join(TotCop, Fallbloom, by = "YEAR")
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
@@ -227,16 +229,16 @@ stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
 #merge by strata for Condition GAM and multi-model dataset:
-AvgStom <- dplyr::left_join(TotCop, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
+AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #spring stomach fullness merge by strata for Condition GAM lag:
-AvgStomSpr <- dplyr::left_join(TotCop, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
-  select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex','StockName', 'Stock', 'Survey',
-         'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-         'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
-         'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CopepodSmallLarge',
-         'ZooplBiomassAnomaly', 'TotalCopepodsMillions', 'AvgStomFullSpringStrata') %>%
-  distinct()
+# AvgStomSpr <- dplyr::left_join(FallBloomCond, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
+#   select('YEAR', 'STRATUM', 'EPU', 'Species', 'sex','StockName', 'Stock', 'Survey',
+#          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+#          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
+#          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CopepodSmallLarge',
+#          'ZooplBiomassAnomaly', 'TotalCopepodsMillions', 'AvgStomFullSpringStrata') %>%
+#   distinct()
 
 #Old code for stomach data not from allfh:
 #AvgStom <- CondCal %>% dplyr::group_by(Species, YEAR, EPU, sex) %>% dplyr::mutate(AvgStomFull=mean(AvgStomFullStrata, na.rm=TRUE))
@@ -257,7 +259,7 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
-         'ZooplBiomassAnomaly', 'TotalCopepodsMillions', 'AvgStomFullStratalag') %>%
+         'ZooplBiomassAnomaly', 'TotalCopepodsMillions','RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
   distinct()
 
 
