@@ -50,7 +50,10 @@ StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata)) 
 
-CondStockjoin <- dplyr::left_join(cond.epu, StockData, by = c("SVSPP", "STRATUM"))
+#Limit survey strata to north of Hatteras:
+cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
+
+CondStockjoin <- dplyr::left_join(cond.strata, StockData, by = c("SVSPP", "STRATUM"))
 
 #Samples without stock area designations (strata where species were sampled but aren't included in stock area definition):
 CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
@@ -255,7 +258,7 @@ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStrata
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'sex', 'StockName', 'Stock', 'Survey',
+  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 'StockName', 'Stock', 'Survey',
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
@@ -322,7 +325,21 @@ StockAssDat <- stockAssessmentData %>%
                         'Acadian redfish',
                         'Sea raven',
                         'Ocean pout',
-                        'Goosefish')) %>%
+                        'Goosefish',
+                        'Cusk',
+                        'Offshore hake',
+                        'Roughtail stingray',
+                        'Spiny butterfly ray',
+                        'Smooth skate',
+                        'Rosette skate',
+                        'Clearnose skate',
+                        'Barndoor skate',
+                        'Bullnose ray',
+                        'Bluntnose stingray',
+                        'Longhorn sculpin',
+                        'Blackbelly rosefish',
+                        'Atlantic croaker'
+                        )) %>%
   filter(Region %in% c('Atlantic',
                        'Gulf of Maine / Georges Bank',
                        'Northwestern Atlantic Coast',
@@ -349,7 +366,7 @@ StockAssDat <- stockAssessmentData %>%
       StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species == 'Windowpane'] <- 'N'
       StockAssDat$Stock[StockAssDat$Region=='Northwestern Atlantic Coast'] <- 'Unit'
       StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species == 'Thorny skate'] <- 'Unit'
+      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
       StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
       StockAssDat$Stock[StockAssDat$Region=='Mid'] <- 'Unit'
       StockAssDat$Stock[StockAssDat$Region=='Atlantic Coast'] <- 'Unit'
@@ -361,6 +378,7 @@ StockAssDat <- stockAssessmentData %>%
       StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c(
         'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
       StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
+      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
      StockAssDat$Stock[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
 #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment for each year and metric:    
