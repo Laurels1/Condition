@@ -429,6 +429,15 @@ CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEA
 
 
 #---------------------------------------------------------------------------------
+#Cold Pool indices summarized by Joe Caracappa from Zhuomin:
+ColdPool <- readr::read_csv(here::here("data","V_max_Strata_ColdPool.csv"))
+
+ColdP <- ColdPool %>% dplyr::mutate(YEAR=year, STRATUM = area, PropColumnColdPool = var.wgt.mean)
+
+CondColdPool <- dplyr::left_join(CondWAAcoeff, ColdP, by=c('YEAR', 'STRATUM'))
+
+
+#---------------------------------------------------------------------------------
 #allfh data includes a better audit of food habits data and eliminates the need for these removals:
 
 
@@ -455,7 +464,7 @@ CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEA
 #CondClean <- CondWAAcoeff
 
 ####If using total biomass (Abundance) or Fmort from StockSMART in GAMs, remove species lacking data: 
- CondClean <- CondWAAcoeff %>%
+ CondClean <- CondColdPool %>%
   filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
                         'Thorny skate',
                                'Atlantic herring',
@@ -481,7 +490,12 @@ CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEA
              ##           'Weakfish',
                         'Acadian redfish',
                ##        'Sea raven',
-                        'Ocean pout'))
+                        'Ocean pout',
+             'Offshore hake',
+             'Smooth skate',
+             'Rosette skate',
+             'Clearnose skate',
+             'Barndoor skate'))
   #                    'Goosefish'))
 
 # #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
@@ -548,10 +562,10 @@ CondClean <- CondCleanSpDogWt %>%
   dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
 
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
-GOMhadd <- CondClean %>% 
-  dplyr::arrange(Stock) %>%
-  dplyr::filter(Species == 'Haddock') %>%
-  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'Stock', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
+# GOMhadd <- CondClean %>% 
+#   dplyr::arrange(Stock) %>%
+#   dplyr::filter(Species == 'Haddock') %>%
+#   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'Stock', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
 
 #Output haddock condition:
 #readr::write_csv(GOMhadd, here::here(out.dir,"FallStrata_RelCond_haddock.csv"))
@@ -563,13 +577,16 @@ EnvirVariables <- CondClean %>%
   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
                 'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass') %>%
+                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+                'PropColumnColdPool') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
                 'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
                 'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
-                'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass')
+                'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass',
+                'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+                'Prop Column Cold Pool'= 'PropColumnColdPool')
 
 #Correlation matrix:
 EnVarCor <- cor(EnvirVariables, use = "complete.obs")
@@ -610,7 +627,7 @@ p.mat <- cor.mtest(EnvirVariables)
 #head(p.mat[, 1:5])
 
 #Plot correlation matrix with ellipses showing neg or positive trend, not plotting indices that have p>0.001 significance:
- CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables.png")
+ CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables_bloom.png")
  png(CorrPlotEnVar, type = "cairo", width = 420, height = 420)
  corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust",
   #       addCoef.col = "black", # Add coefficient of correlation
