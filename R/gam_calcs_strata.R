@@ -578,7 +578,7 @@ EnvirVariables <- CondClean %>%
                 'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
                 'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
-                'PropColumnColdPool') %>%
+                'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
                 'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
@@ -586,7 +586,8 @@ EnvirVariables <- CondClean %>%
                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
                 'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass',
                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
-                'Prop Column Cold Pool'= 'PropColumnColdPool')
+                'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
+                'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
 
 #Correlation matrix:
 EnVarCor <- cor(EnvirVariables, use = "complete.obs")
@@ -627,7 +628,7 @@ p.mat <- cor.mtest(EnvirVariables)
 #head(p.mat[, 1:5])
 
 #Plot correlation matrix with ellipses showing neg or positive trend, not plotting indices that have p>0.001 significance:
- CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvironmenalVariables_bloom.png")
+ CorrPlotEnVar <- here::here(out.dir,"CorrelationPlot_EnvirVariables_bloomLatYear.png")
  png(CorrPlotEnVar, type = "cairo", width = 420, height = 420)
  corrplot(EnVarCor, method= "ellipse", type="upper", order="hclust",
   #       addCoef.col = "black", # Add coefficient of correlation
