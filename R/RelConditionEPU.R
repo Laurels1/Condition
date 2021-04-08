@@ -321,7 +321,7 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 #check if scup exists, doesn't because LWparams only have unsexed 
 #sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
 
-#Paring by EPU using corrected conversions in survdat package:
+#Paring by EPU using corrected conversions in survdat package and Wigley et all L-W params:
 cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
 #View(cond.epu)
@@ -342,7 +342,8 @@ cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond 
 #cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
 
 #cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
-cond.epu <- cond.epu %>% dplyr::filter(is.na(sex) | sex != 4)
+#Only including condition that is within 1 standard deviation of mean for each species:
+cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 4)
 
 cond.epu <- cond.epu %>% dplyr::mutate(sexMF = sex)
 
@@ -403,10 +404,13 @@ cond.epu$Species[cond.epu$SVSPP=='136'] <- 'Atlantic croaker'
 #Summarize annually and filter based on count of condition data by species
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
+#After removing samples outside of 1 std. dev, cusk and blackbelly rosefish no longer have n>3 for >20 years:
 annualcond <- cond.epu %>% dplyr::group_by(Species, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sexMF) %>% 
   dplyr::filter(n >= 20)
+
+condNYrSpp <- condNshelfSpp %>% dplyr::distinct(Species)
 
 #Summarize annually by EPU (use for SOE plots)
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
