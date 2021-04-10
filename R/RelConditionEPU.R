@@ -426,7 +426,7 @@ condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU)
 #  dplyr::filter(n >= 20)
 
 condEPUlen <- condNSppEPUlen 
-readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2020_EPU_length.csv"))
+#readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2020_EPU_length.csv"))
 
 #Output for socio-economic models (by year):
 annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
@@ -436,11 +436,11 @@ condNSppYear <- annualcondYear %>% dplyr::add_count(Species)
 #  dplyr::filter(n >= 20)
 
 condYear <- condNSppYear
-readr::write_csv(condYear, here::here(out.dir,"RelCond2020_YearEcon.csv"))
+#readr::write_csv(condYear, here::here(out.dir,"RelCond2020_YearEcon.csv"))
 
 ####For 2021 SOE: 
 condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
-readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
+#readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
