@@ -274,7 +274,7 @@ mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #filters out values without losing rows with NAs:
 mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<900)
-mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0)
+mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0.004)
 mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
 mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
 #over 176,000 missing Indwt:
@@ -326,24 +326,33 @@ cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = '
 
 #View(cond.epu)
 #condno <- filter(cond.epu, is.na(SEX))
+#cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
+#Remove fish that are 0.001 kg or less
+#condNoTiny <- subset(cond.epu, cond.epu$INDWT > 0.005)
 
 #summarize condition as annual average:
 #calculate single standard deviation of relative condition for each species
 condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
-names(condstdev)[ncol(condstdev)] = 'condSD'
-
-#cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
-#Remove fish that are 0.001 kg or less
-condClean <- subset(cond.epu, cond.epu$INDWT > 0.001)
+names(condstdev)[ncol(condstdev)] = 'OrigCondSD'
 
 #Remove relative conditons that are outside of 1 standard deviation
-condsd <- merge(condClean, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
-cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$condSD) & condsd$RelCond > (100-condsd$condSD))
+condsd <- left_join(cond.epu, condstdev, by='SVSPP')
+
+#condsd <- merge(condNoTiny, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
+cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$OrigCondSD) & condsd$RelCond > (100-condsd$OrigCondSD))
 #cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
+
+#Standard deviation after removing outliers:
+condstdev_NoOutliers <- aggregate(cond.sd$RelCond, by = list('SVSPP'=cond.sd$SVSPP), sd)
+names(condstdev_NoOutliers)[ncol(condstdev_NoOutliers)] = 'CondSD_noOutliers'
+
+#Remove relative conditons that are outside of 1 standard deviation
+condsd_NoOutliers <- left_join(cond.sd, condstdev_NoOutliers, by='SVSPP')
+
 
 #cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
 #Only including condition that is within 1 standard deviation of mean for each species:
-cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 4)
+cond.epu <- condsd_NoOutliers %>% dplyr::filter(is.na(sex) | sex != 4)
 
 cond.epu <- cond.epu %>% dplyr::mutate(sexMF = sex)
 
@@ -404,7 +413,7 @@ cond.epu$Species[cond.epu$SVSPP=='136'] <- 'Atlantic croaker'
 #Summarize annually and filter based on count of condition data by species
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
-#After removing samples outside of 1 std. dev, cusk and blackbelly rosefish no longer have n>3 for >20 years:
+#After removing samples outside of 1 std. dev, cusk, smooth dogfish and blackbelly rosefish no longer have n>3 for >20 years:
 annualcond <- cond.epu %>% dplyr::group_by(Species, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3)
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sexMF) %>% 
