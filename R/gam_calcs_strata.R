@@ -1074,7 +1074,7 @@ for(sp in spp) {
   #2021 icludes survdat data with corrected calibration coefficients and Wigley et al. L-W params:
  #    filename <- here::here(out.dir,paste0(sp,"_StomFullSpringStrata2020_AvgCondStrata.jpg"))
  #    filename <- here::here(out.dir,paste0(sp,"_StomFullStrataLag2020_AvgCondStrata.jpg"))
-     filename <- here::here(out.dir,paste0(sp,"2021_YEAR_AvgCondStrata.jpg"))
+     filename <- here::here(out.dir,paste0(sp,"2021NoOutiers_YEAR_AvgCondStrata.jpg"))
 #   filename <- here::here(out.dir,paste0(sp,"2021_LatLon_AvgCondStrata.jpg"))
    #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring_AvgCondStrata.jpg"))
   #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer_AvgCondStrata.jpg"))
