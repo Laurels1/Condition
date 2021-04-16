@@ -43,10 +43,10 @@ for (aspecies in speciesList) {
       dplyr::filter(variable == modelSpecs$resource) %>%
       dplyr::filter(variable == modelSpecs$spatial)
       
-  }
-}
-
 # This would require that all of the data is in one big data frame (in this example called "bigDataFrame") 
+# Either add ALL variables for ALL species and have NA for missing years or ..
+#
+#
 # The data will need to have fields. 
 # Species - species name
 # variable - name of variable. This must match the names in the modelScenarios df above. 
@@ -64,3 +64,16 @@ for (aspecies in speciesList) {
 # cod       1971    summerTemp   22
 # cod       1972    summerTemp   25
 # cod       1973    summerTemp   23
+
+    # now run model with data set and store output
+    
+    
+  }
+  
+  # sort models. pick best one, two, five and see how different.
+  
+  # fowrard/backward stepwise fit for best model to determine sig variables
+  
+}
+
+
