@@ -4,75 +4,94 @@
 #' for example. the cold pool is only relevant or some species, stomach data is missing for others
 
 library(magrittr)
+# load data
+data <- readRDS(file=here::here("other","condSPP.rds")) %>% 
+  dplyr::rename(CopepodSmall_Large = `CopepodSmall/Large`) %>%
+  dplyr::ungroup()
+
+cond <- data %>% dplyr::select(YEAR, CRUISE6, STRATUM, sex, AvgRelCondStrata, Species,SVSPP, LocalBiomass, LocalAbundance, 
+                       StockBiomass,
+                       Fproxy, 
+                       LocalBottomTemp, PropColumnColdPool,
+                       SpringTemp, SummerTemp, FallTemp, WinterTemp,
+                       CopepodSmall_Large,
+                       ZooplanktonBiomass,TotalCopepods, StomachFullness,FallBloomMagnitude ,FallBloomDuration,
+                       AverageLatStrata,AverageLonStrata
+                       )
+
+
 # variables and levels
-bottomTemp <- "Bottom Temp"
-populationDensity <- "stockBiomass"
+localDensity <- c("LocalBiomass","LocalAbundance")
+populationDensity <- "StockBiomass"
 fishing <- "Fproxy"
-localEnv <- c("bottomTemp","coldPool")
-localDensity <- c("Biomass","Abundance")
+localEnv <- c("LocalBottomTemp","PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
-resource <- c("zooBiomass","TotalCopepod","stomachFullness","FallBloomMagnitude","FallBloomDuration")
-spatial <- c("Latlon")
+copepod <- "CopepodSmall_Large"
+resource <- c("ZooplanktonBiomass","TotalCopepods","StomachFullness","FallBloomMagnitude","FallBloomDuration")
+spatialLon <- "AverageLonStrata"
+spatialLat <- "AverageLatStrata"
 
 # create full matrix of models
-modelScenarios <- expand.grid(bottomTemp=bottomTemp,
-            populationDensity=populationDensity,
-            fishing=fishing,
-            localEnv=localEnv,
-            localDensity=localDensity,
-            broadEnv=broadEnv,
-            resource=resource,
-            spatial=spatial)
+modelScenarios <- expand.grid(populationDensity,
+            fishing,
+            localEnv,
+            localDensity,
+            broadEnv,
+            copepod,
+            resource)
 
 
-# you could loop over all of the species
-# speciesList would be a character vector of all species
-for (aspecies in speciesList) {
+# create a character vector of species names
+speciesList <- cond %>%
+  dplyr::distinct(Species) %>% 
+  dplyr::pull()
+
+modelResults <- list()
+
+for (aspecies in speciesList) {  
+  print(aspecies)
+  
+  # check for incomplete data
+  
+  
+  
+  
   # now loop through each of the models
   for (iloop in 1:nrow(modelScenarios)) {
-    # assuming you have your data formatted in a particular way, which we could do
-    modelSpecs <- modelScenarios[iloop,]
-    
-    speciesData <- bigDataFrame %>% dplyr::filter(Species == aspecies) %>% 
-      dplyr::filter(variable == modelSpecs$bottomTemp) %>%
-      dplyr::filter(variable == modelSpecs$populationDensity) %>%
-      dplyr::filter(variable == modelSpecs$fishing) %>%
-      dplyr::filter(variable == modelSpecs$localEnv) %>%
-      dplyr::filter(variable == modelSpecs$localDensity) %>%
-      dplyr::filter(variable == modelSpecs$broadEnv) %>%
-      dplyr::filter(variable == modelSpecs$resource) %>%
-      dplyr::filter(variable == modelSpecs$spatial)
-      
-# This would require that all of the data is in one big data frame (in this example called "bigDataFrame") 
-# Either add ALL variables for ALL species and have NA for missing years or ..
-#
-#
-# The data will need to have fields. 
-# Species - species name
-# variable - name of variable. This must match the names in the modelScenarios df above. 
-# Of course these names can be whatever you want. They just need to match
-# year - year of data point
-# value - value of variable
 
-# for example:
-#
-# species   year   variable    value
-# dogfish   1971    Fproxy       .2
-# dogfish   1972    Fproxy       .4
-# dogfish   1973    Fproxy       .1
-# ...
-# cod       1971    summerTemp   22
-# cod       1972    summerTemp   25
-# cod       1973    summerTemp   23
+    
+    # pull variable names for the model
+    modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))
+    # pull the variable data
+    speciesData <- cond %>% 
+      dplyr::filter(Species == aspecies) %>%
+      dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs), AverageLonStrata, AverageLatStrata )
+    
+    # fit the GAM model
+    # create formula. Each explanatory variable has k = 10.
+    # Add spatialLon, spatialLat jointly
+    
+    # get character vector of explanatory variables
+    explanatoryVariableNames <- speciesData %>% 
+      dplyr::select(-AvgRelCondStrata,-AverageLonStrata,-AverageLatStrata) %>%
+      names()
+    
+    # create the formula for the model
+    mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames,",k=10)" ,collapse=" + "), sep="~")
+    mymodel <- as.formula(paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, k=25)"))
 
-    # now run model with data set and store output
+    # fit the GAM
+    modelFit <- mgcv::gam(formula = mymodel, data = speciesData)
     
+    #store the results
+    modelResults[[iloop]] <- summary(modelFit)
     
+
   }
   
   # sort models. pick best one, two, five and see how different.
   
-  # fowrard/backward stepwise fit for best model to determine sig variables
+  # forrard/backward stepwise fit for best model to determine sig variables
   
 }
 
