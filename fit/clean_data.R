@@ -10,6 +10,11 @@
 #' @param NAallow Numeric scalar. The proportion of allowed NAs in each column. Otherwise variable is removed
 #' @param k Numeric scalar. mgcv::gam argument representing smoother
 #' 
+#' @return list of three items
+#' \item{data}{data frame. Resulting data frame with rows omitted due to NAs}
+#' \item{omittedVars}{Character Vector. Variables required for omission in model fit}
+#' \item{propRowsRemoved}{Numeric scalar. Proportion of rows omitted due to NAs}
+ 
 
 clean_data <- function(rawData,vars,NAallow,k) {
   
