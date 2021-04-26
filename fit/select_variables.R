@@ -1,7 +1,14 @@
 #' Grab appropriate variables for a fit.
 #' 
 #' For each species fit full model. Due to missing data some species wont have the same type of full model
-#' for example. the cold pool is only relevant or some species, stomach data is missing for others
+#' for example. the cold pool is only relevant or some species, stomach data is missing for others.
+#' 
+#' Missing data is removed from data set rather than letting mgcv do it. This reduces Errors from mgcv.
+#' Variables are removed if insufficient data
+#' Model Fit stats are saved to a list and saved as RDS files
+#' Plots of the best full model (based on GCV) are saved to plots folder
+#' 
+#' 
 
 source(here::here("fit","clean_data.R"))
 source(here::here("fit","clean_model.R"))
