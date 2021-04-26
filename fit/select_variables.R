@@ -12,6 +12,9 @@ library(magrittr)
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
 k <- 10
 latlonk <- 25
+if (!dir.exists(here::here("fit","plots"))) {
+  dir.create(here::here("fit","plots"))
+}
 
 # read in main data file 
 data <- readRDS(file=here::here("other","condSPP.rds")) %>% 
@@ -82,7 +85,7 @@ speciesList <- cond %>%
 
 mainList <- list()
 finalModels <- list()
-for (aspecies in speciesList[37:40]) {  
+for (aspecies in speciesList) {  
   print(aspecies)
   # pre allocate variables
   spcriterion <- NULL
@@ -166,6 +169,8 @@ for (aspecies in speciesList[37:40]) {
     finalModels[[aspecies]] <- NULL
     mainList[[aspecies]]$models <- NULL # the model object
     next
+  } else {
+    mainList[[aspecies]]$models <- modelResults
   }
   
 
@@ -199,4 +204,5 @@ for (aspecies in speciesList[37:40]) {
   
 }
 
-
+saveRDS(mainList,file = here::here("fit","allModels.RDS"))
+saveRDS(finalModels,file = here::here("fit","finalModels.RDS"))
