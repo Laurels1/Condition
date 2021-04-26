@@ -170,6 +170,7 @@ for (aspecies in speciesList) {
 
   # store info for each model for later exploration
   mainList[[aspecies]]$cleaning <- cleanedData # the cleaned version of the data
+  mainList[[aspecies]]$species <- aspecies # species name
   
   
   if (is.null(spcriterion)) { # not enough data for any model
@@ -192,7 +193,7 @@ for (aspecies in speciesList) {
   finalModels[[aspecies]]$dev.expl <- summary(modelResults[[bestModel]])$dev.expl
   finalModels[[aspecies]]$n <- summary(modelResults[[bestModel]])$n  # 
   finalModels[[aspecies]]$gamcheck <- mgcv::gam.check(modelResults[[bestModel]])
-
+  finalModels[[aspecies]]$species <- aspecies
   # forward/backward stepwise fit for best model to determine sig variables
   
 
