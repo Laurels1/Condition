@@ -77,12 +77,18 @@ speciesList <- cond %>%
   dplyr::distinct(Species) %>% 
   dplyr::pull()
 
-modelResults <- list()
 
-for (aspecies in speciesList) {  
+# Loop over species -------------------------------------------------------
+
+mainList <- list()
+finalModels <- list()
+for (aspecies in speciesList[37:40]) {  
   print(aspecies)
+  # pre allocate variables
+  spcriterion <- NULL
+  modelResults <- list()
   
-  # check for incomplete data. we use all variables to help clean and interpolate data
+  # check for incomplete data. We use all variables to help clean and interpolate data
   allSpeciesData <- cond %>% 
     dplyr::filter(Species == aspecies)
   
@@ -90,24 +96,25 @@ for (aspecies in speciesList) {
   cleanedData <- clean_data(allSpeciesData,allVars,NANpropAllowed,k)
   print(cleanedData$omittedVars)
 
-  # now loop through each of the models
+
+# Loop over models -----------------------------------------------------
+
   for (iloop in 1:nrow(modelScenarios)) {
     message(paste0("model # ",iloop, " for ",aspecies))
     # pull variable names for the model
     modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))
 
-    # check to see if this model has variables filtered out
+    # remove variables identified by data_clean()
+    # modelSpecsPlus contains list of variables for model fitting
     modelSpecPlus <- clean_model(modelSpecs,df,cleanedData$omittedVars)
-    
-    if (is.null(modelSpecPlus$modelSpecs)) {
-      dummyModel <- list()
+
+    if (is.null(modelSpecPlus$modelSpecs)) { # if null then can not fit model
       message("skip")
-      dummyModel$sp.criterion <- NA
-      names(dummyModel$sp.criterion) <- "GCV.Cp"
-      modelResults[[iloop]] <- dummyModel
+      modelResults[[iloop]] <- NA
       next
+    } else {
+      modelSpecs <- modelSpecPlus$modelSpecs
     }
-    modelSpecs <- modelSpecPlus$modelSpecs
 
     # pull the variable data
     if (modelSpecPlus$latlon) { # use lat and lon
@@ -133,24 +140,62 @@ for (aspecies in speciesList) {
     
     # create the formula for the model
     mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," ,bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
-    if (modelSpecPlus$latlon) {
+    if (modelSpecPlus$latlon) { # use lat and lon
       mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
     }
 
-    if (nrow(speciesData) < 100) next
+    if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
+      modelResults[[iloop]] <- NA
+      next
+    } 
     # fit the GAM
     modelFit <- mgcv::gam(formula = as.formula(mymodel), data = speciesData) #, na.action = na.action
     
     #store the results
-    modelResults[[iloop]] <- summary(modelFit)
+    modelResults[[iloop]] <- modelFit
+    # store sp.criterion to select best model
+    spcriterion[iloop] <- summary(modelFit)$sp.criterion
     
   }
+
+  # store info for each model for later exploration
+  mainList[[aspecies]]$cleaning <- cleanedData # the cleaned version of the data
   
+  
+  if (is.null(spcriterion)) { # not enough data for any model
+    finalModels[[aspecies]] <- NULL
+    mainList[[aspecies]]$models <- NULL # the model object
+    next
+  }
+  
+
   # sort models. pick best one, two, five and see how different.
-  GCV <- unlist(lapply(modelResults,`[[`,"sp.criterion"))
-  bestModel <- which(min(GCV,na.rm=T)==GCV)
-  modelResults[[bestModel]]
+  bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
+
+  finalModels[[aspecies]]$model <- modelResults[[bestModel]]
+  finalModels[[aspecies]]$summary <- summary(modelResults[[bestModel]])
+  finalModels[[aspecies]]$GCV <- summary(modelResults[[bestModel]])$sp.criterion
+  finalModels[[aspecies]]$s.pv <- summary(modelResults[[bestModel]])$s.pv
+  finalModels[[aspecies]]$r.sq <- summary(modelResults[[bestModel]])$r.sq
+  finalModels[[aspecies]]$dev.expl <- summary(modelResults[[bestModel]])$dev.expl
+  finalModels[[aspecies]]$n <- summary(modelResults[[bestModel]])$n  # 
+  finalModels[[aspecies]]$gamcheck <- mgcv::gam.check(modelResults[[bestModel]])
+
   # forward/backward stepwise fit for best model to determine sig variables
+  
+
+# Stepwise fitting --------------------------------------------------------
+
+
+
+# Plotting ----------------------------------------------------------------
+
+  # plot best model and save as png
+  png(filename = here::here("fit","plots",paste0(gsub("\\s","",aspecies),".png")),
+      width = 1000,height=1000,units="px")
+  plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
+  dev.off()
+
   
 }
 
