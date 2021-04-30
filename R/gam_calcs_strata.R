@@ -604,6 +604,27 @@ EnvirVariables <- CondClean %>%
 EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 #::write_csv(as.data.frame(EnVarCor), here::here(out.dir,"Corr_Env.csv"))
 
+#Environmental covariates for NRHA:
+HabitatAssess <- CondClean %>%
+  ungroup() %>%
+  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'SVSPP', 'sex', 'StockName', 'Stock',
+                'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+                'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
+                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+                'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
+  dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+                'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
+                'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+                'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
+                'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
+                'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass',
+                'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+                'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
+                'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
+
+# readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess.csv"))
+
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |
 #                                    ('AvgExpcatchnumStrata'< -0.3 | 'AvgExpcatchnumStrata' > 0.3) |
