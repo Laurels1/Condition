@@ -3,14 +3,13 @@
 .RData
 .Ruserdata
 .Rproj
-
 #files
 *.html
 *.txt
 *.jpg
 Rprof.out
 .RDataTmp
-
 # folders
 output/
 other/
+survbio_NRHA.RData
