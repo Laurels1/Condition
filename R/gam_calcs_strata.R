@@ -152,7 +152,7 @@ GLORYSnaStratum <- GLORYSna_not[!duplicated(GLORYSna_not[,'STRATUM']),]
 GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
 
 #--------------------------------------------------------------------------------
-#Bringing in ratio of small to large copepods
+#Bringing in ratio of small to large copepods (by EPU):
 load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
 Calfin <- Zooplankton_Primary_Prod
@@ -166,6 +166,9 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
                                        if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
 CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
+
+#Bring in ratio of small to large copepods (by strata from Ryan Morse):
+load(here::here("data","TS_spring_zoop.rda"))
 
 #Bring in total zooplankton biomass 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
