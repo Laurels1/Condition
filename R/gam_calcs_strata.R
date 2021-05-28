@@ -48,12 +48,15 @@ StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
 #StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
-StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata)) 
+StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata))
 
 #Limit survey strata to north of Hatteras:
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 CondStockjoin <- dplyr::left_join(cond.strata, StockData, by = c("SVSPP", "STRATUM"))
+
+#Assign stock to Unit if sample is outside of stock strata or no stock strata are definited for species:
+CondStockUnit <- CondStockjoin %>% dplyr::mutate(StockUnit =ifelse(is.na(Stock), "Unit", Stock))
 
 #Samples without stock area designations (strata where species were sampled but aren't included in stock area definition):
 CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
@@ -83,7 +86,7 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex
-AvgStrataCond <- CondStockjoin %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
@@ -169,8 +172,15 @@ CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Bring in ratio of small to large copepods (by strata from Ryan Morse):
 load(here::here("data","TS_spring_zoop.rda"))
+ZoopSpring <- zoo.spr
 
-#Bring in total zooplankton biomass 
+load(here::here("data","TS_fall_zoop.rda"))
+ZoopFall <- zoo.fall
+
+load(here::here("data","TS_yearly_zoop.rda"))
+ZoopAnnual <- zoo.yr
+
+#Bring in zooplankton anomalies: 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
 
 Zoop <- ZoopBio %>% dplyr::rename(YEAR=Year)
@@ -261,7 +271,7 @@ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStrata
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 'StockName', 'Stock', 'Survey',
+  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 'StockName', 'StockUnit', 'Survey',
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
@@ -363,27 +373,27 @@ StockAssDat <- stockAssessmentData %>%
 #stocksunique <- unique(stocks)
 #View(stocksunique)
 
-#Reformat StockSmart Regions to merge with Stock from stockStrataFall.csv:
-      StockAssDat$Stock[StockAssDat$Region=='Atlantic'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species %in% c(
+#Reformat StockSmart Regions to merge with StockUnit from stockStrataFall.csv:
+      StockAssDat$StockUnit[StockAssDat$Region=='Atlantic'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species %in% c(
         'Acadian redfish', 'American plaice', 'Pollock', 'White hake')] <- 'Unit' 
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species == 'Windowpane'] <- 'N'
-      StockAssDat$Stock[StockAssDat$Region=='Northwestern Atlantic Coast'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Mid'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Atlantic Coast'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Gulf of Maine / Northern Georges Bank'] <- 'N'
-      StockAssDat$Stock[StockAssDat$Region=='Southern Georges Bank / Mid'] <- 'S'
-      StockAssDat$Stock[StockAssDat$Region=='Georges Bank' & StockAssDat$Species %in% c(
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species == 'Windowpane'] <- 'N'
+      StockAssDat$StockUnit[StockAssDat$Region=='Northwestern Atlantic Coast'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Mid'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Atlantic Coast'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Northern Georges Bank'] <- 'N'
+      StockAssDat$StockUnit[StockAssDat$Region=='Southern Georges Bank / Mid'] <- 'S'
+      StockAssDat$StockUnit[StockAssDat$Region=='Georges Bank' & StockAssDat$Species %in% c(
         'Atlantic cod', 'Haddock', 'Yellowtail flounder', 'Winter flounder')] <- 'GB'
-      StockAssDat$Stock[StockAssDat$Region=='Georges Bank / Southern New England'] <- 'Unit'
-      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c(
+      StockAssDat$StockUnit[StockAssDat$Region=='Georges Bank / Southern New England'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c(
         'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
-      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
-      StockAssDat$Stock[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
-     StockAssDat$Stock[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
+      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
+      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
+     StockAssDat$StockUnit[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
 #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment for each year and metric:    
      # StockAssYear <- StockAssDat %>%
@@ -393,7 +403,7 @@ StockAssDat <- stockAssessmentData %>%
      #   ungroup()
      
 #2019 Opperational assessment for GB haddock only includes 2011-2018, so need to change to 2017 assessment year (not working yet):
-         if(StockAssDat$Species== 'Haddock' && StockAssDat$Stock =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
+         if(StockAssDat$Species== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
      #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
 maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('Species'=StockAssDat$Species, 'Region'=StockAssDat$Region),max)
   names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
@@ -403,13 +413,13 @@ maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('Species'=StockAssDat$Spe
  StockAssYear= subset(say, say$keep=='y')       
  
 AssDat <- StockAssYear %>%
-  select(Species, Region, Stock, Year, AssessmentYear, Value, Metric) %>%
+  select(Species, Region, StockUnit, Year, AssessmentYear, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
-  #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of stock:
+  #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of StockUnit:
 #  group_by(Species, YEAR) %>%
 #  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
-  #If by stock:
+  #If by StockUnit:
   dplyr::mutate(TotalBiomass = Abundance)
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
@@ -420,9 +430,9 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 
 #Using Average stomach fullness lagged 1 year:
-CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'Stock', 'YEAR'))
+CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
-#CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'Stock', 'YEAR'))
+#CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 
 #------------------------------------------------------------------------------------
 #Weight at age coefficients from Kevin's GLM output: pt tab of glm_out_GrowthCovariates_species.xls
@@ -577,9 +587,9 @@ CondClean <- CondCleanSpDogWt %>%
 
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
 # GOMhadd <- CondClean %>% 
-#   dplyr::arrange(Stock) %>%
+#   dplyr::arrange(StockUnit) %>%
 #   dplyr::filter(Species == 'Haddock') %>%
-#   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'Stock', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
+#   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'sex', 'StockUnit', 'AvgRelCondStrata', 'AvgRelCondStrataSD')
 
 #Output haddock condition:
 #readr::write_csv(GOMhadd, here::here(out.dir,"FallStrata_RelCond_haddock.csv"))
@@ -610,7 +620,7 @@ EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 #Environmental covariates for NRHA:
 HabitatAssess <- CondClean %>%
   ungroup() %>%
-  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'SVSPP', 'sex', 'StockName', 'Stock',
+  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'SVSPP', 'sex', 'StockName', 'StockUnit',
                 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
                 'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
@@ -687,8 +697,8 @@ condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'L
                                        'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
                                        'AverageLonStrata' = 'AvgLonStrata')
 
-saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
-
+#saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
+saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 
 
  spp <- unique(CondClean$Species)
@@ -697,8 +707,8 @@ saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 
 ######End code before GAM analyses#####
 
-#Run GAMS by species and stock (not working):
-#SppStock <- unique(CondClean$Species, CondClean$Stock)
+#Run GAMS by species and StockUnit (not working):
+#SppStockUnit <- unique(CondClean$Species, CondClean$StockUnit)
  
 
 for(sp in spp) {

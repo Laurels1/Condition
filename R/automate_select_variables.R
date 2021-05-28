@@ -216,4 +216,4 @@ saveRDS(mainList,file = here::here("output","automate","allModels.RDS"))
 saveRDS(finalModels,file = here::here("output","automate","finalModels.RDS"))
 
 allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
-finalModels <- readRDS(file=here::here("output","automate","finalMOdels.RDS"))
+finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
