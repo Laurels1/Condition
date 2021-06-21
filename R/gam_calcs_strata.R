@@ -305,14 +305,17 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
 #------------------------------------------------------------------------------------ 
 #Add stock assessment data from Stock SMART: https://www.fisheries.noaa.gov/resource/tool-app/stock-smart
 #load(here::here("data","stockAssessmentData.Rdata"))
-load(here::here("data","stockAssessmentData.rda"))
+#load(here::here("data","stockAssessmentData.rda"))
+#Updated pull May 28, 2021:
+load(here::here("data","stockAssessmentData_05-28-2021.rda"))
+
 #View(stockAssessmentData)
 
 #2019 goosefish assessment has too few years to use, also 2019 assessment of GOM cod, 2018 assessment of herring,
 #Also 2019 assessment of GB haddock, 2017 assessment of GOM winter flounder, 2019 assessment of GB YT
 #cusk and blackbelly rosefish don't have n>=3 and years > 20 if only using condition within 1 standard deviation of mean:
 StockAssDat <- stockAssessmentData %>%
-  filter(Species %in% c('Spiny dogfish', 'Winter skate', 'Little skate',
+  filter(CommonName %in% c('Spiny dogfish', 'Winter skate', 'Little skate',
                         #'Smooth dogfish' (not enough data when outliers removed)
                         'Thorny skate',
                         'Atlantic herring',
@@ -354,7 +357,7 @@ StockAssDat <- stockAssessmentData %>%
 #                        'Blackbelly rosefish',
                         'Atlantic croaker'
                         )) %>%
-  filter(Region %in% c('Atlantic',
+  filter(StockArea %in% c('Atlantic',
                        'Gulf of Maine / Georges Bank',
                        'Northwestern Atlantic Coast',
                        'Gulf of Maine',
@@ -374,26 +377,26 @@ StockAssDat <- stockAssessmentData %>%
 #View(stocksunique)
 
 #Reformat StockSmart Regions to merge with StockUnit from stockStrataFall.csv:
-      StockAssDat$StockUnit[StockAssDat$Region=='Atlantic'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species %in% c(
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName %in% c(
         'Acadian redfish', 'American plaice', 'Pollock', 'White hake')] <- 'Unit' 
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Georges Bank' & StockAssDat$Species == 'Windowpane'] <- 'N'
-      StockAssDat$StockUnit[StockAssDat$Region=='Northwestern Atlantic Coast'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine' & StockAssDat$Species %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Mid'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Atlantic Coast'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Gulf of Maine / Northern Georges Bank'] <- 'N'
-      StockAssDat$StockUnit[StockAssDat$Region=='Southern Georges Bank / Mid'] <- 'S'
-      StockAssDat$StockUnit[StockAssDat$Region=='Georges Bank' & StockAssDat$Species %in% c(
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName == 'Windowpane'] <- 'N'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Northwestern Atlantic Coast'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Mid'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic Coast'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Northern Georges Bank'] <- 'N'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Southern Georges Bank / Mid'] <- 'S'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank' & StockAssDat$CommonName %in% c(
         'Atlantic cod', 'Haddock', 'Yellowtail flounder', 'Winter flounder')] <- 'GB'
-      StockAssDat$StockUnit[StockAssDat$Region=='Georges Bank / Southern New England'] <- 'Unit'
-      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c(
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank / Southern New England'] <- 'Unit'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c(
         'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
-      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species == 'Windowpane'] <- 'S'
-      StockAssDat$StockUnit[StockAssDat$Region=='Southern New England / Mid' & StockAssDat$Species %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
-     StockAssDat$StockUnit[StockAssDat$Region=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName == 'Windowpane'] <- 'S'
+      StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
+     StockAssDat$StockUnit[StockAssDat$StockArea=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
 #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment for each year and metric:    
      # StockAssYear <- StockAssDat %>%
@@ -403,17 +406,17 @@ StockAssDat <- stockAssessmentData %>%
      #   ungroup()
      
 #2019 Opperational assessment for GB haddock only includes 2011-2018, so need to change to 2017 assessment year (not working yet):
-         if(StockAssDat$Species== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
+         if(StockAssDat$CommonName== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
      #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
-maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('Species'=StockAssDat$Species, 'Region'=StockAssDat$Region),max)
+maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('CommonName'=StockAssDat$CommonName, 'StockArea'=StockAssDat$StockArea),max)
   names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
      maxAssyr$keep='y'      
  
- say=merge(StockAssDat, maxAssyr, by=c('Species', 'Region', 'AssessmentYear'), all.x=T)
+ say=merge(StockAssDat, maxAssyr, by=c('CommonName', 'StockArea', 'AssessmentYear'), all.x=T)
  StockAssYear= subset(say, say$keep=='y')       
  
 AssDat <- StockAssYear %>%
-  select(Species, Region, StockUnit, Year, AssessmentYear, Value, Metric) %>%
+  select(CommonName, StockArea, StockUnit, Year, AssessmentYear, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
   #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of StockUnit:
@@ -428,6 +431,9 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 
 #Output Stock Assessment data as csv (examined missing data as .xls:
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
+
+#In 5-28-2021 StockSmart pull, have to rename CommonName to Species:
+AssDatFormat <- mutate(AssDat,Species=CommonName)
 
 #Using Average stomach fullness lagged 1 year:
 CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
