@@ -366,6 +366,7 @@ StockAssDat <- stockAssessmentData %>%
                        'Atlantic Coast',
                        'Gulf of Maine / Northern Georges Bank',
                        'Southern Georges Bank / Mid',
+                       'Southern Georges Bank / Mid-Atlantic',
                        'Georges Bank',
                        'Georges Bank / Southern New England',
                        'Southern New England / Mid',
@@ -423,7 +424,9 @@ AssDat <- StockAssYear %>%
 #  group_by(Species, YEAR) %>%
 #  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
   #If by StockUnit:
-  dplyr::mutate(TotalBiomass = Abundance)
+  dplyr::mutate(TotalBiomass = Abundance) %>%
+#In 5-28-2021 StockSmart pull, have to rename CommonName to Species:
+dplyr::mutate(Species=CommonName)
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
@@ -431,9 +434,6 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 
 #Output Stock Assessment data as csv (examined missing data as .xls:
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
-
-#In 5-28-2021 StockSmart pull, have to rename CommonName to Species:
-AssDatFormat <- mutate(AssDat,Species=CommonName)
 
 #Using Average stomach fullness lagged 1 year:
 CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
