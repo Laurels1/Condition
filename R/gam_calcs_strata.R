@@ -498,15 +498,28 @@ StockAssDat$StockUnit[StockAssDat$StockName=='Goosefish - Southern Georges Bank 
 #2019 Opperational assessment for GB haddock only includes 2011-2018, so need to change to 2017 assessment year (not working yet):
          if(StockAssDat$CommonName== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
      #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
-maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('CommonName'=StockAssDat$CommonName, 'StockArea'=StockAssDat$StockArea),max)
+# maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('CommonName'=StockAssDat$CommonName, 'StockArea'=StockAssDat$StockArea),max)
+# names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
+# maxAssyr$keep='y'      
+# 
+# say=merge(StockAssDat, maxAssyr, by=c('CommonName', 'StockArea', 'AssessmentYear'), all.x=T)
+# StockAssYear= subset(say, say$keep=='y')       
+# 
+# AssDat <- StockAssYear %>%
+#   select(CommonName, StockArea, StockUnit, Year, AssessmentYear, Value, Metric) %>%
+#   spread(Metric, Value) %>%
+#   dplyr::mutate(YEAR = Year) %>%
+  
+#for 5/28/2021 data pull, CommonName and StockUnit are missing for many stocks, use StockName:
+maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('StockName'=StockAssDat$StockName),max)
   names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
      maxAssyr$keep='y'      
  
- say=merge(StockAssDat, maxAssyr, by=c('CommonName', 'StockArea', 'AssessmentYear'), all.x=T)
+ say=merge(StockAssDat, maxAssyr, by=c('StockName', 'AssessmentYear'), all.x=T)
  StockAssYear= subset(say, say$keep=='y')       
  
 AssDat <- StockAssYear %>%
-  select(CommonName, StockArea, StockUnit, Year, AssessmentYear, Value, Metric) %>%
+  select(StockName, StockUnit, Year, AssessmentYear, Value, Metric) %>%
   spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
   #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of StockUnit:
@@ -514,8 +527,10 @@ AssDat <- StockAssYear %>%
 #  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
   #If by StockUnit:
   dplyr::mutate(TotalBiomass = Abundance) %>%
-#In 5-28-2021 StockSmart pull, have to rename CommonName to Species:
-dplyr::mutate(Species=CommonName)
+#In 5-28-2021 StockSmart pull, have to rename StockName to Species:
+  #****select StockName up to '-' to get Species:
+  dplyr::mutate() %>%
+  dplyr::mutate(Species=StockName)
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
