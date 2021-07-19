@@ -528,9 +528,9 @@ AssDat <- StockAssYear %>%
   #If by StockUnit:
   dplyr::mutate(TotalBiomass = Abundance) %>%
 #In 5-28-2021 StockSmart pull, have to rename StockName to Species:
-  #****select StockName up to '-' to get Species:
-  dplyr::mutate() %>%
-  dplyr::mutate(Species=StockName)
+  #select StockName up to '-' to get Species:
+  dplyr::mutate(Species = sub("\\-.*", "", StockName))
+
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
@@ -540,6 +540,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 
 #Using Average stomach fullness lagged 1 year:
+#*** not merging in stock assessment data:
 CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
