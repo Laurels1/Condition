@@ -16,7 +16,7 @@
 #' \item{propRowsRemoved}{Numeric scalar. Proportion of rows omitted due to NAs}
  
 
-clean_data <- function(rawData,vars,NAallow,k) {
+automate_clean_data <- function(rawData,vars,NAallow,k) {
   
   # select explanatory variables
   explanatoryVars <- rawData %>% 

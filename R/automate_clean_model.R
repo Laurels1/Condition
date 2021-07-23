@@ -12,7 +12,7 @@
 #' \item{latlon}{Boolean. Whether to use lat and lon in model fit}
 
 
-clean_model <- function(modelSpecs,df,omittedVars) {
+automate_clean_model <- function(modelSpecs,df,omittedVars) {
   
   # check to see if lat and long should be added to model
   latlon <-  T
