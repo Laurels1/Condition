@@ -174,11 +174,25 @@ CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 load(here::here("data","TS_spring_zoop.rda"))
 ZoopSpring <- zoo.spr
 
+ZooSprStrata <- ZoopSpring %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
 load(here::here("data","TS_fall_zoop.rda"))
 ZoopFall <- zoo.fall
 
+ZooFallStrata <- ZoopFall %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
+
 load(here::here("data","TS_yearly_zoop.rda"))
 ZoopAnnual <- zoo.yr
+
+ZooAnnualStrata <- ZoopAnnual %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
 
 #Bring in zooplankton anomalies: 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
