@@ -19,6 +19,8 @@ library(magrittr)
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
 k <- 10
 latlonk <- 25
+makePlots <- TRUE
+
 if (!dir.exists(here::here("output","automate"))) {
   dir.create(here::here("output","automate"))
 }
@@ -96,6 +98,7 @@ for (aspecies in speciesList) {
   print(aspecies)
   # pre allocate variables
   spcriterion <- NULL
+  varsUsed <- list()
   modelResults <- list()
   
   # check for incomplete data. We use all variables to help clean and interpolate data
@@ -103,7 +106,7 @@ for (aspecies in speciesList) {
     dplyr::filter(Species == aspecies)
   
   # remove any variables that have < NANpropAllowed
-  cleanedData <- clean_data(allSpeciesData,allVars,NANpropAllowed,k)
+  cleanedData <- automate_clean_data(allSpeciesData,allVars,NANpropAllowed,k)
   print(cleanedData$omittedVars)
 
 
@@ -116,11 +119,12 @@ for (aspecies in speciesList) {
 
     # remove variables identified by data_clean()
     # modelSpecsPlus contains list of variables for model fitting
-    modelSpecPlus <- clean_model(modelSpecs,df,cleanedData$omittedVars)
+    modelSpecPlus <- automate_clean_model(modelSpecs,df,cleanedData$omittedVars)
 
     if (is.null(modelSpecPlus$modelSpecs)) { # if null then can not fit model
       message("skip")
       modelResults[[iloop]] <- NA
+      varsUsed[[iloop]] <- NA
       next
     } else {
       modelSpecs <- modelSpecPlus$modelSpecs
@@ -147,11 +151,13 @@ for (aspecies in speciesList) {
     explanatoryVariableNames <- speciesData %>% 
       dplyr::select(-AvgRelCondStrata,-AverageLonStrata,-AverageLatStrata) %>%
       names()
-    
+    # list all variables used
+    modelSelectedVars <- explanatoryVariableNames
     # create the formula for the model
     mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," ,bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
     if (modelSpecPlus$latlon) { # use lat and lon
       mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
+      modelSelectedVars <- c(modelSelectedVars,"AverageLatStrata","AverageLonStrata")
     }
 
     if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
@@ -165,14 +171,15 @@ for (aspecies in speciesList) {
     modelResults[[iloop]] <- modelFit
     # store sp.criterion to select best model
     spcriterion[iloop] <- summary(modelFit)$sp.criterion
-    
-  }
+    # list variables used in fit
+    varsUsed[[iloop]] <- modelSelectedVars
 
+  }
+  
   # store info for each model for later exploration
   mainList[[aspecies]]$cleaning <- cleanedData # the cleaned version of the data
   mainList[[aspecies]]$species <- aspecies # species name
-  
-  
+
   if (is.null(spcriterion)) { # not enough data for any model
     finalModels[[aspecies]] <- NULL
     mainList[[aspecies]]$models <- NULL # the model object
@@ -180,7 +187,6 @@ for (aspecies in speciesList) {
   } else {
     mainList[[aspecies]]$models <- modelResults
   }
-  
 
   # sort models. pick best one, two, five and see how different.
   bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
@@ -194,26 +200,29 @@ for (aspecies in speciesList) {
   finalModels[[aspecies]]$n <- summary(modelResults[[bestModel]])$n  # 
   finalModels[[aspecies]]$gamcheck <- mgcv::gam.check(modelResults[[bestModel]])
   finalModels[[aspecies]]$species <- aspecies
-  # forward/backward stepwise fit for best model to determine sig variables
-  
+  finalModels[[aspecies]]$variables <- varsUsed[[bestModel]]
+  finalModels[[aspecies]]$formula <- modelResults[[bestModel]]$formula
 
-# Stepwise fitting --------------------------------------------------------
+  # forward/backward stepwise fit for best model to determine sig variables
+  # Stepwise fitting --------------------------------------------------------
+  # do this in automate_fit_best_model.r
 
 
 
 # Plotting ----------------------------------------------------------------
 
-  # plot best model and save as png
-  png(filename = here::here("output","automate",paste0(gsub("\\s","",aspecies),".png")),
-      width = 1000,height=1000,units="px")
-  plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
-  dev.off()
-
-  
+  if (makePlots) {
+    # plot best model and save as png
+    png(filename = here::here("output","automate",paste0(gsub("\\s","",aspecies),".png")),
+        width = 1000,height=1000,units="px")
+    plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
+    dev.off()
+  }  
 }
+
 
 saveRDS(mainList,file = here::here("output","automate","allModels.RDS"))
 saveRDS(finalModels,file = here::here("output","automate","finalModels.RDS"))
 
-allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
-finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
+#allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
+#finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
