@@ -174,11 +174,25 @@ CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 load(here::here("data","TS_spring_zoop.rda"))
 ZoopSpring <- zoo.spr
 
+ZooSprStrata <- ZoopSpring %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
 load(here::here("data","TS_fall_zoop.rda"))
 ZoopFall <- zoo.fall
 
+ZooFallStrata <- ZoopFall %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
+
 load(here::here("data","TS_yearly_zoop.rda"))
 ZoopAnnual <- zoo.yr
+
+ZooAnnualStrata <- ZoopAnnual %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+  dplyr::filter(calfin_100m3 > 0) %>%
+  dplyr::mutate(CopepodSmallLarge = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3))
+
 
 #Bring in zooplankton anomalies: 
 ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
@@ -528,9 +542,9 @@ AssDat <- StockAssYear %>%
   #If by StockUnit:
   dplyr::mutate(TotalBiomass = Abundance) %>%
 #In 5-28-2021 StockSmart pull, have to rename StockName to Species:
-  #****select StockName up to '-' to get Species:
-  dplyr::mutate() %>%
-  dplyr::mutate(Species=StockName)
+  #select StockName up to '-' to get Species:
+  dplyr::mutate(Species = sub("\\-.*", "", StockName))
+
 
   #Catch/biomass as index of Fmort for Goosefish for GAMs:
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
@@ -540,6 +554,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 
 #Using Average stomach fullness lagged 1 year:
+#*** not merging in stock assessment data:
 CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))

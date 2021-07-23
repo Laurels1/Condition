@@ -309,6 +309,8 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 #strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
 #For survdat package:
+#strata <- sf::st_read(dsn = system.file("extdata", dsn=here::here(gis.dir, "EPU_extended.shp"), package = "survdat"),
+ #                     quiet = T)
 strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
                       quiet = T)
 
@@ -411,6 +413,8 @@ cond.epu$Species[cond.epu$SVSPP=='18'] <- 'Bluntnose stingray'
 cond.epu$Species[cond.epu$SVSPP=='163'] <- 'Longhorn sculpin'
 cond.epu$Species[cond.epu$SVSPP=='156'] <- 'Blackbelly rosefish'
 cond.epu$Species[cond.epu$SVSPP=='136'] <- 'Atlantic croaker'
+
+count(cond.epu, is.na(EPU))
 
 #Summarize annually and filter based on count of condition data by species
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
