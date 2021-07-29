@@ -12,7 +12,6 @@ library(magrittr)
 final <- readRDS(here::here("output/automate","finalModels.RDS"))
 # read in main data file 
 cond <- readRDS(file=here::here("other","condSPP.rds")) %>% 
-  dplyr::rename(CopepodSmall_Large = `CopepodSmall/Large`) %>% # change variable name because of special character
   dplyr::ungroup()
 
 speciesList <- cond %>% 

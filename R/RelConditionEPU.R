@@ -24,7 +24,7 @@
 #devtools::install_github('slucey/RSurvey/Survdat', )
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
-#remotes::install_github("NOAA-EDAB/survdat",build_vignettes = TRUE)
+#remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
 library(survdat)
 library(data.table)
 # library(graphics)
@@ -309,10 +309,8 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 #strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
 #For survdat package:
-#strata <- sf::st_read(dsn = system.file("extdata", dsn=here::here(gis.dir, "EPU_extended.shp"), package = "survdat"),
- #                     quiet = T)
 strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
-                      quiet = T)
+                    quiet = T)
 
 #Needed in direct data pull but not in Survdat:
 #data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
@@ -329,6 +327,7 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
 #View(cond.epu)
+condnoEPU <- filter(cond.epu, is.na(EPU))
 #condno <- filter(cond.epu, is.na(SEX))
 #cond.001wgt <- subset(cond.epu, cond.epu$INDWT == 0.001)
 #Remove fish that are 0.001 kg or less
@@ -338,6 +337,9 @@ cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = '
 #calculate single standard deviation of relative condition for each species
 condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
 names(condstdev)[ncol(condstdev)] = 'OrigCondSD'
+
+#calculate single standard deviation and mean of relative condition for each species
+#condstdev <-aggregate(SVSPP ~ , data = data, FUN = function(x) c(mean = mean(x), n = length(x)))
 
 #Remove relative conditons that are outside of 1 standard deviation
 condsd <- left_join(cond.epu, condstdev, by='SVSPP')

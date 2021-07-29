@@ -27,26 +27,25 @@ if (!dir.exists(here::here("output","automate"))) {
 
 # read in main data file 
 data <- readRDS(file=here::here("other","condSPP.rds")) %>% 
-  dplyr::rename(CopepodSmall_Large = `CopepodSmall/Large`) %>% # change variable name because of special character
   dplyr::ungroup()
 
 # select subset of variables needed in analysis
 cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, LocalAbundance,
-                               StockBiomass,
-                               Fproxy,
+  #                             StockBiomass,
+ #                              Fproxy,
                                LocalBottomTemp, PropColumnColdPool,
                                SpringTemp, SummerTemp, FallTemp, WinterTemp,
                                CopepodSmall_Large,
                                ZooplanktonBiomass,TotalCopepods, StomachFullness,FallBloomMagnitude ,FallBloomDuration,
                                AverageLatStrata,AverageLonStrata,
-                               AssessmentYear
+#                               AssessmentYear
 )
 
 
 # define variable and levels
 localDensity <- c("LocalBiomass","LocalAbundance")
-populationDensity <- "StockBiomass"
-fishing <- "Fproxy"
+#populationDensity <- "StockBiomass"
+#fishing <- "Fproxy"
 localEnv <- c("LocalBottomTemp","PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
 copepod <- "CopepodSmall_Large"
@@ -56,25 +55,28 @@ spatialLat <- "AverageLatStrata"
 
 # model should only contain one value from each variable
 df <- data.frame(variables = c("localDensity","localDensity",
-                               "populationDensity",
-                               "fishing",
+ #                              "populationDensity",
+  #                             "fishing",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod",
                                "resource","resource","resource","resource","resource"
                                ),
                  level = c(localDensity,
-                           populationDensity,
-                           fishing,
+   #                        populationDensity,
+    #                       fishing,
                            localEnv,
                            broadEnv,
                            copepod,
                            resource),
-                 num = c(2,2,1,1,2,2,4,4,4,4,1,5,5,5,5,5))
+                 num = c(2,2,
+  #                       1,1,
+                         2,2,4,4,4,4,1,5,5,5,5,5))
 
 # create full matrix of models. Note: leave out lat and lo. they will be added to all models jointly
-modelScenarios <- expand.grid(populationDensity,
-                              fishing,
+modelScenarios <- expand.grid(
+  #populationDensity,
+     #                         fishing,
                               localEnv,
                               localDensity,
                               broadEnv,
