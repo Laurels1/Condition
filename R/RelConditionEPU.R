@@ -335,26 +335,28 @@ condnoEPU <- filter(cond.epu, is.na(EPU))
 
 #summarize condition as annual average:
 #calculate single standard deviation of relative condition for each species
-condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
-names(condstdev)[ncol(condstdev)] = 'OrigCondSD'
+#condstdev <- aggregate(cond.epu$RelCond, by = list('SVSPP'=cond.epu$SVSPP), sd)
+#names(condstdev)[ncol(condstdev)] = 'OrigCondSD'
 
-#calculate single standard deviation and mean of relative condition for each species
-#condstdev <-aggregate(SVSPP ~ , data = data, FUN = function(x) c(mean = mean(x), n = length(x)))
+#calculate single standard deviation and mean of relative condition for each species and sex:
+condstdev <- group_by(cond.epu, SVSPP, SEX) %>% summarize(mean = mean(RelCond), sd = sd(RelCond))
 
 #Remove relative conditons that are outside of 1 standard deviation
-condsd <- left_join(cond.epu, condstdev, by='SVSPP')
+condsd <- left_join(cond.epu, condstdev, by=c('SVSPP', 'SEX'))
+ungroup(condsd)
 
 #condsd <- merge(condNoTiny, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
-cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$OrigCondSD) & condsd$RelCond > (100-condsd$OrigCondSD))
-#cond.sd <- subset(condsd, condsd$RelCond>=100-condsd$condSD | condsd$RelCond<=100+condsd$condSD)
+#cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$OrigCondSD) & condsd$RelCond > (100-condsd$OrigCondSD))
+cond.sd <- subset(condsd, condsd$RelCond < (mean+sd) & condsd$RelCond > (mean-sd))
 
 #Standard deviation after removing outliers:
-condstdev_NoOutliers <- aggregate(cond.sd$RelCond, by = list('SVSPP'=cond.sd$SVSPP), sd)
+condstdev_NoOutliers <- group_by(cond.sd, SVSPP, SEX) %>% summarize(meanNoOutliers = mean(RelCond), sd = sd(RelCond))
+
 names(condstdev_NoOutliers)[ncol(condstdev_NoOutliers)] = 'CondSD_noOutliers'
 
 #Remove relative conditons that are outside of 1 standard deviation
-condsd_NoOutliers <- left_join(cond.sd, condstdev_NoOutliers, by='SVSPP')
-
+condsd_NoOutliers <- left_join(cond.sd, condstdev_NoOutliers, by=c('SVSPP', 'SEX'))
+ungroup(condsd_NoOutliers)
 
 #cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 0) # remove all other category for sex (when I used != c(0, 4) it didn't remove all 4s)
 #Only including condition that is within 1 standard deviation of mean for each species:
