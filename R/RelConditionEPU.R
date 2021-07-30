@@ -339,16 +339,17 @@ condnoEPU <- filter(cond.epu, is.na(EPU))
 #names(condstdev)[ncol(condstdev)] = 'OrigCondSD'
 
 #calculate single standard deviation and mean of relative condition for each species and sex:
-# condstdev <- group_by(cond.epu, SVSPP, SEX) %>% summarize(mean = mean(RelCond), sd = sd(RelCond))
+ condstdev <- group_by(cond.epu, SVSPP, SEX) %>% summarize(mean = mean(RelCond), sd = sd(RelCond))
 # 
 # #Remove relative conditons that are outside of 1 standard deviation
-# condsd <- left_join(cond.epu, condstdev, by=c('SVSPP', 'SEX'))
-# ungroup(condsd)
+ condsd <- left_join(cond.epu, condstdev, by=c('SVSPP', 'SEX'))
+ ungroup(condsd)
 # 
 # #condsd <- merge(condNoTiny, condstdev, by='SVSPP', all.cond.epu=T, all.condClean = F)
 # #cond.sd <- subset(condsd, condsd$RelCond < (100+condsd$OrigCondSD) & condsd$RelCond > (100-condsd$OrigCondSD))
-# cond.sd <- subset(condsd, condsd$RelCond < (mean+sd) & condsd$RelCond > (mean-sd))
-# 
+  cond.sd <- filter(condsd, RelCond < (mean+(2*sd)) & RelCond > (mean-(2*sd)))
+ 
+ # 
 # #Standard deviation after removing outliers:
 # condstdev_NoOutliers <- group_by(cond.sd, SVSPP, SEX) %>% summarize(meanNoOutliers = mean(RelCond), sd = sd(RelCond))
 # 
@@ -362,7 +363,7 @@ condnoEPU <- filter(cond.epu, is.na(EPU))
 #Only including condition that is within 1 standard deviation of mean for each species:
 #cond.epu <- condsd_NoOutliers %>% dplyr::filter(is.na(sex) | sex != 4)
 
-cond.epu <- cond.epu %>% dplyr::filter(is.na(sex) | sex != 4)
+cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 4)
 
 cond.epu <- cond.epu %>% dplyr::mutate(sexMF = sex)
 
