@@ -35,7 +35,7 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
  #                              Fproxy,
                                LocalBottomTemp, PropColumnColdPool,
                                SpringTemp, SummerTemp, FallTemp, WinterTemp,
-                               CopepodSmall_Large,
+                               CopepodSmall_Large,CopepodSmLg_SprStrata, CopepodSmLg_FallStrata, CopepodSmLg_AnnualStrata,
                                ZooplanktonBiomass,TotalCopepods, StomachFullness,FallBloomMagnitude ,FallBloomDuration,
                                AverageLatStrata,AverageLonStrata,
 #                               AssessmentYear
@@ -48,7 +48,7 @@ localDensity <- c("LocalBiomass","LocalAbundance")
 #fishing <- "Fproxy"
 localEnv <- c("LocalBottomTemp","PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
-copepod <- "CopepodSmall_Large"
+copepod <- c("CopepodSmall_Large","CopepodSmLg_SprStrata", "CopepodSmLg_FallStrata", "CopepodSmLg_AnnualStrata")
 resource <- c("ZooplanktonBiomass","TotalCopepods","StomachFullness","FallBloomMagnitude","FallBloomDuration")
 spatialLon <- "AverageLonStrata"
 spatialLat <- "AverageLatStrata"
@@ -59,7 +59,7 @@ df <- data.frame(variables = c("localDensity","localDensity",
   #                             "fishing",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
-                               "copepod",
+                               "copepod","copepod","copepod","copepod",
                                "resource","resource","resource","resource","resource"
                                ),
                  level = c(localDensity,
@@ -71,7 +71,7 @@ df <- data.frame(variables = c("localDensity","localDensity",
                            resource),
                  num = c(2,2,
   #                       1,1,
-                         2,2,4,4,4,4,1,5,5,5,5,5))
+                         2,2,4,4,4,4,4,4,4,4,5,5,5,5,5))
 
 # create full matrix of models. Note: leave out lat and lo. they will be added to all models jointly
 modelScenarios <- expand.grid(
