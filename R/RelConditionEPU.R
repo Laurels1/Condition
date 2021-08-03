@@ -295,6 +295,22 @@ condcalc <- dplyr::mutate(mergeLW,
 
 cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 
+#Add ITIS codes and link to SVSPP:
+#connect to vpn, copy into console and fill in server and uid:
+channel <- dbutils::connect_to_database(server="",uid="")
+
+# Gets itis codes
+itis <- dbutils::create_species_lookup(channel,species=unique(cond$SVSPP),speciesType = "SVSPP")
+
+# clean output
+codes <- itis$data %>% 
+  dplyr::select(SVSPPsv,COMNAME,SCIENTIFIC_NAME,SPECIES_ITIS) %>% 
+  dplyr::rename(SVSPP=SVSPPsv) %>%
+  dplyr::distinct()
+
+cond.itis <- left_join(cond, codes)
+cond <- cond.itis %>% dplyr::mutate(ITIS= ifelse(SVSPP==193, '630979', SPECIES_ITIS))
+
 #check where condition is missing
 #nocond <- filter(cond, is.na(RelCond))
 #unique(nocond$SVSPP)
