@@ -200,7 +200,7 @@ for (aspecies in speciesList) {
   finalModels[[aspecies]]$r.sq <- summary(modelResults[[bestModel]])$r.sq
   finalModels[[aspecies]]$dev.expl <- summary(modelResults[[bestModel]])$dev.expl
   finalModels[[aspecies]]$n <- summary(modelResults[[bestModel]])$n  # 
-  finalModels[[aspecies]]$gamcheck <- mgcv::gam.check(modelResults[[bestModel]])
+  finalModels[[aspecies]]$gamcheck <- mgcv::k.check(modelResults[[bestModel]])
   finalModels[[aspecies]]$species <- aspecies
   finalModels[[aspecies]]$variables <- varsUsed[[bestModel]]
   finalModels[[aspecies]]$formula <- modelResults[[bestModel]]$formula
