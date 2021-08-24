@@ -53,7 +53,8 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 #Limit survey strata to north of Hatteras:
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
-CondStockjoin <- dplyr::left_join(cond.strata, StockData, by = c("SVSPP", "STRATUM"))
+#Drop StockName column for merge with StockSMART:
+CondStockjoin <- dplyr::left_join(cond.strata, select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
 
 #Assign stock to Unit if sample is outside of stock strata or no stock strata are definited for species:
 CondStockUnit <- CondStockjoin %>% dplyr::mutate(StockUnit =ifelse(is.na(Stock), "Unit", Stock))
@@ -294,7 +295,9 @@ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStrata
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 'StockName', 'StockUnit', 'Survey',
+  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
+         #'StockName', 'Survey',
+         'StockUnit', 
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
@@ -564,8 +567,7 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 
 #Using Average stomach fullness lagged 1 year:
-#*** not merging in stock assessment data:
-#CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
+CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 
@@ -573,9 +575,9 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #Weight at age coefficients from Kevin's GLM output: pt tab of glm_out_GrowthCovariates_species.xls
 WAA <- readr::read_csv(here::here("data","GrowthCovariates_15species.csv"))
 #Don't join on sex since F is changed to FALSE when importing csv into R:
-#CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEASON'))
+CondWAAcoeff <- dplyr::left_join(CondStockAss, WAA, by=c('Species', 'YEAR' ,'SEASON'))
 #Until StockSMART data is finalized:
-CondWAAcoeff <- dplyr::left_join(AvgStomStrataLag, WAA, by=c('Species', 'YEAR' ,'SEASON'))
+#CondWAAcoeff <- dplyr::left_join(AvgStomStrataLag, WAA, by=c('Species', 'YEAR' ,'SEASON'))
 
 
 #AvgStomSpring doesn't include SEASON so don't join to WAA

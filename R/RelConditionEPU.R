@@ -297,19 +297,30 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 
 #Add ITIS codes and link to SVSPP:
 #connect to vpn, copy into console and fill in server and uid:
-channel <- dbutils::connect_to_database(server="",uid="")
+#channel <- dbutils::connect_to_database(server="",uid="")
 
 # Gets itis codes
-itis <- dbutils::create_species_lookup(channel,species=unique(cond$SVSPP),speciesType = "SVSPP")
+#itis <- dbutils::create_species_lookup(channel,species=unique(cond$SVSPP),speciesType = "SVSPP")
 
 # clean output
-codes <- itis$data %>% 
-  dplyr::select(SVSPPsv,COMNAME,SCIENTIFIC_NAME,SPECIES_ITIS) %>% 
-  dplyr::rename(SVSPP=SVSPPsv) %>%
-  dplyr::distinct()
+#ITIScodes <- itis$data %>% 
+#  dplyr::select(SVSPPsv,COMNAME,SCIENTIFIC_NAME,SPECIES_ITIS) %>% 
+#  dplyr::rename(SVSPP=SVSPPsv) %>%
+#  dplyr::distinct()
 
-cond.itis <- left_join(cond, codes)
+#save ITIS codes so connection to Oracle isn't needed:
+#save(ITIScodes, file=here::here(data.dir,paste0('ITIScodes.rds')))
+load(file.path(data.dir, 'ITIScodes.rds', sep = ''))
+
+cond.itis <- left_join(cond, ITIScodes)
+#fill in ITIS codes for ocean pout
 cond <- cond.itis %>% dplyr::mutate(ITIS= ifelse(SVSPP==193, '630979', SPECIES_ITIS))
+#If needed for merges other than stockSMART, fill in ITIS codes for ocean pout, roughtail stingray, spiny butterfly ray, bullnose ray:
+#cond.itis$ITIS <- ifelse(cond.itis$SVSPP==193, '630979', 
+#                                                 ifelse(cond.itis$SVSPP==4, '160952', 
+#                                                 ifelse(cond.itis$SVSPP==375, '160961', 
+#                                                 ifelse(cond.itis$SVSPP==18, '160954', 
+#                                                 ifelse(cond.itis$SVSPP==19, '564391', cond.itis$SPECIES_ITIS)))))
 
 #check where condition is missing
 #nocond <- filter(cond, is.na(RelCond))
