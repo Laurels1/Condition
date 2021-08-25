@@ -565,9 +565,10 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 
 #Output Stock Assessment data as csv (examined missing data as .xls:
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
-
+AssDat <- tibble::as_tibble(AssDat) %>%
+  dplyr::mutate(Species = trimws(Species))
 #Using Average stomach fullness lagged 1 year:
-CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
+CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 
