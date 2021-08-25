@@ -35,7 +35,7 @@ library(tidyr)
 library(tidyverse)
 #library(gapminder)
 library(rgdal)
-library(RODBC)
+#library(RODBC)
 #dowload dbutils to pull survdat data:
 #remotes::install_github("andybeet/dbutils")
 #library(gam)
