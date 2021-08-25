@@ -310,11 +310,11 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 
 #save ITIS codes so connection to Oracle isn't needed:
 #save(ITIScodes, file=here::here(data.dir,paste0('ITIScodes.rds')))
-load(file.path(data.dir, 'ITIScodes.rds', sep = ''))
+#load(file.path(data.dir, 'ITIScodes.rds', sep = ''))
 
-cond.itis <- left_join(cond, ITIScodes)
+#cond.itis <- left_join(cond, ITIScodes)
 #fill in ITIS codes for ocean pout
-cond <- cond.itis %>% dplyr::mutate(ITIS= ifelse(SVSPP==193, '630979', SPECIES_ITIS))
+#cond <- cond.itis %>% dplyr::mutate(ITIS= ifelse(SVSPP==193, '630979', SPECIES_ITIS))
 #If needed for merges other than stockSMART, fill in ITIS codes for ocean pout, roughtail stingray, spiny butterfly ray, bullnose ray:
 #cond.itis$ITIS <- ifelse(cond.itis$SVSPP==193, '630979', 
 #                                                 ifelse(cond.itis$SVSPP==4, '160952', 
