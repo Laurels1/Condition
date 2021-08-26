@@ -156,65 +156,79 @@ GLORYSnaStratum <- GLORYSna_not[!duplicated(GLORYSna_not[,'STRATUM']),]
 GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
 
 #--------------------------------------------------------------------------------
-#Bringing in ratio of small to large copepods (by EPU):
-load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
-#View(Zooplankton_Primary_Prod)
-Calfin <- Zooplankton_Primary_Prod
-#head(Calfin)
-CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% 
-  select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>% 
-  gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
-  mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
-                       if_else(CalEPU=='SLI.gom', 'GOM',
-                               if_else(CalEPU=='SLI.mab', 'MAB',
-                                       if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
+#Bringing in small/large copepods, total copepods and zooplankton abundance anomaly by strata from Harvey Walsh:
+ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData_BTSMeanAbundance.csv"))
 
-CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
+#****have to separate out into 4 seasons to merge with condition data
+ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year) %>%
+  dplyr::mutate(STRATUM = BTS) %>%
+  dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
+  dplyr::mutate(TotalCopepodsThousandsStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
+  dplyr::mutate(ZooplAbundanceThousandsStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
+                                                 Cirripedia+Cnidaria+Cyclopoida+Decapoda+
+                                                 Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
+                                                 Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
+                                                 Protozoa+Thecosomata+Tunicata)/1000)
 
-#Bring in ratio of small to large copepods (by strata from Ryan Morse):
-load(here::here("data","TS_spring_zoop.rda"))
-ZoopSpring <- zoo.spr
-
-ZooSprStrata <- ZoopSpring %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
-  dplyr::filter(calfin_100m3 > 0) %>%
-  dplyr::mutate(CopepodSmallLargeSprStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
-  dplyr::select(YEAR, STRATUM, CopepodSmallLargeSprStrata)
-
-load(here::here("data","TS_fall_zoop.rda"))
-ZoopFall <- zoo.fall
-
-ZooFallStrata <- ZoopFall %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
-  dplyr::filter(calfin_100m3 > 0) %>%
-  dplyr::mutate(CopepodSmallLargeFallStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
-  dplyr::select(YEAR, STRATUM, CopepodSmallLargeFallStrata)
-
-load(here::here("data","TS_yearly_zoop.rda"))
-ZoopAnnual <- zoo.yr
-
-ZooAnnualStrata <- ZoopAnnual %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
-  dplyr::filter(calfin_100m3 > 0) %>%
-  dplyr::mutate(CopepodSmallLargeAnnualStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
-  dplyr::select(YEAR, STRATUM, CopepodSmallLargeAnnualStrata)
-
-
-CondSLIspr <- dplyr::left_join(CondCal, ZooSprStrata, by=c("YEAR", "STRATUM"))
-CondSLIfall <- dplyr::left_join(CondSLIspr, ZooFallStrata, by=c("YEAR", "STRATUM"))
-CondSLIstrata <- dplyr::left_join(CondSLIfall, ZooAnnualStrata, by=c("YEAR", "STRATUM"))
-
-dplyr::ungroup(CondSLIstrata)
-dplyr::count(CondSLIstrata, is.na(CopepodSmallLargeSprStrata))
-
-#Bring in zooplankton anomalies: 
-ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
-
-Zoop <- ZoopBio %>% dplyr::rename(YEAR=Year)
-
-CondZoo <- dplyr::left_join(CondSLIstrata, Zoop, by = c("YEAR", "EPU"))
+#Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
+# load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
+# #View(Zooplankton_Primary_Prod)
+# Calfin <- Zooplankton_Primary_Prod
+# #head(Calfin)
+# CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>% 
+#   select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>% 
+#   gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
+#   mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
+#                        if_else(CalEPU=='SLI.gom', 'GOM',
+#                                if_else(CalEPU=='SLI.mab', 'MAB',
+#                                        if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
+# 
+# CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
+# 
+# #Bring in ratio of small to large copepods (by strata from Ryan Morse):
+# load(here::here("data","TS_spring_zoop.rda"))
+# ZoopSpring <- zoo.spr
+# 
+# ZooSprStrata <- ZoopSpring %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+#   dplyr::filter(calfin_100m3 > 0) %>%
+#   dplyr::mutate(CopepodSmallLargeSprStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
+#   dplyr::select(YEAR, STRATUM, CopepodSmallLargeSprStrata)
+# 
+# load(here::here("data","TS_fall_zoop.rda"))
+# ZoopFall <- zoo.fall
+# 
+# ZooFallStrata <- ZoopFall %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+#   dplyr::filter(calfin_100m3 > 0) %>%
+#   dplyr::mutate(CopepodSmallLargeFallStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
+#   dplyr::select(YEAR, STRATUM, CopepodSmallLargeFallStrata)
+# 
+# load(here::here("data","TS_yearly_zoop.rda"))
+# ZoopAnnual <- zoo.yr
+# 
+# ZooAnnualStrata <- ZoopAnnual %>% dplyr::rename(YEAR=year, STRATUM = epu) %>%
+#   dplyr::filter(calfin_100m3 > 0) %>%
+#   dplyr::mutate(CopepodSmallLargeAnnualStrata = ((pseudo_100m3 + tlong_100m3 + cham_100m3 +ctyp_100m3)/calfin_100m3)) %>%
+#   dplyr::select(YEAR, STRATUM, CopepodSmallLargeAnnualStrata)
+# 
+# 
+# CondSLIspr <- dplyr::left_join(CondCal, ZooSprStrata, by=c("YEAR", "STRATUM"))
+# CondSLIfall <- dplyr::left_join(CondSLIspr, ZooFallStrata, by=c("YEAR", "STRATUM"))
+# CondSLIstrata <- dplyr::left_join(CondSLIfall, ZooAnnualStrata, by=c("YEAR", "STRATUM"))
+# 
+# dplyr::ungroup(CondSLIstrata)
+# dplyr::count(CondSLIstrata, is.na(CopepodSmallLargeSprStrata))
+# 
+# #Bring in zooplankton anomalies: 
+# ZoopBio <- readr::read_csv(here::here("data","EPUCopepodBiomassAnomalies.csv"))
+# 
+# Zoop <- ZoopBio %>% dplyr::rename(YEAR=Year)
+# 
+# CondZoo <- dplyr::left_join(CondSLIstrata, Zoop, by = c("YEAR", "EPU"))
 
 #Bring in total copepods (as millions of individuals) from NEFSCZooplankton_v3_6b_v2018.xls:
-TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
-
-TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
+# TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
+# 
+# TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 
 #--------------------------------------------------------------------------------
 #Bloom time and magnitude data
@@ -225,7 +239,7 @@ Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
 Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 
 #merge with condition data:
-FallBloomCond <- dplyr::left_join(TotCop, Fallbloom, by = "YEAR")
+FallBloomCond <- dplyr::left_join(ZoopStr, Fallbloom, by = "YEAR")
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
