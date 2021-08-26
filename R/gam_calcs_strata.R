@@ -828,7 +828,7 @@ condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'L
                                        'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
                                        'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
                                        'StomachFullness'= 'AvgStomFullStratalag',  
-                                       #'StockBiomass'= 'TotalBiomass',
+                                       'StockBiomass'= 'TotalBiomass',
                                        'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
                                        'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
                                        'AverageLonStrata' = 'AvgLonStrata')

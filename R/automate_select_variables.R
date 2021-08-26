@@ -31,8 +31,8 @@ data <- readRDS(file=here::here("other","condSPP.rds")) %>%
 
 # select subset of variables needed in analysis
 cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, LocalAbundance,
-  #                             StockBiomass,
- #                              Fproxy,
+                               StockBiomass,
+                               Fproxy,
                                LocalBottomTemp, PropColumnColdPool,
                                SpringTemp, SummerTemp, FallTemp, WinterTemp,
                                CopepodSmall_Large,
@@ -45,8 +45,8 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
 
 # define variable and levels
 localDensity <- c("LocalBiomass","LocalAbundance")
-#populationDensity <- "StockBiomass"
-#fishing <- "Fproxy"
+populationDensity <- "StockBiomass"
+fishing <- "Fproxy"
 localEnv <- c("LocalBottomTemp","PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
 copepod <- c("CopepodSmall_Large")
@@ -56,28 +56,28 @@ spatialLat <- "AverageLatStrata"
 
 # model should only contain one value from each variable
 df <- data.frame(variables = c("localDensity","localDensity",
- #                              "populationDensity",
-  #                             "fishing",
+                               "populationDensity",
+                               "fishing",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "CopepodSmall_Large",
                                "resource","resource","resource","resource","resource"
                                ),
                  level = c(localDensity,
-   #                        populationDensity,
-    #                       fishing,
+                           populationDensity,
+                           fishing,
                            localEnv,
                            broadEnv,
                            copepod,
                            resource),
                  num = c(2,2,
-  #                       1,1,
+                         1,1,
                          2,2,4,4,4,4,1,5,5,5,5,5))
 
 # create full matrix of models. Note: leave out lat and lo. they will be added to all models jointly
 modelScenarios <- expand.grid(
-  #populationDensity,
-     #                         fishing,
+  populationDensity,
+                              fishing,
                               localEnv,
                               localDensity,
                               broadEnv,
@@ -216,7 +216,7 @@ for (aspecies in speciesList) {
 
   if (makePlots) {
     # plot best model and save as png
-    png(filename = here::here("output","automate",paste0(gsub("\\s","",aspecies),".png")),
+    png(filename = here::here("output","automate",paste0(gsub("\\s","F_TotBiom_noNA_ZooplEPU",aspecies),".png")),
         width = 1000,height=1000,units="px")
     plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
     dev.off()
@@ -224,8 +224,8 @@ for (aspecies in speciesList) {
 }
 
 
-saveRDS(mainList,file = here::here("output","automate","allModels.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","finalModels.RDS"))
+saveRDS(mainList,file = here::here("output","automate","allModels_F_TotBiom_noNA_ZooplEPU.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","finalModels_F_TotBiom_noNA_ZooplEPU.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
 #finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
