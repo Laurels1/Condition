@@ -161,9 +161,7 @@ GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
 ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData_BTSMeanAbundance.csv"))
 
 #****have to separate out into 4 seasons to merge with condition data
-ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year) %>%
-  dplyr::mutate(STRATUM = BTS) %>%
-  dplyr::mutate(Seasons = as.character(Season)) %>%
+ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%
   dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
   dplyr::mutate(TotalCopepodStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
   dplyr::mutate(ZooplAbundStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
@@ -171,23 +169,26 @@ ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year) %>%
                                      Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
                                      Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
                                      Protozoa+Thecosomata+Tunicata)/1000) %>%
-  dplyr::select(YEAR, STRATUM, Season, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) 
+  dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) 
 
-#***********Not renaming seasons:
-ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = if_else(Seasons == '1', 'Winter', 
-                                 if_else(Seasons =='2', 'Spring', if_else(Seasons =='3', 'Summer', if_else(Seasons=='4', 'Fall', NA))))) 
+ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
+                                 ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
 
+ SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
+   dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
+   tidyr::spread(season1, CopepodSmallLargeStrata)
+ 
+ TotCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, TotalCopepodStrata) %>%
+   dplyr::mutate(season1=paste('TotalCopepodStrata', season1, sep="")) %>%
+   tidyr::spread(season1, TotalCopepodStrata)
+ 
+ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, ZooplAbundStrata) %>%
+   dplyr::mutate(season1=paste('ZooplAbundStrata', season1, sep="")) %>%
+   tidyr::spread(season1, ZooplAbundStrata)
 
-ZooStrataSeason <- dcast(setDT(ZooStr), id ~ season1, value.var = c('CopepodSmallLargeStrata', 
-                                                                                'TotalCopepodStrata',
-                                                                                'ZooplAbundStrata'), sep = "")
+ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
-  #tidyr::spread(Season, c(CopepodSmallLargeStrata, TotalCopepodsThousandsStrata, ZooplAbundanceThousandsStrata))
-# ZooStrSeason <- reshape(data=ZoopStr, idvar = c('YEAR', 'STRATUM'), v.names = c('CopepodSmallLargeStrata', 
-#                                                                                 'TotalCopepodStrata',
-#                                                                                 'ZooplAbundStrata'), 
-#                         timevar = 'Season', direction = 'wide')
-
+ZoopData <- dplyr::left_join(CondGLORYS, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
 
 #Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
 # load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
