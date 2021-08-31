@@ -259,7 +259,7 @@ Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
 Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 
 #merge with condition data:
-FallBloomCond <- dplyr::left_join(ZoopStr, Fallbloom, by = "YEAR")
+FallBloomCond <- dplyr::left_join(ZoopData, Fallbloom, by = "YEAR")
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
@@ -334,9 +334,14 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
          'StockUnit', 
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
          'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
-         'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall','CalEPU', 'CopepodSmallLarge',
-         'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
-         'ZooplBiomassAnomaly', 'TotalCopepodsMillions','RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
+         'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+         #'CalEPU', 'CopepodSmallLarge',
+         'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+ #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
+          'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+          'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+    #      'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
+          'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
   distinct()
 
 
@@ -656,7 +661,7 @@ CondColdPool <- dplyr::left_join(CondWAAcoeff, ColdP, by=c('YEAR', 'STRATUM'))
 ####If using total biomass (Abundance) or Fmort from StockSMART in GAMs, remove species lacking data: 
  CondClean <- CondColdPool %>%
   filter(Species %in% c(
-    #                 'Smooth dogfish', (not enough data once outliers removed)
+                    'Smooth dogfish', #(not enough data once outliers removed)
                       'Spiny dogfish',
                       'Winter skate',
                       'Little skate',
@@ -752,10 +757,10 @@ CondColdPool <- dplyr::left_join(CondWAAcoeff, ColdP, by=c('YEAR', 'STRATUM'))
 #remove TotalCopepodsMillions >10000
 #remove spiny dogfish with AvgExpcatchwtStrata >1500
 #remove yellowtail with AvgExpcatchnumStrata > 600
-CondCleanTotCop <- CondClean %>%
-  dplyr::filter((is.na(TotalCopepodsMillions) | TotalCopepodsMillions < 10000))
+# CondCleanTotCop <- CondClean %>%
+#   dplyr::filter((is.na(TotalCopepodsMillions) | TotalCopepodsMillions < 10000))
 
-CondCleanSpDogWt <- CondCleanTotCop %>%
+CondCleanSpDogWt <- CondClean %>%
   dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
 
 CondClean <- CondCleanSpDogWt %>%
@@ -776,22 +781,26 @@ EnvirVariables <- CondClean %>%
   ungroup() %>%
   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
                 'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-                'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
-                'AvgStomFullStratalag', 
-                #'Fproxy', 'TotalBiomass', 
+   #             'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
+    #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
+   'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+    'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+   'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+              'AvgStomFullStratalag', 
+                'Fproxy', 'TotalBiomass', 
                 'RangeMagnitude','RangeDuration',
                 'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
                 'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
-                'Fall Temp'= 'AvgTempFall', 'CopepodSmall_Large'= 'CopepodSmallLarge',
-                'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
-                'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
-                'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
-                'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
+                'Fall Temp'= 'AvgTempFall', 
+                #'CopepodSmall_Large'= 'CopepodSmallLarge',
+                #'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
+        #        'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
+         #       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
+          #      'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
                 'Stomach Fullness'= 'AvgStomFullStratalag',  
-                #'Stock Biomass'= 'TotalBiomass',
+                'Stock Biomass'= 'TotalBiomass',
                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
@@ -856,12 +865,13 @@ EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
                                        'LocalBottomTemp'= 'AvgBottomTempStrata','WinterTemp'= 'AvgTempWinter',
                                        'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
-                                       'FallTemp'= 'AvgTempFall', 'CopepodSmall_Large'= 'CopepodSmallLarge',
-                                       'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
-                                       'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
-                                       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
-                                       'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
-                                       'StomachFullness'= 'AvgStomFullStratalag',  
+                                       'FallTemp'= 'AvgTempFall', 
+                                       #'CopepodSmall_Large'= 'CopepodSmallLarge',
+                                       #'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
+                                       #'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
+                                       #'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
+                                       #'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
+                                      'StomachFullness'= 'AvgStomFullStratalag',  
                                        'StockBiomass'= 'TotalBiomass',
                                        'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
                                        'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
