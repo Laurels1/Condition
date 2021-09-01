@@ -766,6 +766,8 @@ CondCleanSpDogWt <- CondClean %>%
 CondClean <- CondCleanSpDogWt %>%
   dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
 
+
+
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
 # GOMhadd <- CondClean %>% 
 #   dplyr::arrange(StockUnit) %>%
@@ -806,7 +808,7 @@ EnvirVariables <- CondClean %>%
                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
 
 #Correlation matrix:
-EnVarCor <- cor(EnvirVariables, use = "complete.obs")
+#EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 #::write_csv(as.data.frame(EnVarCor), here::here(out.dir,"Corr_Env.csv"))
 
 #Environmental covariates for NRHA:
@@ -890,769 +892,769 @@ saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 #Run GAMS by species and StockUnit (not working):
 #SppStockUnit <- unique(CondClean$Species, CondClean$StockUnit)
  
-
-for(sp in spp) {
-  condSPP <- CondClean %>% dplyr::filter(Species==sp)
-  
-  #Rename columns:
-  condSPP <-  condSPP %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
-                             'LocalBottomTemp'= 'AvgBottomTempStrata','WinterTemp'= 'AvgTempWinter',
-                             'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
-                             'FallTemp'= 'AvgTempFall', 'CopepodSmall/Large'= 'CopepodSmallLarge',
-                             'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
-                             'StomachFullness'= 'AvgStomFullStratalag',  'StockBiomass'= 'TotalBiomass',
-                             'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
-                             'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
-                             'AverageLonStrata' = 'AvgLonStrata')
-
-  
-  #set up for 2020 data with only representative tows, using variables with <0.3 covariance:
- 
-  #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
-  #Same as above without shrinkage smoothers:
-#     form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
-# #   
-# #    #na.gam.replace works if not including stomach data:  
-# #    #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
-# #    #  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
-# #    #Without null space penalization:
-#     condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+# 
+# for(sp in spp) {
+#   condSPP <- CondClean %>% dplyr::filter(Species==sp)
+#   
+#   #Rename columns:
+#   condSPP <-  condSPP %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
+#                              'LocalBottomTemp'= 'AvgBottomTempStrata','WinterTemp'= 'AvgTempWinter',
+#                              'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
+#                              'FallTemp'= 'AvgTempFall', 'CopepodSmall/Large'= 'CopepodSmallLarge',
+#                              'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
+#                              'StomachFullness'= 'AvgStomFullStratalag',  'StockBiomass'= 'TotalBiomass',
+#                              'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
+#                              'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
+#                              'AverageLonStrata' = 'AvgLonStrata')
+# 
+#   
+#   #set up for 2020 data with only representative tows, using variables with <0.3 covariance:
+#  
+#   #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
+#   #Same as above without shrinkage smoothers:
+# #     form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
+# # #   
+# # #    #na.gam.replace works if not including stomach data:  
+# # #    #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
+# # #    #  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
+# # #    #Without null space penalization:
+# #     condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+# # #    
+# #     GAMstats <- summary(condGAM)
+# # #    #Trying to add in AIC but wasn't included in the output: 
+# # #    #AIC(condGAM)
+# # #    
+# #    SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
+# # #    
+# #     dl=data.frame(SumCondGAM)
+# # #    
+# # #    #Fproxy and Total Biomass removing variables correlated >0.3:
+# #    GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
+# #               'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# # #    
+# # #    #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
+# #     names(dl)=GAMnames
+# #     datalist[[sp]] <- dl
+# # #   
+# #    filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
+# # #    
+# #    jpeg(filename)
+# #    #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
+# #    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+# #    #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+# #    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
+# #    dev.off()
+# # 
+# #    sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
+# # 
+# #    mgcv::gam.check(condGAM)
+# #    mgcv.helper::vif.gam(condGAM)
+# # #       
+# #     sink()
+# # # 
+# #  }
+# # # 
+# #  AllSPP = do.call(rbind, datalist)
+# # # 
+# #  readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_2021NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
+# # # 
 # #    
-#     GAMstats <- summary(condGAM)
-# #    #Trying to add in AIC but wasn't included in the output: 
-# #    #AIC(condGAM)
-# #    
+#    
+#   
+#   #turn on for testing a single species outside of loop:
+#   #condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='Atlantic cod')
+#   
+#   #Full model
+#   #   form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
+#   #Single index
+# #  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
+#   # form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
+# #   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHWT, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
+#  #   form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
+# #   form.cond <- formula(AvgRelCondStrata ~ s(AvgLonStrata, AvgLatStrata, k=25), data=condSPP)
+#   
+#   # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullSpringStrata, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
+#  #  form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(TotalCopepodsMillions, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
+# #    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
+#     form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
+#   #form.cond <- formula(AvgRelCondStrata ~ s(Abundance, k=10), data=condSPP)
+#  # form.cond <- formula(AvgRelCondStrata ~ s(TotalBiomass, k=10), data=condSPP)
+#  # form.cond <- formula(AvgRelCondStrata ~ s(Fproxy, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(PropColumnColdPool, k=10), data=condSPP)
+#   
+#   
+#   
+#   #Eplains highest deviance:
+# #    form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   
+#   #Mechanisms model:
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #Not enough non-NAs:
+#   # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10) +s(Fproxy, k=10), data=condSPP)
+#   
+#   #Mechanism models selecting Expcatwt/Expcatnum, AvgStomFullStratalag/AvgStomFullSpringStrata, AvgTempSpring/AvgTempSummer/AvgTempFall, CopepodSmallLarge/ZooplBiomassAnomaly based on lowest p-values and if both zero, highest deviance explained:
+#   ##For Smooth dogfish:
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##cod full mechanisms (would have to remove AvgStomFullStratalag to run for cod Deviance Explained = 0.91):
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##cod (previous run Deviance Explained = 0.125, can't get to run for cod now!):
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##summer flounder and red hake:
+#   #   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ## Spiny dogfish, silver hake (had to reduce K to 3 since got Error in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots) : 
+#   #A term has fewer unique covariate combinations than specified maximum degrees of freedom):
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchwtStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(CopepodSmallLarge, k=3) +s(AvgTempSummer, k=3), data=condSPP)
+#   ##white hake:
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchwtStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(CopepodSmallLarge, k=3) +s(AvgTempFall, k=3), data=condSPP)
+#   ##Winter skate:  
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##Witch flounder and bluefish:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##Sea raven:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##Acadian redfish:
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##goosefish:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##Little skate:
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchnumStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(ZooplBiomassAnomaly, k=3) +s(AvgTempFall, k=3), data=condSPP)
+#   ##haddock:
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##American plaice, black sea bass
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##winter flounder:
+#   #     form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##ocean pout:
+#   ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##Spotted hake and weakfish:
+#   ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##Thorny skate:
+#   ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatcwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##Butterfish:
+#   ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##Atlantic herring:
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   ##pollock, yellowtail:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##mackerel:
+#   ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   
+#   
+#   #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
+#   #(winter skate above)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #(Witch flounder and bluefish above):
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #(Sea raven above):
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##Acadian redfish:
+#   #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##summer flounder and red hake:
+#   #   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   ##For Smooth dogfish:
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##goosefish:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #Remove stomach fullness for herring:
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   #Remove stomach fullness for cod:
+#   #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #Remove stomach fullness for yellowtail:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #Remove stomach fullness for mackerel:
+#   #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   
+#   #With Fproxy and Total Biomass:
+#  # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   
+#   #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
+#  #Same as above without shrinkage smoothers:
+# #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
+#   
+#   
+#   #-----------------------------
+#   ####For weight at age coefficients instead of condition GAMs:
+#   #(winter skate above)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #(Witch flounder and bluefish above):
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #(Sea raven above):
+#   #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+#   #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   ##Acadian redfish:
+#   #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##summer flounder and red hake:
+#   #   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   ##For Smooth dogfish:
+#   #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
+#   ##goosefish:
+#   #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   
+#   #Remove stomach fullness for herring:
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
+#   #Remove stomach fullness for cod:
+#   #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #Remove stomach fullness for yellowtail:
+#   #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
+#   #Remove stomach fullness for mackerel:
+#   #   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
+#   
+#   
+#   #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
+#   #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
+#   
+#   #na.gam.replace works if not including stomach data:  
+#   #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
+# #  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
+#  #Without null space penalization:
+#    condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
+#     
+#   #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
+#   #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
+#   #                                              "LON, LAT" =~1+LON,LAT +s(LON,LAT),
+#   #                                              "YEAR" =~1+YEAR))
+#   
+#    GAMstats <- summary(condGAM)
+#   #  #Trying to add in AIC but wasn't included in the output: 
+#   # #AIC(condGAM)
+#   # 
 #    SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
-# #    
-#     dl=data.frame(SumCondGAM)
-# #    
-# #    #Fproxy and Total Biomass removing variables correlated >0.3:
-#    GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
-#               'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-# #    
-# #    #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
-#     names(dl)=GAMnames
-#     datalist[[sp]] <- dl
-# #   
-#    filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
-# #    
+#   # 
+#    dl=data.frame(SumCondGAM)
+#   #Full model output:
+#   #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #Full Model with reasonable mechanisms relating to condition changes:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #Not enough non-NAs:
+#   # GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'Total Biomass', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #For Smooth dogfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##cod (have to remove AvgStomFullStratalag to run for cod):
+# #  GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##summer flounder and red hake:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ## Spiny dogfish, silver hake:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##white hake:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Winter skate:  
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Witch flounder and bluefish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Sea raven:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Acadian redfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##fourspot, windowpane:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##goosefish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Little skate:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##haddock:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##American plaice, black sea bass
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##winter flounder:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##ocean pout:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Spotted hake and weakfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Thorny skate:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Butterfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Atlantic herring:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##pollock, yellowtail:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##mackerel:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
+#   #(winter skate above)
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #(Witch flounder and bluefish above):
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #(Sea raven above):
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##Acadian redfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##summer flounder and red hake:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   ##For Smooth dogfish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   ##goosefish:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #Removed stomach fullness for herring:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #Remove stomach fullness for cod:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #Remove stomach fullness for yellowtail:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #Remove stomach fullness for mackerel:
+#   #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# 
+#     #With Fproxy and Total Biomass:
+#  # GAMnames=c('Species', 'Bottom Temp Strata', 'AvgExpcatchwtStrata', 'Total Biomass', 'Fproxy', 'CopepodSmallLarge', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'Bottom Temp Strata', 'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #Fproxy and Total Biomass removing variables correlated >0.3:
+#   # GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
+#   #            'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   
+#    #Model with highest deviance explained:
+#   #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   
+#   #single variable runs
+# # GAMnames=c('Species', 'AvgStomFullSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# # GAMnames=c('Species', 'AvgStomFullLag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   GAMnames=c('Species', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'AvgTempWinter', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#   #GAMnames=c('Species', 'ZooplBiomassAnomaly', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  #  GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #   GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #  GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#  #   GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #   GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #   GAMnames=c('Species', 'AvgLonStrata AvgLatStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+# #   GAMnames=c('Species', 'PropColumnColdPool', 'R sq.', 'Deviance Explained', 'GCV', 'n')
+#     
+#   #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
+#    names(dl)=GAMnames
+#    datalist[[sp]] <- dl
+#   # 
+#   #Use for testing plot with single species
+#   #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
+#   
+#   #Single variable output:
+#   #2021 icludes survdat data with corrected calibration coefficients and Wigley et al. L-W params:
+#  #    filename <- here::here(out.dir,paste0(sp,"_StomFullSpringStrata2020_AvgCondStrata.jpg"))
+#  #    filename <- here::here(out.dir,paste0(sp,"_StomFullStrataLag2020_AvgCondStrata.jpg"))
+#      filename <- here::here(out.dir,paste0(sp,"2021NoOutiers_YEAR_AvgCondStrata.jpg"))
+# #   filename <- here::here(out.dir,paste0(sp,"2021_LatLon_AvgCondStrata.jpg"))
+#    #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring_AvgCondStrata.jpg"))
+#   #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer_AvgCondStrata.jpg"))
+#   #   filename <- here::here(out.dir,paste0(sp,"_AvgTempFall_AvgCondStrata.jpg"))
+#   #   filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter_AvgCondStrata.jpg"))
+#   #    filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
+#   #    filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge_AvgCondStrata.jpg"))
+#   #   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods_AvgCondStrata.jpg"))
+#  #  filename <- here::here(out.dir,paste0(sp,"_2021_BottomTempStrata_AvgCondStrata.jpg"))
+#  #     filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
+# #  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
+# #  filename <- here::here(out.dir,paste0(sp,"_Fproxy_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_TotalBiomass_AvgCondStrata.jpg"))
+# #  filename <- here::here(out.dir,paste0(sp,"_TotalBiomass2020_AvgCondStrata.jpg"))
+# #  filename <- here::here(out.dir,paste0(sp,"_Fproxy2020_AvgCondStrata.jpg"))
+# #  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata2020_AvgCondStrata.jpg"))
+# #   filename <- here::here(out.dir,paste0(sp,"_BottomTempStrata2020_AvgCondStrata.jpg"))
+# #   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods2020_AvgCondStrata.jpg"))
+#   #     filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge2020_AvgCondStrata.jpg"))
+# #     filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
+#  #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring2020_AvgCondStrata.jpg"))
+#  #      filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer2020_AvgCondStrata.jpg"))
+#  #       filename <- here::here(out.dir,paste0(sp,"_AvgTempFall2020_AvgCondStrata.jpg"))
+#  #       filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter2020_AvgCondStrata.jpg"))
+#  #  filename <- here::here(out.dir,paste0(sp,"_PropColumnColdPool2020_AvgCondStrata.jpg"))
+#    
+#   
+#   #Full model output:
+#   # filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
+#   
+#   #Mechanism model:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_SummerTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #Not enough non-NAs:
+#   # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_Biom_Fproxy_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_ZooplBiomass_Fproxy_AvgCondStrata.jpg"))
+#   
+#   #For Smooth dogfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.jpg"))
+#   ##cod (have to remove AvgStomFullStratalag to run for cod):
+# #  filename <- here::here(out.dir,paste0(sp,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##summer flounder and red hake:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ## Spiny dogfish, silver hake:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringSummer_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##white hake:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##Winter skate:  
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   ##Witch flounder and bluefish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##Sea raven:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##Acadian redfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##fourspot, windowpane:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
+#   ##goosefish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.jpg"))
+#   ##Little skate:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.jpg"))
+#   ##haddock:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##American plaice, black sea bass
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##winter flounder:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##ocean pout:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
+#   ##Spotted hake and weakfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SummerTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##Thorny skate:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
+#   ##Butterfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.jpg"))
+#   ##Atlantic herring:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
+#   ##pollock, yellowtail:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##mackerel:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
+#   
+#   #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
+#   #(winter skate above)
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   
+#   #(Witch flounder and bluefish above):
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   #(Sea raven above):
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   
+#   ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
+#   
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##Acadian redfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   ##summer flounder and red hake:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
+#   
+#   ##For Smooth dogfish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   ##goosefish:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   
+#   #Remove stomach fullness for herring:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.jpg"))
+#   #Remove stomach fullness for cod:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
+#   #Remove stomach fullness for yellowtail:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
+#   #Remove stomach fullness for mackerel:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
+#   
+#   #With Fproxy and Total Biomass:      
+#  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.jpg"))
+#  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempSpring_AvgCondStrata.jpg"))
+#   
+#   #Fproxy and Total Biomass removing variables correlated >0.3:
+#   # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
+#   
+#   #-----------------------------
+#   ####For weight at age coefficients instead of condition GAMs:
+#   #Remove stomach fullness for mackerel:
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
+#   #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
+#   
+#   
 #    jpeg(filename)
-#    #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
+#   # #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
 #    par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-#    #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
+#   # #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
 #    plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
 #    dev.off()
+#   
+#   
+#   #  plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
+#   
+#   
+#   #gam.check (run model checks including checking smoothing basis dimensions)
+#   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
+#   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
+#   #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+#   #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
+#   #sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
+#   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods_AvgCondStrata.txt")))
+#   #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021LocalAbundance_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalBiomass2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Fproxy2020_AvgCondStrata.txt")))
+#   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_BottomTempStrata2020_AvgCondStrata.txt")))
+#   #sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_CopepodSmallLarge2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_ZooplanktonAnomaly2020_AvgCondStrata.txt")))
+#   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_SpringTempAnom2020_AvgCondStrata.txt")))
+#  #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_SummerTempAnom2020_AvgCondStrata.txt")))
+#   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_FallTempAnom2020_AvgCondStrata.txt")))
+#   # sink(here::here(out.dir,paste0(sp,"_GAMcheck_WinterTempAnom2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_AvgStomFullStaraLag2020_AvgCondStrata.txt")))
+# # sink(here::here(out.dir,paste0(sp,"_GAMcheck_AvgStomFullStaraSpring2020_AvgCondStrata.txt")))
+# #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_PropColumnColdPool2021_AvgCondStrata.txt")))
+#    
+#         
+#    sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021YEAR_AvgCondStrata.txt")))
+#  #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021LatLonStrata_AvgCondStrata.txt")))
+#  #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_BottomTempStrata2021_AvgCondStrata.txt")))
+#    
+#   #With Fproxy and Total Biomass:
+# #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
+# #  sink(here::here(out.dir,paste0(sp, "_GAMcheck_TotalBiomass_Fproxy_CopepodSmallLarge_SpringTemp2020_AvgCondStrata.txt")))
 # 
-#    sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
-# 
-#    mgcv::gam.check(condGAM)
-#    mgcv.helper::vif.gam(condGAM)
-# #       
-#     sink()
-# # 
+# #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
+# #   
+# #   
+#      mgcv::gam.check(condGAM)
+# #   
+#    sink()
 #  }
 # # 
 #  AllSPP = do.call(rbind, datalist)
-# # 
-#  readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_2021NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
-# # 
-#    
-   
-  
-  #turn on for testing a single species outside of loop:
-  #condSPP <- CondClean %>% dplyr::filter(Species=='Atlantic cod') %>% mutate(sp='Atlantic cod')
-  
-  #Full model
-  #   form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10) +s(EXPCATCHWT, k=10) +s(LON, LAT, k=25) +s(AvgStomFullLag, k=10) +s(CopepodSmallLarge) +s(AvgTempSpring) +s(YEAR), data=condSPP)
-  #Single index
-#  form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
-  # form.cond <- formula(AvgRelCondStrata ~ s(BOTTEMP, k=10), data=condSPP)
-#   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHWT, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchwtStrata, k=10), data=condSPP)
- #   form.cond <- formula(AvgRelCondStrata ~ s(AvgExpcatchnumStrata, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(EXPCATCHNUM, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(LON, LAT, k=25), data=condSPP)
-#   form.cond <- formula(AvgRelCondStrata ~ s(AvgLonStrata, AvgLatStrata, k=25), data=condSPP)
-  
-  # form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStrata, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullStratalag, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgStomFullSpringStrata, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(CopepodSmallLarge, k=10), data=condSPP)
- #  form.cond <- formula(AvgRelCondStrata ~ s(ZooplBiomassAnomaly, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(TotalCopepodsMillions, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSpring, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempSummer, k=10), data=condSPP)
-#    form.cond <- formula(AvgRelCondStrata ~ s(AvgTempFall, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgTempWinter, k=10), data=condSPP)
-    form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10), data=condSPP)
-  #form.cond <- formula(AvgRelCondStrata ~ s(Abundance, k=10), data=condSPP)
- # form.cond <- formula(AvgRelCondStrata ~ s(TotalBiomass, k=10), data=condSPP)
- # form.cond <- formula(AvgRelCondStrata ~ s(Fproxy, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(PropColumnColdPool, k=10), data=condSPP)
-  
-  
-  
-  #Eplains highest deviance:
-#    form.cond <- formula(AvgRelCondStrata ~ s(YEAR, k=10) +s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgLonStrata, AvgLatStrata, k=25) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  
-  #Mechanisms model:
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #Not enough non-NAs:
-  # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10) +s(Fproxy, k=10), data=condSPP)
-  
-  #Mechanism models selecting Expcatwt/Expcatnum, AvgStomFullStratalag/AvgStomFullSpringStrata, AvgTempSpring/AvgTempSummer/AvgTempFall, CopepodSmallLarge/ZooplBiomassAnomaly based on lowest p-values and if both zero, highest deviance explained:
-  ##For Smooth dogfish:
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##cod full mechanisms (would have to remove AvgStomFullStratalag to run for cod Deviance Explained = 0.91):
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##cod (previous run Deviance Explained = 0.125, can't get to run for cod now!):
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##summer flounder and red hake:
-  #   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ## Spiny dogfish, silver hake (had to reduce K to 3 since got Error in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots) : 
-  #A term has fewer unique covariate combinations than specified maximum degrees of freedom):
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchwtStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(CopepodSmallLarge, k=3) +s(AvgTempSummer, k=3), data=condSPP)
-  ##white hake:
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchwtStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(CopepodSmallLarge, k=3) +s(AvgTempFall, k=3), data=condSPP)
-  ##Winter skate:  
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##Witch flounder and bluefish:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##Sea raven:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##Acadian redfish:
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##goosefish:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##Little skate:
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=3) +s(AvgExpcatchnumStrata, k=3) +s(AvgStomFullSpringStrata, k=3) +s(ZooplBiomassAnomaly, k=3) +s(AvgTempFall, k=3), data=condSPP)
-  ##haddock:
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##American plaice, black sea bass
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##winter flounder:
-  #     form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##ocean pout:
-  ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##Spotted hake and weakfish:
-  ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##Thorny skate:
-  ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatcwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##Butterfish:
-  ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##Atlantic herring:
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  ##pollock, yellowtail:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##mackerel:
-  ##    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullSpringStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  
-  
-  #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
-  #(winter skate above)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #(Witch flounder and bluefish above):
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #(Sea raven above):
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##Acadian redfish:
-  #      form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##summer flounder and red hake:
-  #   form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  ##For Smooth dogfish:
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##goosefish:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #Remove stomach fullness for herring:
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  #Remove stomach fullness for cod:
-  #  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #Remove stomach fullness for yellowtail:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #Remove stomach fullness for mackerel:
-  #    form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  
-  #With Fproxy and Total Biomass:
- # form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  
-  #Fproxy and Total Biomass removing variables correlated >0.3 and adding shrinkage smoothers (bs="ts"):
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, bs="ts", k=10) +s(AvgTempWinter, bs="ts", k=10) +s(AvgExpcatchwtStrata, bs="ts", k=10) +s(AvgExpcatchnumStrata, bs="ts", k=10) +s(TotalBiomass, bs="ts", k=10) +s(Fproxy, bs="ts", k=10) +s(CopepodSmallLarge, bs="ts", k=10), data=condSPP)
- #Same as above without shrinkage smoothers:
-#  form.cond <- formula(AvgRelCondStrata ~ s(AvgBottomTempStrata, k=10) +s(AvgTempWinter, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(TotalBiomass, k=10) +s(Fproxy, k=10) +s(CopepodSmallLarge, k=10), data=condSPP)
-  
-  
-  #-----------------------------
-  ####For weight at age coefficients instead of condition GAMs:
-  #(winter skate above)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #(Witch flounder and bluefish above):
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #(Sea raven above):
-  #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-  #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(ZooplBiomassAnomaly, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  ##Acadian redfish:
-  #      form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##summer flounder and red hake:
-  #   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  ##For Smooth dogfish:
-  #form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempSummer, k=10), data=condSPP)
-  ##goosefish:
-  #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(AvgStomFullStratalag, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  
-  #Remove stomach fullness for herring:
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=10) +s(AvgTempFall, k=10), data=condSPP)
-  #Remove stomach fullness for cod:
-  #  form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchnumStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #Remove stomach fullness for yellowtail:
-  #    form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(CopepodSmallLarge, k=10) +s(AvgTempSpring, k=10), data=condSPP)
-  #Remove stomach fullness for mackerel:
-  #   form.cond <- formula(WeightAAcoefficient ~ s(AvgBottomTempStrata, k=10) +s(AvgExpcatchwtStrata, k=10) +s(TotalCopepodsMillions, k=15) +s(AvgTempSpring, k=15), data=condSPP)
-  
-  
-  #Can add factor variable as a by variable: e.g. +s(LON, LAT, k=25, by = EPU)
-  #EXPCATCHWT had slightly more significance than EXPCATCHNUM for more species
-  
-  #na.gam.replace works if not including stomach data:  
-  #Including null space penalization (method="REML", select=T), which selects out variables with poor diviance explained:
-#  condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, method="REML", select=T, na.action = na.gam.replace)
- #Without null space penalization:
-   condGAM <- mgcv::gam(form.cond, family= gaussian, data=condSPP, na.action = na.gam.replace)
-    
-  #    step.cond <- step.Gam(condGAM, scope= list("BOTTEMP" =~1+BOTTEMP+s(BOTTEMP),
-  #                                              "EXPCATCHNUM" =~1+EXPCATCHNUM+s(EXPCATCHNUM),
-  #                                              "LON, LAT" =~1+LON,LAT +s(LON,LAT),
-  #                                              "YEAR" =~1+YEAR))
-  
-   GAMstats <- summary(condGAM)
-  #  #Trying to add in AIC but wasn't included in the output: 
-  # #AIC(condGAM)
-  # 
-   SumCondGAM <- t(c(sp, round(GAMstats$s.pv,3),  round(GAMstats$r.sq,3), round(GAMstats$dev.expl,3),  round(GAMstats$sp.criterion,3), GAMstats$n))
-  # 
-   dl=data.frame(SumCondGAM)
-  #Full model output:
-  #GAMnames=c('Species', 'Bottom Temp', 'Local Biomass', 'LON LAT', 'AvgStomFullLag', 'CopepodSL', 'AvgTempSpring', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #Full Model with reasonable mechanisms relating to condition changes:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #Not enough non-NAs:
-  # GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'AvgStomFullLag', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'Total Biomass', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass strata', 'Zooplanton Biomass Anomaly', 'AvgTempSpring', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #For Smooth dogfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##cod (have to remove AvgStomFullStratalag to run for cod):
-#  GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##summer flounder and red hake:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ## Spiny dogfish, silver hake:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##white hake:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Winter skate:  
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Witch flounder and bluefish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Sea raven:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Acadian redfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##fourspot, windowpane:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##goosefish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Little skate:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##haddock:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##American plaice, black sea bass
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##winter flounder:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##ocean pout:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Spotted hake and weakfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Thorny skate:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Butterfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Atlantic herring:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##pollock, yellowtail:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##mackerel:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullSpring', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
-  #(winter skate above)
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #(Witch flounder and bluefish above):
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #(Sea raven above):
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Zooplankton Biomass Anomaly', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##Acadian redfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##summer flounder and red hake:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Copepod Small/Large Ratio', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  ##For Smooth dogfish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  ##goosefish:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'AvgStomFullStrataLag', 'Total Copepods Millions', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #Removed stomach fullness for herring:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #Remove stomach fullness for cod:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Abundance Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #Remove stomach fullness for yellowtail:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #Remove stomach fullness for mackerel:
-  #GAMnames=c('Species', 'Bottom Temp Strata', 'Local Biomass Strata', 'Total Copepods Millions', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-
-    #With Fproxy and Total Biomass:
- # GAMnames=c('Species', 'Bottom Temp Strata', 'AvgExpcatchwtStrata', 'Total Biomass', 'Fproxy', 'CopepodSmallLarge', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'Bottom Temp Strata', 'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #Fproxy and Total Biomass removing variables correlated >0.3:
-  # GAMnames=c('Species', 'Bottom Temp Strata', 'Average Winter Bottom Temp', 'Local Biomass', 'Local Abundance',
-  #            'Total Biomass', 'Fproxy', 'Copepod Small/Large Ratio', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  
-   #Model with highest deviance explained:
-  #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'YEAR', 'Bottom Temp Strata', 'Local Biomass Strata', 'LON LAT strata', 'AvgStomFullLag', 'Zooplankton Biomass Anomaly', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  
-  #single variable runs
-# GAMnames=c('Species', 'AvgStomFullSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-# GAMnames=c('Species', 'AvgStomFullLag', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  GAMnames=c('Species', 'YEAR', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'AvgTempSpring', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'AvgTempSummer', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'AvgTempFall', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'AvgTempWinter', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-  #GAMnames=c('Species', 'ZooplBiomassAnomaly', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'CopepodSmallLarge', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'TotalCopepodsMillions', 'R sq.', 'Deviance Explained', 'GCV', 'n')
- #  GAMnames=c('Species', 'Bottom Temp Strata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#   GAMnames=c('Species', 'AvgExpcatchwtStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#  GAMnames=c('Species', 'AvgExpcatchnumStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
- #   GAMnames=c('Species', 'Fproxy', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#   GAMnames=c('Species', 'Total Biomass', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#   GAMnames=c('Species', 'AvgLonStrata AvgLatStrata', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-#   GAMnames=c('Species', 'PropColumnColdPool', 'R sq.', 'Deviance Explained', 'GCV', 'n')
-    
-  #error if you try to add YEAR to GAMnames because GAM doesn't include YEAR as a variable.
-   names(dl)=GAMnames
-   datalist[[sp]] <- dl
-  # 
-  #Use for testing plot with single species
-  #filename <-here::here(out.dir, paste0('GoosefishYEAR_condition.jpg'))
-  
-  #Single variable output:
-  #2021 icludes survdat data with corrected calibration coefficients and Wigley et al. L-W params:
- #    filename <- here::here(out.dir,paste0(sp,"_StomFullSpringStrata2020_AvgCondStrata.jpg"))
- #    filename <- here::here(out.dir,paste0(sp,"_StomFullStrataLag2020_AvgCondStrata.jpg"))
-     filename <- here::here(out.dir,paste0(sp,"2021NoOutiers_YEAR_AvgCondStrata.jpg"))
-#   filename <- here::here(out.dir,paste0(sp,"2021_LatLon_AvgCondStrata.jpg"))
-   #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring_AvgCondStrata.jpg"))
-  #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer_AvgCondStrata.jpg"))
-  #   filename <- here::here(out.dir,paste0(sp,"_AvgTempFall_AvgCondStrata.jpg"))
-  #   filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter_AvgCondStrata.jpg"))
-  #    filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
-  #    filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge_AvgCondStrata.jpg"))
-  #   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods_AvgCondStrata.jpg"))
- #  filename <- here::here(out.dir,paste0(sp,"_2021_BottomTempStrata_AvgCondStrata.jpg"))
- #     filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata_AvgCondStrata.jpg"))
-#  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchnumStrata_AvgCondStrata.jpg"))
-#  filename <- here::here(out.dir,paste0(sp,"_Fproxy_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_TotalBiomass_AvgCondStrata.jpg"))
-#  filename <- here::here(out.dir,paste0(sp,"_TotalBiomass2020_AvgCondStrata.jpg"))
-#  filename <- here::here(out.dir,paste0(sp,"_Fproxy2020_AvgCondStrata.jpg"))
-#  filename <- here::here(out.dir,paste0(sp,"_AvgExpcatchwtStrata2020_AvgCondStrata.jpg"))
-#   filename <- here::here(out.dir,paste0(sp,"_BottomTempStrata2020_AvgCondStrata.jpg"))
-#   filename <- here::here(out.dir,paste0(sp,"_TotalCopepods2020_AvgCondStrata.jpg"))
-  #     filename <- here::here(out.dir,paste0(sp,"_CopepodSmallLarge2020_AvgCondStrata.jpg"))
-#     filename <- here::here(out.dir,paste0(sp,"_ZooplBiomassAnomaly_AvgCondStrata.jpg"))
- #   filename <- here::here(out.dir,paste0(sp,"_AvgTempSpring2020_AvgCondStrata.jpg"))
- #      filename <- here::here(out.dir,paste0(sp,"_AvgTempSummer2020_AvgCondStrata.jpg"))
- #       filename <- here::here(out.dir,paste0(sp,"_AvgTempFall2020_AvgCondStrata.jpg"))
- #       filename <- here::here(out.dir,paste0(sp,"_AvgTempWinter2020_AvgCondStrata.jpg"))
- #  filename <- here::here(out.dir,paste0(sp,"_PropColumnColdPool2020_AvgCondStrata.jpg"))
-   
-  
-  #Full model output:
-  # filename <- here::here(out.dir,paste0(sp,"_HighesDevExplYr_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
-  
-  #Mechanism model:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_SummerTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.jpg"))
-  #Not enough non-NAs:
-  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_StomFullStrata_ZooplBiomass_Biom_Fproxy_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_ZooplBiomass_Fproxy_AvgCondStrata.jpg"))
-  
-  #For Smooth dogfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.jpg"))
-  ##cod (have to remove AvgStomFullStratalag to run for cod):
-#  filename <- here::here(out.dir,paste0(sp,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##summer flounder and red hake:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ## Spiny dogfish, silver hake:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringSummer_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##white hake:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##Winter skate:  
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  ##Witch flounder and bluefish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##Sea raven:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##Acadian redfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##fourspot, windowpane:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
-  ##goosefish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.jpg"))
-  ##Little skate:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.jpg"))
-  ##haddock:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##American plaice, black sea bass
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##winter flounder:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##ocean pout:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
-  ##Spotted hake and weakfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SummerTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##Thorny skate:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
-  ##Butterfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.jpg"))
-  ##Atlantic herring:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
-  ##pollock, yellowtail:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##mackerel:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_TotalCopepods_AvgCondStrata.jpg"))
-  
-  #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
-  #(winter skate above)
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  
-  #(Witch flounder and bluefish above):
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  #(Sea raven above):
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  
-  ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.jpg"))
-  
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##Acadian redfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  ##summer flounder and red hake:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.jpg"))
-  
-  ##For Smooth dogfish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  ##goosefish:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  
-  #Remove stomach fullness for herring:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.jpg"))
-  #Remove stomach fullness for cod:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
-  #Remove stomach fullness for yellowtail:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.jpg"))
-  #Remove stomach fullness for mackerel:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
-  
-  #With Fproxy and Total Biomass:      
- # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.jpg"))
- # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempSpring_AvgCondStrata.jpg"))
-  
-  #Fproxy and Total Biomass removing variables correlated >0.3:
-  # filename <- here::here(out.dir,paste0(sp,"_Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBiomass_LocalAbundance_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.jpg"))
-  
-  #-----------------------------
-  ####For weight at age coefficients instead of condition GAMs:
-  #Remove stomach fullness for mackerel:
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.jpg"))
-  #filename <- here::here(out.dir,paste0(sp,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.jpg"))
-  
-  
-   jpeg(filename)
-  # #Getting error that margins too large when running gam.check single species with WAA, set mar =c(1,1,,):
-   par(mfrow=c(2,2), mar=c(2.15,2.15,0.15,0.25), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-  # #   par(mfrow=c(2,2), mar=c(1,1,1,1), mgp=c(0.25,1,0), cex=0.75, tck=-0.015)
-   plot(condGAM, pages=1, residuals=TRUE, rug=T) #show partial residuals
-   dev.off()
-  
-  
-  #  plot(condGAM, pages=1, seWithMean=TRUE) #'with intercept' CIs
-  
-  
-  #gam.check (run model checks including checking smoothing basis dimensions)
-  #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-  #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbundance_FallTemp_ZooplanktonBiom_AvgCondStrata.txt")))
-  #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
-  #        sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.txt")))
-  #sink(here::here(out.dir,paste0(sp,"_GAMcheck_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.txt")))
-  #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods_AvgCondStrata.txt")))
-  #   sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021LocalAbundance_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalBiomass2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_Fproxy2020_AvgCondStrata.txt")))
-  # sink(here::here(out.dir,paste0(sp,"_GAMcheck_LocalBiomass2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_BottomTempStrata2020_AvgCondStrata.txt")))
-  #sink(here::here(out.dir,paste0(sp,"_GAMcheck_TotalCopepods2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_CopepodSmallLarge2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_ZooplanktonAnomaly2020_AvgCondStrata.txt")))
-  # sink(here::here(out.dir,paste0(sp,"_GAMcheck_SpringTempAnom2020_AvgCondStrata.txt")))
- #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_SummerTempAnom2020_AvgCondStrata.txt")))
-  # sink(here::here(out.dir,paste0(sp,"_GAMcheck_FallTempAnom2020_AvgCondStrata.txt")))
-  # sink(here::here(out.dir,paste0(sp,"_GAMcheck_WinterTempAnom2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp,"_GAMcheck_AvgStomFullStaraLag2020_AvgCondStrata.txt")))
-# sink(here::here(out.dir,paste0(sp,"_GAMcheck_AvgStomFullStaraSpring2020_AvgCondStrata.txt")))
-#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_PropColumnColdPool2021_AvgCondStrata.txt")))
-   
-        
-   sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021YEAR_AvgCondStrata.txt")))
- #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_2021LatLonStrata_AvgCondStrata.txt")))
- #  sink(here::here(out.dir,paste0(sp,"_GAMcheck_BottomTempStrata2021_AvgCondStrata.txt")))
-   
-  #With Fproxy and Total Biomass:
-#  sink(here::here(out.dir,paste0(sp, "_GAMcheck_LocalBiomass_TotalBiomass_Fproxy_CopepodSmallLarge_AvgTempFall2020_AvgCondStrata.txt")))
-#  sink(here::here(out.dir,paste0(sp, "_GAMcheck_TotalBiomass_Fproxy_CopepodSmallLarge_SpringTemp2020_AvgCondStrata.txt")))
-
-#   sink(here::here(out.dir,paste0(sp,"_GAMcheck_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmallLarge_AvgCondStrata.txt")))
-#   
-#   
-     mgcv::gam.check(condGAM)
-#   
-   sink()
- }
 # 
- AllSPP = do.call(rbind, datalist)
-
-#Full model output:
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
-
-#Mechanisms model:
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_SummerTemp_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
-#Not enough non-NAs:
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_Biom_Fproxy_ZooplBiomassAnomaly.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_NoStom_AvgRelCondStrata_Fproxy_ZooplBiomassAnomaly.csv"))   
-
-#For Smooth dogfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.csv"))
-##cod (have to remove AvgStomFullStratalag to run for cod):
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
-##summer flounder and red hake:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
-## Spiny dogfish, silver hake:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringSummer_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##white hake:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##Winter skate:  
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-##Witch flounder and bluefish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
-##Sea raven:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
-##Acadian redfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
-##fourspot, windowpane:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
-##goosefish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.csv"))
-##Little skate:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.csv"))
-##haddock:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##American plaice, black sea bass
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##winter flounder:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##ocean pout:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
-##Spotted hake and weakfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SummerTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##Thorny skate:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
-##Butterfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.csv"))
-##Atlantic herring:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
-##pollock, yellowtail:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
-##mackerel:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
-
-#####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
-#(winter skate above)
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-
-#(Witch flounder and bluefish above):
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-#(Sea raven above):
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-
-##fourspot, windowpane (removed stomach fullness lagged for windowpane):
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
-
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-##Acadian redfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-##summer flounder and red hake:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
-
-##For Smooth dogfish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-##goosefish:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-
-#Remove stomach fullness for herring:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.csv"))
-#Remove stomach fullness for cod:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
-#Remove stomach fullness for yellowtail:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
-#Remove stomach fullness for mackerel:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
-
-#With Fproxy and Total Biomass:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.csv"))  
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_TotalBiomass_Fproxy_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
-
-#Fproxy and Total Biomass removing variables correlated >0.3:
-# readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
-
-
-#-----------------------------
-####For weight at age coefficients instead of condition GAMs:
-#Remove stomach fullness for mackerel:
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
-
-
-#Single variable output:
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullSpringStrata2020.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrataLag.csv"))   
-readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021Year_AvgCondStrata.csv"))  
- 
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021LatLonStrata_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring_AvgCondStrata.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer_AvgCondStrata.csv"))     
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall_AvgCondStrata.csv"))       
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter_AvgCondStrata.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly_AvgCondStrata.csv"))   
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))  
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021BottomTempStrata_AvgCondStrata.csv")) 
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata.csv"))
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_PropColumnColdPool_AvgCondStrata.csv"))
- 
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata_2020.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata_2020.csv"))
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata_2020.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata2020_AvgCondStrata.csv"))  
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods2020_AvgCondStrata.csv"))    
-# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly2020_AvgCondStrata.csv")) 
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring2020_AvgCondStrata.csv"))   
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall2020_AvgCondStrata.csv"))       
-#readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter2020_AvgCondStrata.csv"))   
+# #Full model output:
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_HighestDevExplYr_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+# 
+# #Mechanisms model:
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_SummerTemp_AvgRelCondStrata_ZooplBiomassAnomaly.csv"))   
+# #Not enough non-NAs:
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_AvgRelCondStrata_Biom_Fproxy_ZooplBiomassAnomaly.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Mechanisms_NoStom_AvgRelCondStrata_Fproxy_ZooplBiomassAnomaly.csv"))   
+# 
+# #For Smooth dogfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.csv"))
+# ##cod (have to remove AvgStomFullStratalag to run for cod):
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms2020_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
+# ##summer flounder and red hake:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
+# ## Spiny dogfish, silver hake:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringSummer_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##white hake:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##Winter skate:  
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# ##Witch flounder and bluefish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
+# ##Sea raven:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
+# ##Acadian redfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SummerTemp_StomFullStratalag_CopepodSmLrg_AvgCondStrata.csv"))
+# ##fourspot, windowpane:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
+# ##goosefish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullStratalag_TotalCopepods_AvgCondStrata.csv"))
+# ##Little skate:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.csv"))
+# ##haddock:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##American plaice, black sea bass
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##winter flounder:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##ocean pout:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
+# ##Spotted hake and weakfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SummerTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##Thorny skate:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
+# ##Butterfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_StomFullSpring_ZooplBiomass_AvgCondStrata.csv"))
+# ##Atlantic herring:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
+# ##pollock, yellowtail:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_CopepodSmLrg_AvgCondStrata.csv"))
+# ##mackerel:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullSpring_TotalCopepods_AvgCondStrata.csv"))
+# 
+# #####Ran into sample size issues with stomach fullness from spring. Instead running iterations of other combinations:
+# #(winter skate above)
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# 
+# #(Witch flounder and bluefish above):
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# #(Sea raven above):
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# 
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# 
+# ##fourspot, windowpane (removed stomach fullness lagged for windowpane):
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_ZooplBiomass_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_ZooplBiomass_AvgCondStrata.csv"))
+# 
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# ##Acadian redfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# ##summer flounder and red hake:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_CopepodSmLrg_AvgCondStrata.csv"))
+# 
+# ##For Smooth dogfish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SpringTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# ##goosefish:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbund_FallTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# 
+# #Remove stomach fullness for herring:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_FallTemp_TotalCopepods_AvgCondStrata.csv"))
+# #Remove stomach fullness for cod:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalAbundance_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
+# #Remove stomach fullness for yellowtail:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
+# #Remove stomach fullness for mackerel:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
+# 
+# #With Fproxy and Total Biomass:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_LocalBiomass_TotalBiomass_Fproxy_CopepodSmLrg_AvgTempFall_AvgCondStrata.csv"))  
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_TotalBiomass_Fproxy_SpringTemp_CopepodSmLrg_AvgCondStrata.csv"))
+# 
+# #Fproxy and Total Biomass removing variables correlated >0.3:
+# # readr::write_csv(AllSPP, here::here(out.dir,"Mechanisms_NoPenal_NAreplace_LocalTemp_WinterTemp_LocalBio_LocalAbund_TotalBiomass_Fproxy_CopepodSmLrg_AvgCondStrata.csv"))
+# 
+# 
+# #-----------------------------
+# ####For weight at age coefficients instead of condition GAMs:
+# #Remove stomach fullness for mackerel:
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalBiomass_SpringTemp_TotalCopepods_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"_Mechanisms_WAAcoeff_LocalAbund_SummerTemp_StomFullStrataLag_TotalCopepods_AvgCondStrata.csv"))
+# 
+# 
+# #Single variable output:
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullSpringStrata2020.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_StomFullStrataLag.csv"))   
+# readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021Year_AvgCondStrata.csv"))  
+#  
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021LatLonStrata_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring_AvgCondStrata.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer_AvgCondStrata.csv"))     
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall_AvgCondStrata.csv"))       
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter_AvgCondStrata.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly_AvgCondStrata.csv"))   
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))  
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods_AvgCondStrata.csv"))  
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_2021BottomTempStrata_AvgCondStrata.csv")) 
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata.csv"))
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_PropColumnColdPool_AvgCondStrata.csv"))
+#  
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalBiomass_AvgCondStrata_2020.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_Fproxy_AvgCondStrata_2020.csv"))
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchwtStrata_AvgCondStrata.csv")) 
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgExpcatchnumStrata_AvgCondStrata_2020.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_BottomTempStrata2020_AvgCondStrata.csv"))  
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_TotalCopepods2020_AvgCondStrata.csv"))    
+# # readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_CopepodSmallLarge_AvgCondStrata.csv"))
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_ZooplBiomassAnomaly2020_AvgCondStrata.csv")) 
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSpring2020_AvgCondStrata.csv"))   
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall2020_AvgCondStrata.csv"))       
+# #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter2020_AvgCondStrata.csv"))   
