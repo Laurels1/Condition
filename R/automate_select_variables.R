@@ -65,7 +65,7 @@ df <- data.frame(variables = c("localDensity","localDensity",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod","copepod","copepod","copepod",
-                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource"
+                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource"
                                ),
                  level = c(localDensity,
                            populationDensity,
