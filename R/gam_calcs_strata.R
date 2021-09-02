@@ -166,7 +166,7 @@ ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData_BTSMe
 
 #****have to separate out into 4 seasons to merge with condition data
 ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%
-  dplyr::filter(LgCalanoida =! 0) %>%
+  dplyr::filter(LgCalanoida != 0) %>%
   dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
   dplyr::mutate(TotalCopepodStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
   dplyr::mutate(ZooplAbundStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
