@@ -17,7 +17,7 @@ library(magrittr)
 
 #na.action = "na.omit" # "na.gam.replace" % mean of column
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
-k <- 10
+k <- 15
 latlonk <- 25
 makePlots <- TRUE
 
@@ -65,7 +65,7 @@ df <- data.frame(variables = c("localDensity","localDensity",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod","copepod","copepod","copepod",
-                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource"
+                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource"
                                ),
                  level = c(localDensity,
                            populationDensity,
@@ -75,8 +75,12 @@ df <- data.frame(variables = c("localDensity","localDensity",
                            copepod,
                            resource),
                  num = c(2,2,
-                         1,1,
-                         2,2,4,4,4,4,4,4,4,4,11,11,11,11,11,11,11,11,11,11,11))
+                         1,
+                         1,
+                         2,2,
+                         4,4,4,4,
+                         4,4,4,4,
+                         11,11,11,11,11,11,11,11,11,11,11))
 
 # create full matrix of models. Note: leave out lat and lo. they will be added to all models jointly
 modelScenarios <- expand.grid(
@@ -101,7 +105,7 @@ speciesList <- cond %>%
 
 mainList <- list()
 finalModels <- list()
-for (aspecies in speciesList) {  
+for (aspecies in speciesList[[1]]) {  
   print(aspecies)
   # pre allocate variables
   spcriterion <- NULL
@@ -119,8 +123,9 @@ for (aspecies in speciesList) {
 
 # Loop over models -----------------------------------------------------
 
-  for (iloop in 1:nrow(modelScenarios)) {
-    message(paste0("model # ",iloop, " for ",aspecies))
+  #for (iloop in 1:nrow(modelScenarios)) {
+  for (iloop in c(95,113)) {
+   #   message(paste0("model # ",iloop, " for ",aspecies))
     # pull variable names for the model
     modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))
 
@@ -129,12 +134,13 @@ for (aspecies in speciesList) {
     modelSpecPlus <- automate_clean_model(modelSpecs,df,cleanedData$omittedVars)
 
     if (is.null(modelSpecPlus$modelSpecs)) { # if null then can not fit model
-      message("skip")
+      #message("skip")
       modelResults[[iloop]] <- NA
       varsUsed[[iloop]] <- NA
       next
     } else {
       modelSpecs <- modelSpecPlus$modelSpecs
+      message(iloop)
     }
 
     # pull the variable data

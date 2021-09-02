@@ -23,12 +23,12 @@ library(data.table)
 #in Nov. 2020 changed data pull to only include representative tows
 #turn off function while changing code
 #gam_calcs <- function(annualcond,out.dir="output") {
-
+gam_calcs_strata <- function(cond.epu=cond.epu,stom=stom,out.dir,data.dir,gis.dir) {
 #turn on output dir when not using funtion
-out.dir = "output"
-data.dir <- "data"
-
-gis.dir  <- "gis"
+# out.dir = "output"
+# data.dir <- "data"
+# 
+# gis.dir  <- "gis"
 
 #--------------------------------------------------------------
 #Set up data structure of condition data for GAMs:
@@ -891,7 +891,7 @@ saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
  spp <- unique(CondClean$Species)
  datalist = list()
 
-
+}
 ######End code before GAM analyses#####
 
 #Run GAMS by species and StockUnit (not working):
@@ -1663,3 +1663,5 @@ saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall2020_AvgCondStrata.csv"))       
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter2020_AvgCondStrata.csv"))   
+ 
+ 
