@@ -193,7 +193,7 @@ ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, ZooplAbundStrat
 
 ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
-ZoopData <- dplyr::left_join(CondGLORYS, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
+ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
 
 #Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
 # load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
