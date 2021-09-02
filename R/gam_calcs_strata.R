@@ -104,6 +104,7 @@ AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
 #---------------------------------------------------------------
 
 #Bringing in average temperature data
+#***Before reading EcoMon data, have to change all NaN values to NAs
 AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2020.csv"))
 AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2020.csv"))
 AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2020.csv"))
@@ -123,38 +124,41 @@ AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::mutate(YEAR=Year) %>%
 
 AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
 
+AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
+  dplyr::mutate_at(c("AvgTempWinter", "AvgTempSpring", "AvgTempSummer", "AvgTempFall"), as.numeric)
+
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #----------------------------------------------------------------------------------
 #Bring in GLORYS bottom temperature data by NEFSC survey strata (mismatch of some strata currently)
-GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
-
-GLORYSformat <- GLORYSdata %>% 
-  separate(date, c('Year2', 'MONTH', 'DAY'), sep='-')
-
-GLORYSseason <- GLORYSformat %>% group_by(Year2, STRATA) %>% 
-  dplyr::mutate(YEAR=as.numeric(Year2),
-                STRATUM = STRATA, 
-                #STRATUM is numeric from survdat pull:
-                #STRATUM = as.character(paste0('0',STRATA)), 
-                GLORYSwinter=ifelse(season==1,(weighted.mean), NA), GLORYSspring=ifelse(season==2,(weighted.mean), NA),
-                GLORYSsummer=ifelse(season==3,(weighted.mean), NA), GLORYSfall=ifelse(season==4,(weighted.mean), NA))
-
-GLORYS2 <- GLORYSseason %>% group_by(YEAR, STRATUM) %>% 
-  summarize(GLORYSwinter=mean(GLORYSwinter, na.rm=T), GLORYSspring=mean(GLORYSspring, na.rm=T),
-            GLORYSsummer=mean(GLORYSsummer, na.rm=T),GLORYSfall=mean(GLORYSfall, na.rm=T))
-
-CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYS2, by=c('YEAR', 'STRATUM'))
-
-#See NAs for GLORYS merge:
-#NAglorys <- CondGLORYS %>% filter(is.na(GLORYSwinter))
-
-#Trying to determine why 27% of Condition data doesn't have corresponding GLORYS data:
-#Occurs across all years and strata
-GLORYSna <- CondGLORYS %>% filter(is.na(GLORYSwinter)) 
-GLORYSna_not <- CondGLORYS %>% filter(!is.na(GLORYSwinter)) 
-GLORYSnaStratum <- GLORYSna_not[!duplicated(GLORYSna_not[,'STRATUM']),]
-GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
+# GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
+# 
+# GLORYSformat <- GLORYSdata %>% 
+#   separate(date, c('Year2', 'MONTH', 'DAY'), sep='-')
+# 
+# GLORYSseason <- GLORYSformat %>% group_by(Year2, STRATA) %>% 
+#   dplyr::mutate(YEAR=as.numeric(Year2),
+#                 STRATUM = STRATA, 
+#                 #STRATUM is numeric from survdat pull:
+#                 #STRATUM = as.character(paste0('0',STRATA)), 
+#                 GLORYSwinter=ifelse(season==1,(weighted.mean), NA), GLORYSspring=ifelse(season==2,(weighted.mean), NA),
+#                 GLORYSsummer=ifelse(season==3,(weighted.mean), NA), GLORYSfall=ifelse(season==4,(weighted.mean), NA))
+# 
+# GLORYS2 <- GLORYSseason %>% group_by(YEAR, STRATUM) %>% 
+#   summarize(GLORYSwinter=mean(GLORYSwinter, na.rm=T), GLORYSspring=mean(GLORYSspring, na.rm=T),
+#             GLORYSsummer=mean(GLORYSsummer, na.rm=T),GLORYSfall=mean(GLORYSfall, na.rm=T))
+# 
+# CondGLORYS <- dplyr::left_join(CondAvgTemp, GLORYS2, by=c('YEAR', 'STRATUM'))
+# 
+# #See NAs for GLORYS merge:
+# #NAglorys <- CondGLORYS %>% filter(is.na(GLORYSwinter))
+# 
+# #Trying to determine why 27% of Condition data doesn't have corresponding GLORYS data:
+# #Occurs across all years and strata
+# GLORYSna <- CondGLORYS %>% filter(is.na(GLORYSwinter)) 
+# GLORYSna_not <- CondGLORYS %>% filter(!is.na(GLORYSwinter)) 
+# GLORYSnaStratum <- GLORYSna_not[!duplicated(GLORYSna_not[,'STRATUM']),]
+# GLORYSnaStratOrder <- GLORYSnaStratum %>% arrange(STRATUM)
 
 #--------------------------------------------------------------------------------
 #Bringing in small/large copepods, total copepods and zooplankton abundance anomaly by strata from Harvey Walsh:
@@ -169,7 +173,8 @@ ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.
                                      Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
                                      Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
                                      Protozoa+Thecosomata+Tunicata)/1000) %>%
-  dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) 
+  dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) %>%
+  dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
 
 ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
                                  ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
