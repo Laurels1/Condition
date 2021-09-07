@@ -17,7 +17,8 @@ library(magrittr)
 
 #na.action = "na.omit" # "na.gam.replace" % mean of column
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
-k <- 15
+kstart <- 15
+k <- kstart
 latlonk <- 25
 makePlots <- TRUE
 
@@ -44,8 +45,7 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
                                StomachFullness,FallBloomMagnitude,FallBloomDuration,
                                AverageLatStrata,AverageLonStrata,
 #                               AssessmentYear
-)
-
+) 
 
 # define variable and levels
 localDensity <- c("LocalBiomass","LocalAbundance")
@@ -105,7 +105,7 @@ speciesList <- cond %>%
 
 mainList <- list()
 finalModels <- list()
-for (aspecies in speciesList[[1]]) {  
+for (aspecies in speciesList) {  
   print(aspecies)
   # pre allocate variables
   spcriterion <- NULL
@@ -123,8 +123,8 @@ for (aspecies in speciesList[[1]]) {
 
 # Loop over models -----------------------------------------------------
 
-  #for (iloop in 1:nrow(modelScenarios)) {
-  for (iloop in c(95,113)) {
+  for (iloop in 1:nrow(modelScenarios)) {
+  #for (iloop in c(113)) {
    #   message(paste0("model # ",iloop, " for ",aspecies))
     # pull variable names for the model
     modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))
@@ -155,6 +155,10 @@ for (aspecies in speciesList[[1]]) {
         dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs))
 
     }
+    if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
+      modelResults[[iloop]] <- NA
+      next
+    } 
     
     # fit the GAM model
     # create formula. Each explanatory variable has k = 10.
@@ -166,22 +170,37 @@ for (aspecies in speciesList[[1]]) {
       names()
     # list all variables used
     modelSelectedVars <- explanatoryVariableNames
-    # create the formula for the model
-    mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," ,bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
-    if (modelSpecPlus$latlon) { # use lat and lon
-      mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
-      modelSelectedVars <- c(modelSelectedVars,"AverageLatStrata","AverageLonStrata")
-    }
-
-    if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
-      modelResults[[iloop]] <- NA
-      next
-    } 
-    # fit the GAM
-    modelFit <- mgcv::gam(formula = as.formula(mymodel), data = speciesData) #, na.action = na.action
     
+    
+    while(1) {
+    
+      # create the formula for the model
+      mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," ,bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
+      if (modelSpecPlus$latlon) { # use lat and lon
+        mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
+        modelSelectedVars <- c(modelSelectedVars,"AverageLatStrata","AverageLonStrata")
+      }
+  
+      result <- tryCatch({
+        # fit the GAM
+        modelFit <- mgcv::gam(formula = as.formula(mymodel), data = speciesData) #, na.action = na.action
+      }, error = function(e) {
+        message(paste0(paste0("k = ",k," is too small")))
+        return(NULL)
+      })
+      
+      if (!is.null(result)) {
+        k <- kstart
+        break        
+      } else {
+        k <- k + 1
+        next
+      }
+    
+    }
+          
     #store the results
-    modelResults[[iloop]] <- modelFit
+    modelResults[[iloop]] <- result
     # store sp.criterion to select best model
     spcriterion[iloop] <- summary(modelFit)$sp.criterion
     # list variables used in fit
