@@ -8,9 +8,11 @@ library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
 library(survdat)
 
-out.dir = "output"
-data.dir <- "data"
-gis.dir <- "gis"
+# out.dir = "output"
+# data.dir <- "data"
+# gis.dir <- "gis"
+
+StomFullnessData_llfh <- function(out.dir,data.dir,gis.dir){
 
 #Stomach weights in union_fscs_svbio are unaudited and only start in 2001 (don't use stom.epu)
 #Use updated food habits data: allfh.Rdata from \\net\bsmith\DataRequests\R
@@ -149,3 +151,6 @@ AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
 
 #Data for 2019 SOE stomach fullness index:
 #readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2019.csv"))
+return(stom)
+
+}

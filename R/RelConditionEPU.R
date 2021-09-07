@@ -42,16 +42,19 @@ library(rgdal)
 library(magrittr)
 #library(readr)
 
-#Turn off the function when running outside of function to test new code
-#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
-# create output directory if it doesnt exist
-#  if (!dir.exists(out.dir)) dir.create(out.dir)
-
 #Turn this on when running outside of function
 out.dir="output"
 
 data.dir <- "data"
 gis.dir  <- "gis"
+
+#Turn off the function when running outside of function to test new code
+#RelConditionEPU <- function(pullNewData=F,out.dir="output") {
+RelConditionEPU <- function(out.dir,data.dir,gis.dir) {
+# create output directory if it doesnt exist
+#  if (!dir.exists(out.dir)) dir.create(out.dir)
+
+
 
 
 #-------------------------------------------------------------------------------
@@ -533,4 +536,6 @@ condMAB <- condNSppEPU %>% dplyr::filter(EPU == "MAB")
 #Comment out output while adding in code and running outside of the function
 #return(list(condNshelfSpp=condNshelfSpp,condGB=condGB,condSS=condSS,condGOM=condGOM,condMAB=condMAB,stom = stom.epu))
 
-#}
+  return(cond.epu)
+
+}
