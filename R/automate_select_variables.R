@@ -197,6 +197,7 @@ for (aspecies in speciesList) {
           k <- k + 1
           next
         } else {
+          k <- kstart
           result <- NULL
           break
         }
@@ -210,7 +211,7 @@ for (aspecies in speciesList) {
     if (!is.null(result)) {
       spcriterion[iloop] <- summary(result)$sp.criterion
     } else {
-      spcriterion[iloop] <- NULL
+      spcriterion[iloop] <- NA
     }
     # list variables used in fit
     varsUsed[[iloop]] <- modelSelectedVars
