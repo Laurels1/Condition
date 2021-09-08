@@ -43,7 +43,7 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
                                ZooplAbundStrataWinter, ZooplAbundStrataSpring,ZooplAbundStrataSummer, ZooplAbundStrataFall,
   #                             ZooplanktonBiomass,TotalCopepods, 
                                StomachFullness,FallBloomMagnitude,FallBloomDuration,
-                               AverageLatStrata,AverageLonStrata,
+                               AverageLatStrata,AverageLonStrata, YEAR
 #                               AssessmentYear
 ) 
 
@@ -55,6 +55,7 @@ localEnv <- c("LocalBottomTemp","PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
 copepod <- c("CopepodSmallLargeStrataWinter", "CopepodSmallLargeStrataSpring", "CopepodSmallLargeStrataSummer", "CopepodSmallLargeStrataFall")
 resource <- c("TotalCopepodStrataWinter", "TotalCopepodStrataSpring", "TotalCopepodStrataSummer", "TotalCopepodStrataFall","ZooplAbundStrataWinter", "ZooplAbundStrataSpring","ZooplAbundStrataSummer", "ZooplAbundStrataFall","StomachFullness","FallBloomMagnitude","FallBloomDuration")
+temporal <- "YEAR"
 spatialLon <- "AverageLonStrata"
 spatialLat <- "AverageLatStrata"
 
@@ -65,22 +66,24 @@ df <- data.frame(variables = c("localDensity","localDensity",
                                "localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod","copepod","copepod","copepod",
-                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource"
-                               ),
+                               "resource","resource","resource","resource","resource","resource","resource","resource","resource","resource","resource",
+                               "temporal"),
                  level = c(localDensity,
                            populationDensity,
                            fishing,
                            localEnv,
                            broadEnv,
                            copepod,
-                           resource),
+                           resource,
+                           temporal),
                  num = c(2,2,
                          1,
                          1,
                          2,2,
                          4,4,4,4,
                          4,4,4,4,
-                         11,11,11,11,11,11,11,11,11,11,11))
+                         11,11,11,11,11,11,11,11,11,11,11,
+                         1))
 
 # create full matrix of models. Note: leave out lat and lo. they will be added to all models jointly
 modelScenarios <- expand.grid(
@@ -90,7 +93,8 @@ modelScenarios <- expand.grid(
                               localDensity,
                               broadEnv,
                               copepod,
-                              resource)
+                              resource,
+                              temporal)
 
 # unique list of all variables. use this to pull out from main data file
 allVars <- c(unique(as.vector(as.matrix(modelScenarios))),"AverageLonStrata", "AverageLatStrata")
@@ -255,7 +259,7 @@ for (aspecies in speciesList) {
 
   if (makePlots) {
     # plot best model and save as png
-    png(filename = here::here("output","automate",paste0(gsub("\\s","F_TotBiom_noNA_ZooplStrata",aspecies),".png")),
+    png(filename = here::here("output","automate",paste0(gsub("\\s","F_TotBiom_noNA_ZooplStrata_Year",aspecies),".png")),
         width = 1000,height=1000,units="px")
     plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
     dev.off()
@@ -263,8 +267,8 @@ for (aspecies in speciesList) {
 }
 
 
-saveRDS(mainList,file = here::here("output","automate","allModels_F_TotBiom_noNA_Zooplstrata.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","finalModels_F_TotBiom_noNA_Zooplstrata.RDS"))
+saveRDS(mainList,file = here::here("output","automate","allModels_F_TotBiom_noNA_Zooplstrata_Year.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","finalModels_F_TotBiom_noNA_Zooplstrata_Year.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
 #finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
