@@ -17,7 +17,7 @@ library(magrittr)
 
 #na.action = "na.omit" # "na.gam.replace" % mean of column
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
-kstart <- 15
+kstart <- 10
 k <- kstart
 latlonk <- 25
 makePlots <- TRUE
@@ -193,8 +193,13 @@ for (aspecies in speciesList) {
         k <- kstart
         break        
       } else {
-        k <- k + 1
-        next
+        if (k < 2*kstart) {
+          k <- k + 1
+          next
+        } else {
+          result <- NULL
+          break
+        }
       }
     
     }
@@ -202,7 +207,11 @@ for (aspecies in speciesList) {
     #store the results
     modelResults[[iloop]] <- result
     # store sp.criterion to select best model
-    spcriterion[iloop] <- summary(modelFit)$sp.criterion
+    if (!is.null(result)) {
+      spcriterion[iloop] <- summary(result)$sp.criterion
+    } else {
+      spcriterion[iloop] <- NULL
+    }
     # list variables used in fit
     varsUsed[[iloop]] <- modelSelectedVars
 
