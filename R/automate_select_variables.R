@@ -34,7 +34,7 @@ data <- readRDS(file=here::here("other","condSPP.rds")) %>%
 cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, LocalAbundance,
   #                             StockBiomass,
   #                             Fproxy,
-                               LocalBottomTemp, PropColumnColdPool,
+                               LocalBottomTemp, LocalSurfaceTemp, PropColumnColdPool,
                                SpringTemp, SummerTemp, FallTemp, WinterTemp,
                               CopepodSmall_Large,
                               # CopepodSmLg_SprStrata, CopepodSmLg_FallStrata, CopepodSmLg_AnnualStrata,
@@ -51,7 +51,7 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
 localDensity <- c("LocalBiomass","LocalAbundance")
 #populationDensity <- "StockBiomass"
 #fishing <- "Fproxy"
-localEnv <- c("LocalBottomTemp","PropColumnColdPool")
+localEnv <- c("LocalBottomTemp", "LocalSurfaceTemp", "PropColumnColdPool")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
 #copepod <- c("CopepodSmallLargeStrataWinter", "CopepodSmallLargeStrataSpring", "CopepodSmallLargeStrataSummer", "CopepodSmallLargeStrataFall")
 copepod <- c("CopepodSmall_Large")
@@ -65,7 +65,7 @@ spatialLat <- "AverageLatStrata"
 df <- data.frame(variables = c("localDensity","localDensity",
   #                             "populationDensity",
    #                            "fishing",
-                               "localEnv","localEnv",
+                               "localEnv","localEnv","localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod",
                                "resource","resource","resource","resource","resource",
@@ -81,7 +81,8 @@ df <- data.frame(variables = c("localDensity","localDensity",
                  num = c(2,2,
             #             1,
              #            1,
-                         2,2,
+             #            2,2,
+                         3,3,3,
                          4,4,4,4,
                          1,
  #                        11,11,11,11,11,11,11,11,11,11,11,
@@ -262,7 +263,7 @@ for (aspecies in speciesList) {
 
   if (makePlots) {
     # plot best model and save as png
-    png(filename = here::here("output","automate",paste0(gsub("\\s","ZooplEPU_Year",aspecies),".png")),
+    png(filename = here::here("output","automate",paste0(gsub("\\s","ZooplEPU_SurfTemp_Year",aspecies),".png")),
         width = 1000,height=1000,units="px")
     plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
     dev.off()
@@ -270,8 +271,8 @@ for (aspecies in speciesList) {
 }
 
 
-saveRDS(mainList,file = here::here("output","automate","allModels_ZooplEPU_Year.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","finalModels_ZooplEPU_Year.RDS"))
+saveRDS(mainList,file = here::here("output","automate","allModels_ZooplEPU_SurfTemp_Year.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","finalModels_ZooplEPU_SurfTemp_Year.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
 #finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))

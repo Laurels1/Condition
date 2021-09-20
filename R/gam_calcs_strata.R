@@ -91,7 +91,7 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
-         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP))) %>%
+         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 
@@ -339,7 +339,7 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
          #'StockName', 'Survey',
         'StockUnit', 
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-         'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata',
+         'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
          'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
          #'CalEPU', 
          'CopepodSmallLarge',
@@ -789,7 +789,8 @@ CondClean <- CondCleanSpDogWt %>%
 EnvirVariables <- CondClean %>%
   ungroup() %>%
   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-                'AvgBottomTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+                'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
     #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
   # 'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
@@ -800,7 +801,8 @@ EnvirVariables <- CondClean %>%
                 'RangeMagnitude','RangeDuration',
                 'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
-                'Local Bottom Temp'= 'AvgBottomTempStrata','Winter Temp'= 'AvgTempWinter',
+                'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp'= 'AvgSurfaceTempStrata',
+                'Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
                 'Fall Temp'= 'AvgTempFall', 
        #         'CopepodSmall_Large'= 'CopepodSmallLarge',
@@ -872,7 +874,8 @@ EnvirVariables <- CondClean %>%
 # 
 #Send Andy condSPP:
 condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
-                                       'LocalBottomTemp'= 'AvgBottomTempStrata','WinterTemp'= 'AvgTempWinter',
+                                       'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
+                                       'WinterTemp'= 'AvgTempWinter',
                                        'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
                                        'FallTemp'= 'AvgTempFall', 
                                        'CopepodSmall_Large'= 'CopepodSmallLarge',
