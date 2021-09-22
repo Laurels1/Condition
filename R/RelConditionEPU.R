@@ -40,6 +40,8 @@ library(rgdal)
 #remotes::install_github("andybeet/dbutils")
 #library(gam)
 library(magrittr)
+#Changepoint analysis:
+library(EnvCpt)
 #library(readr)
 
 #Turn this on when running outside of function
@@ -398,9 +400,9 @@ cond.epu <- cond.sd %>% dplyr::filter(is.na(sex) | sex != 4)
 cond.epu <- cond.epu %>% dplyr::mutate(sexMF = sex)
 
 #recoding SEX (1,2) to sex (M, F)
-cond.epu$sex[cond.epu$sexMF==1] <- 'M'
-cond.epu$sex[cond.epu$sexMF==2] <- 'F'
-cond.epu$sex[cond.epu$sexMF==0] <- 'U'
+# cond.epu$sex[cond.epu$sexMF==1] <- 'M'
+# cond.epu$sex[cond.epu$sexMF==2] <- 'F'
+# cond.epu$sex[cond.epu$sexMF==0] <- 'U'
 
 #Tried to use LOGGED_SPECIES_NAME for species names, but doesn't exist before 2001 and too many version of names
 #Names for SVSPP codes '013','015','023','026','028','032','072','073','074','075','076','077','078','102','103','104','105','106','107','108','121','131','135','141','143','145','155','164','193','197':

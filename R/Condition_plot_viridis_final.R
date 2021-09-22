@@ -16,7 +16,7 @@ annualCondition <- condMAB %>%
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
 
 speciesNames <- annualCondition %>%
-    dplyr::filter(sex == "F") %>%
+#    dplyr::filter(sexMF == "F") %>%
     group_by(Species) %>% 
     mutate(scaleCond = scale(MeanCond, scale = TRUE, center = TRUE))
 
@@ -56,4 +56,4 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
           axis.text.y = element_text(size = 10), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
 
-ggsave(path= here::here(out.dir),"MABcondition_2020_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"MABcondition_MF_2020_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
