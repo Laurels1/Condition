@@ -116,13 +116,13 @@ fh.epu$Species[fh.epu$SVSPP=='136'] <- 'Atlantic croaker'
 #prey volume by prey group and EPU for 2020 SOE (need to use allwt_stratfin_byvars.R to get diet comps by prey weight):
 prey <- fh.epu %>%
   dplyr::filter(!is.na(Species), year >1990, pdwgt >=1, !is.na(pdgutw)) %>%
-  select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, analcat)
+  dplyr::select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, analcat)
 
 #calculate stomach fullness and remove duplicates due to each row being a prey item:
 uniqstom <- fh.epu %>%
   dplyr::filter(!is.na(Species), year >1990, pdwgt >= 1, !is.na(pdgutw)) %>%
   mutate(stom_full = pdgutw/pdwgt) %>%
-  select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, stom_full)
+  dplyr::select(CRUISE6, STRATUM, STATION, year, season, EPU, Species, pdid, pdsex, pdwgt, pdgutw, stom_full)
 
 stom <- dplyr::distinct(uniqstom)
 

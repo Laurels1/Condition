@@ -55,7 +55,7 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #Drop StockName column for merge with StockSMART:
-CondStockjoin <- dplyr::left_join(cond.strata, select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
+CondStockjoin <- dplyr::left_join(cond.strata, dplyr::select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
 
 #Assign stock to Unit if sample is outside of stock strata or no stock strata are definited for species:
 CondStockUnit <- CondStockjoin %>% dplyr::mutate(StockUnit =ifelse(is.na(Stock), "Unit", Stock))
@@ -202,9 +202,9 @@ load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
 CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
-  select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>%
-  gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
-  mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
+  dplyr::select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>%
+  tidyr::gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
+  dplyr::mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
                        if_else(CalEPU=='SLI.gom', 'GOM',
                                if_else(CalEPU=='SLI.mab', 'MAB',
                                        if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
@@ -292,15 +292,15 @@ AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
 
 # change stomach data variables to merge with condition data: 
 stom.data.EPU <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
-  distinct(YEAR, EPU, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, EPU, Species, SEASON, SEX, AvgStomFullEPU)
+  dplyr::distinct(YEAR, EPU, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, EPU, Species, SEASON, SEX, AvgStomFullEPU)
 
 #Fall stomach data by strata:
 stom.data.strata <- AvgStomFullStrata %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
-  distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullStrata)
+  dplyr::distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullStrata)
 
 #Spring stomach data by strata as test for lagging in GAM:
 stom.spring.strata <- AvgStomFullSpringStrata %>% dplyr::mutate(YEAR = year, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
-  distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>%   select(YEAR, STRATUM, EPU, Species, SEX, AvgStomFullSpringStrata)
+  dplyr::distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, STRATUM, EPU, Species, SEX, AvgStomFullSpringStrata)
 
 
 stom.data.strata$SEX <- as.factor(stom.data.strata$SEX) 
@@ -327,7 +327,7 @@ AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEA
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
 #Lagged stomach index by strata for Condition GAM:
-A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
+A <- AvgStom %>% dplyr::select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
 B <- unique(A)
 C <- B %>% dplyr::mutate(YEARstom= YEAR)
 D <- C %>% dplyr::ungroup()
@@ -335,7 +335,7 @@ E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStrata
 Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
+  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
          #'StockName', 'Survey',
         'StockUnit', 
          'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
@@ -390,7 +390,7 @@ load(here::here("data","stockAssessmentData_05-28-2021.rda"))
 #cusk and blackbelly rosefish don't have n>=3 and years > 20 if only using condition within 1 standard deviation of mean:
 #5/28/2021 pull from StockSMART is missing some StockAreas. Have to use StockName instead:
  StockAssDat <- stockAssessmentData %>%
-   filter(StockName %in% c('Spiny dogfish - Atlantic Coast',
+   dplyr::filter(StockName %in% c('Spiny dogfish - Atlantic Coast',
                            'Winter skate - Georges Bank / Southern New England',
                            'Little skate - Georges Bank / Southern New England',
                            'Thorny skate - Gulf of Maine',
@@ -592,8 +592,8 @@ maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('StockName'=StockAssDat$S
  StockAssYear= subset(say, say$keep=='y')       
  
 AssDat <- StockAssYear %>%
-  select(StockName, StockUnit, Year, AssessmentYear, Value, Metric) %>%
-  spread(Metric, Value) %>%
+  dplyr::select(StockName, StockUnit, Year, AssessmentYear, Value, Metric) %>%
+  tidyr::spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
   #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of StockUnit:
 #  group_by(Species, YEAR) %>%

@@ -452,6 +452,9 @@ cond.epu$Species[cond.epu$SVSPP=='18'] <- 'Bluntnose stingray'
 cond.epu$Species[cond.epu$SVSPP=='163'] <- 'Longhorn sculpin'
 cond.epu$Species[cond.epu$SVSPP=='156'] <- 'Blackbelly rosefish'
 cond.epu$Species[cond.epu$SVSPP=='136'] <- 'Atlantic croaker'
+cond.epu$Species[cond.epu$SVSPP=='149'] <- 'Spot'
+cond.epu$Species[cond.epu$SVSPP=='35'] <- 'Atlantic menhaden'
+cond.epu$Species[cond.epu$SVSPP=='192'] <- 'Atlantic wolffish'
 
 count(cond.epu, is.na(EPU))
 
@@ -460,20 +463,21 @@ count(cond.epu, is.na(EPU))
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
 #After removing samples outside of 1 std. dev, cusk, smooth dogfish and blackbelly rosefish no longer have n>3 for >20 years:
 annualcond <- cond.epu %>% dplyr::group_by(Species, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-condNshelf <- dplyr::filter(annualcond, nCond>=3)
+condNshelf <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNshelfSpp <- condNshelf %>% dplyr::add_count(Species, sexMF) %>% 
   dplyr::filter(n >= 20)
 
 condNYrSpp <- condNshelfSpp %>% dplyr::distinct(Species)
 
 #Summarize annually by EPU (use for SOE plots)
-annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcondEPU, nCond>=3)
-condNSppEPU <- condN %>% dplyr::add_count(Species, EPU, sexMF) %>% 
+annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
+condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
 
 #Output for socio-economic models (by EPU and length):
-annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
+  dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppEPUlen <- annualcondEPUlen %>% dplyr::add_count(Species, EPU) 
 #%>% 
@@ -483,7 +487,8 @@ condEPUlen <- condNSppEPUlen
 #readr::write_csv(condEPUlen, here::here(out.dir,"RelCond2020_EPU_length.csv"))
 
 #Output for socio-economic models (by year):
-annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% 
+  dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppYear <- annualcondYear %>% dplyr::add_count(Species) 
 #%>% 
@@ -498,7 +503,7 @@ condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcondStrata, nCond>=3)
+condN <- dplyr::filter(annualcondStrata, nCond>=3) %>% ungroup()
 condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>% 
   dplyr::filter(n >= 20)
 #Format output to be read into plotting function:

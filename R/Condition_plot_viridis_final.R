@@ -56,4 +56,4 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
           axis.text.y = element_text(size = 10), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
 
-ggsave(path= here::here(out.dir),"MABcondition_MF_2020_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"MABcondition_allsex_2021_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
