@@ -41,7 +41,9 @@ library(rgdal)
 #library(gam)
 library(magrittr)
 #Changepoint analysis:
-library(EnvCpt)
+#library(EnvCpt)
+library(rpart)
+library(rpart.plot)
 #library(readr)
 
 #Turn this on when running outside of function
@@ -474,6 +476,17 @@ annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summ
 condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
+
+#Summarize annually over all EPUs for butterfish WG:
+annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count(Species) %>% 
+  dplyr::filter(n >= 20)
+
+#Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+ButtCond <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
+ButtRegime <- rpart(MeanCond~YEAR, data=ButtCond)
+ButtPlot <- rpart.plot(ButtRegime)
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
