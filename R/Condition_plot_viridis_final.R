@@ -9,8 +9,10 @@ out.dir="output"
 #Data from RelConditionEPU.R
 #No data available for 2020 due to Covid-19
 #Removed MAB values in 2017 due to low sampling coverage:
-annualCondition <- condMAB %>% 
-    dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
+annualCondition <- condNSpp 
+#%>% 
+ #   dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
+ #   dplyr::filter(!(YEAR == 2017)) 
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
@@ -43,7 +45,9 @@ speciesNames$Species <-   factor(speciesNames$Species, levels = sortNames)
 #scales::show_col(viridis::viridis_pal()(5))
 vir <- viridis::viridis_pal()(5)
 
+#Labeling legend title not working:
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = category)) +
+    labs(fill="Quintiles of Condition") +
     geom_tile() +
     coord_equal() +
     theme_bw() +
@@ -51,9 +55,10 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     guides(fill = guide_legend(reverse = TRUE)) +
     #scale_x_discrete works if don't need to pad final year for missing data. Changed Year to numeric above and this works:
    scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
-        theme(legend.position = "right", legend.box = "vertical", legend.title = element_blank(), 
-          axis.title = element_blank(), axis.text.x = element_text(size = 10),
-          axis.text.y = element_text(size = 10), panel.grid.major = element_blank(),
+        theme(legend.position = "right", legend.box = "vertical", legend.title = element_text(size = 8),
+              legend.text = element_text(size = 6),
+          axis.title = element_blank(), axis.text.x = element_text(size = 6),
+          axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
 
-ggsave(path= here::here(out.dir),"MABcondition_allsex_2021_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"ShelfCondition_allsex_2021_viridis_final.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
