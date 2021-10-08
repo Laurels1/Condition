@@ -28,6 +28,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
     geom_line()+
     geom_point() +
     labs(title="Butterfish Relative Condition", y = "Relative Condition") +
-    geom_vline(xintercept=2011, color='red')
+    geom_vline(xintercept=ButtSplit1, color='red')+
+    geom_vline(xintercept=ButtSplit2, color='red')
 
 ggsave(path= here::here(out.dir),"Butterfish_ShelfCondition_allsex_2021_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

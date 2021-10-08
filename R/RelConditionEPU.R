@@ -485,10 +485,18 @@ condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count(Species) %>% 
   dplyr::filter(n >= 20)
 
+#Mean butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+ButtCondPlot <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
+
 #Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-ButtCond <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
-ButtRegime <- rpart(MeanCond~YEAR, data=ButtCond)
-ButtPlot <- rpart.plot(ButtRegime)
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(RelCond, YEAR)
+ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+ButtResults <- as.data.frame(ButtRegime[["splits"]])
+ButtSplit1 <- ButtResults$index[1]
+ButtSplit2 <- ButtResults$index[2]
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
