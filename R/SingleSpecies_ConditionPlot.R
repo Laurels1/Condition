@@ -7,7 +7,7 @@ out.dir="output"
 #Data from RelConditionEPU.R
 #No data available for 2020 due to Covid-19
 #Removed MAB values in 2017 due to low sampling coverage:
-annualCondition <- ButtCond 
+annualCondition <- ButtCondPlot 
 #%>% 
  #   dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
  #   dplyr::filter(!(YEAR == 2017)) 

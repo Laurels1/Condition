@@ -498,6 +498,16 @@ ButtResults <- as.data.frame(ButtRegime[["splits"]])
 ButtSplit1 <- ButtResults$index[1]
 ButtSplit2 <- ButtResults$index[2]
 
+#Regime shift analysis for all species together over all EPUs:
+AllSppCond <- condNSpp %>% dplyr::select(MeanCond, YEAR)
+AllSppRegime <- rpart::rpart(MeanCond~YEAR, data=AllSppCond)
+AllSppPlot <- rpart.plot::rpart.plot(AllSppRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+AllSppResults <- as.data.frame(AllSppRegime[["splits"]])
+AllSppSplit1 <- AllSppResults$index[1]
+AllSppSplit2 <- AllSppResults$index[2]
+
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
