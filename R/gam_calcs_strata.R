@@ -129,6 +129,17 @@ AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
 
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
+#Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+SummerTemp <- AvgTempSummerFormat %>% dplyr::select(YEAR, AvgTempSummer)
+SummerRegime <- rpart::rpart(AvgTempSummer~YEAR, data=SummerTemp)
+SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+SummerRegimeResults <- as.data.frame(SummerRegime[["splits"]])
+SummerSplit1 <- SummerRegimeResults$index[1]
+SummerSplit2 <- SummerRegimeResults$index[2]
+SummerSplit3 <- SummerRegimeResults$index[3]
+
 #----------------------------------------------------------------------------------
 #Bring in GLORYS bottom temperature data by NEFSC survey strata (mismatch of some strata currently)
 # GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))

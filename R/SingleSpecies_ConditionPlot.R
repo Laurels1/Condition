@@ -23,7 +23,7 @@ speciesNames <- annualCondition
 #scales::show_col(viridis::viridis_pal()(5))
 #vir <- viridis::viridis_pal()(5)
 
-#Labeling legend title not working:
+#Line plot of condition
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
     geom_line()+
     geom_point() +
@@ -32,3 +32,17 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
     geom_vline(xintercept=ButtSplit2, color='red')
 
 ggsave(path= here::here(out.dir),"Butterfish_ShelfCondition_allsex_2021_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Average bottom temp data by EPU and season (from gam_calcs_strata.R):
+AvgSummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>%
+    dplyr::select(YEAR, EPU, AvgTempSummer) %>% group_by(EPU)
+
+#Line plot of summer temp:
+p2 <- ggplot(AvgSummerTemp, aes(x = YEAR, y = AvgTempSummer)) +
+    geom_line(aes(color = EPU)) + 
+    scale_color_manual(values = c("red", "blue", "green", "orange")) +
+    geom_point(aes(color = EPU)) +
+    labs(title="Average Summer Bottom Temperature by EPU", y = "Average Summer Bottom Temp") +
+    geom_vline(xintercept=SummerSplit1, color='red', linetype = "longdash") 
+
+ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
