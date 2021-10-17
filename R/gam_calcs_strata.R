@@ -130,9 +130,9 @@ AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-SummerTemp <- AvgTempSummerFormat %>% dplyr::select(YEAR, AvgTempSummer)
+SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
 SummerRegime <- rpart::rpart(AvgTempSummer~YEAR, data=SummerTemp)
-SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
+#SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
 
 #Pull regime shift years into new data frame to add to plot:
 SummerRegimeResults <- as.data.frame(SummerRegime[["splits"]])
@@ -222,6 +222,16 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 
 CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 
+#Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
+CopepodEPURegime <- rpart::rpart(CopepodSmallLarge~YEAR, data=CopepodEPU)
+#CopepodEPURegimePlot <- rpart.plot::rpart.plot(CopepodEPURegime)
+
+#Pull regime shift years into new data frame to add to plot:
+CopepodEPURegimeResults <- as.data.frame(CopepodEPURegime[["splits"]])
+CopepodEPUSplit1 <- CopepodEPURegimeResults$index[1]
+CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
+
 # #Bring in ratio of small to large copepods (by strata from Ryan Morse):
 # load(here::here("data","TS_spring_zoop.rda"))
 # ZoopSpring <- zoo.spr
@@ -277,6 +287,16 @@ Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 
 #merge with condition data:
 FallBloomCond <- dplyr::left_join(TotCop, Fallbloom, by = "YEAR")
+
+#Test for regime shifts in fall bloom magnitude (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+FallBloomMag <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeMagnitude)
+FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
+#FallBloomMagRegimePlot <- rpart.plot::rpart.plot(FallBloomMagRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
+FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
+FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
