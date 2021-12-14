@@ -498,6 +498,38 @@ ButtResults <- as.data.frame(ButtRegime[["splits"]])
 ButtSplit1 <- ButtResults$index[1]
 ButtSplit2 <- ButtResults$index[2]
 
+#Summarize annually BY SEX over all EPUs for butterfish WG:
+annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR, SEX) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSppSex <- condN %>% dplyr::add_count(Species) %>% 
+  dplyr::filter(n >= 20)
+
+#Mean FEMALE butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+FemButtCondPlot <- condNSppSex %>% dplyr::filter(Species == 'Butterfish', SEX == 2) %>% dplyr::select(MeanCond, YEAR)
+
+#Test for regime shifts in FEMALE butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', SEX == 2) %>% dplyr::select(RelCond, YEAR)
+ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+FemButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+ButtResults <- as.data.frame(ButtRegime[["splits"]])
+FemButtSplit1 <- ButtResults$index[1]
+FemButtSplit2 <- ButtResults$index[2]
+
+#Mean MALE butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+MaleButtCondPlot <- condNSppSex %>% dplyr::filter(Species == 'Butterfish', SEX == 1) %>% dplyr::select(MeanCond, YEAR)
+
+#Test for regime shifts in MALE butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', SEX == 1) %>% dplyr::select(RelCond, YEAR)
+ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+MaleButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+
+#Male Butterfish: Pull regime shift years into new data frame to add to plot:
+ButtResults <- as.data.frame(ButtRegime[["splits"]])
+MaleButtSplit1 <- ButtResults$index[1]
+MaleButtSplit2 <- ButtResults$index[2]
+
 #Regime shift analysis for all species together over all EPUs:
 AllSppCond <- condNSpp %>% dplyr::select(MeanCond, YEAR)
 AllSppRegime <- rpart::rpart(MeanCond~YEAR, data=AllSppCond)

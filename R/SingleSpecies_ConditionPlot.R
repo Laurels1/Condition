@@ -33,6 +33,42 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
 
 ggsave(path= here::here(out.dir),"Butterfish_ShelfCondition_allsex_2021_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+#FEMALE butterfish condition and regime shift:
+annualCondition <- FemButtCondPlot 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+    geom_line()+
+    geom_point() +
+    labs(title="Female Butterfish Relative Condition", y = "Relative Condition") +
+    geom_vline(xintercept=FemButtSplit1, color='red')+
+    geom_vline(xintercept=FemButtSplit2, color='red')
+
+ggsave(path= here::here(out.dir),"Female_Butterfish_ShelfCondition_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#MALE butterfish condition and regime shift:
+annualCondition <- MaleButtCondPlot 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+    geom_line()+
+    geom_point() +
+    labs(title="Male Butterfish Relative Condition", y = "Relative Condition") +
+    geom_vline(xintercept=MaleButtSplit1, color='red')+
+    geom_vline(xintercept=MaleButtSplit2, color='red')
+
+ggsave(path= here::here(out.dir),"Male_Butterfish_ShelfCondition_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgSummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>%
     dplyr::select(YEAR, EPU, AvgTempSummer) %>% group_by(EPU)

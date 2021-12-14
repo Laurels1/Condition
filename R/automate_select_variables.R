@@ -17,7 +17,7 @@ library(magrittr)
 
 #na.action = "na.omit" # "na.gam.replace" % mean of column
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
-kstart <- 10
+kstart <- 20
 k <- kstart
 latlonk <- 25
 makePlots <- TRUE
@@ -271,8 +271,8 @@ for (aspecies in speciesList) {
 }
 
 
-saveRDS(mainList,file = here::here("output","automate","allModels_ZooplEPU_SurfTemp_Year.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","finalModels_ZooplEPU_SurfTemp_Year.RDS"))
+saveRDS(mainList,file = here::here("output","automate","allModels_k20_ZooplEPU_SurfTemp_Year.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","finalModels_k20_ZooplEPU_SurfTemp_Year.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
 #finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
