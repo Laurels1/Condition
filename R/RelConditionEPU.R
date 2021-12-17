@@ -102,12 +102,12 @@ gis.dir  <- "gis"
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
 
-#survey <- get_survdat_data(channel, getBio = T)
-
-#survbio=as.data.frame(survey[['survdat']])
-
-#save survbio object so RData data doesn't need to be pulled each time:
-# save(survbio, file='survbio.RData')
+# survey <- get_survdat_data(channel, getBio = T)
+# 
+# survbio=as.data.frame(survey[['survdat']])
+# 
+# #save survbio object so RData data doesn't need to be pulled each time:
+#  save(survbio, file='survbio.RData')
 ###end data pull
 
 #Pull data for NRHA:
