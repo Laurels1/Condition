@@ -15,7 +15,7 @@ library(survdat)
 #StomFullnessData_llfh <- function(out.dir,data.dir,gis.dir){
 
 #Stomach weights in union_fscs_svbio are unaudited and only start in 2001 (don't use stom.epu)
-#Use updated food habits data: allfh.Rdata from \\net\bsmith\DataRequests\R
+#Use updated food habits data: allfh.Rdata from \\net.nefsc.noaa.gov\home10\bsmith\DataRequests\R
 load(file.path(data.dir, 'allfh.RData'))
 
 #View poststrat function to determine variables required
@@ -150,7 +150,7 @@ AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
   mutate(AvgStomFullSpringStrata=(mean(stom_full)))
 
 #Data for 2019 SOE stomach fullness index:
-#readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2019.csv"))
+readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2020.csv"))
 #return(stom)
 
 #}

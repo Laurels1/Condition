@@ -69,4 +69,4 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
 #     geom_vline(xintercept=AllSppSplit1, color='red', size = 1.2)+
 #     geom_vline(xintercept=AllSppSplit2, color='red', linetype = 2, size = 1.2)
 
-ggsave(path= here::here(out.dir),"GOM_Condition_allsex_2022_viridis_regime.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"GOM_Condition_allsex_2022_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
