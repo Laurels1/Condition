@@ -150,7 +150,7 @@ AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
   mutate(AvgStomFullSpringStrata=(mean(stom_full)))
 
 #Data for 2019 SOE stomach fullness index:
-readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2020.csv"))
+#readr::write_csv(AvgStomFullEPU, here::here(out.dir,"AnnualStomFullnessEPU_2020.csv"))
 #return(stom)
 
 #}
