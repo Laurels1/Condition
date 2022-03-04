@@ -295,9 +295,10 @@ mergeLW <- dplyr::filter(mergeindwt, !is.na(lna))
 # cond <- dplyr::mutate(mergeLW, 
 #                       predwt = (exp(COEFFICIENT_FALL_COMPL))*LENGTH**EXPONENT_FALL_COMPL,
 #                       RelCond = INDWT/predwt*100)
+#Relative condition from LeCren 1951:
 condcalc <- dplyr::mutate(mergeLW, 
                       predwt = (exp(lna))*LENGTH^b,
-                      RelCond = INDWT/predwt*100)
+                      RelCond = INDWT/predwt)
 
 
 cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
