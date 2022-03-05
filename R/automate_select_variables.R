@@ -22,8 +22,8 @@ k <- kstart
 latlonk <- 25
 makePlots <- TRUE
 
-if (!dir.exists(here::here("output","automate"))) {
-  dir.create(here::here("output","automate"))
+if (!dir.exists(here::here("output","automate", "test"))) {
+  dir.create(here::here("output","automate", "test"))
 }
 
 # read in main data file 
@@ -263,7 +263,7 @@ for (aspecies in speciesList) {
 
   if (makePlots) {
     # plot best model and save as png
-    png(filename = here::here("output","automate",paste0(gsub("\\s",aspecies,"ZooplEPU_Year_no100"),".png")),
+    png(filename = here::here("output","automate","test",paste0("ZooplEPU_Year_test100",gsub("\\s","",aspecies),".png")),
         width = 1000,height=1000,units="px")
     plot(finalModels[[aspecies]]$model,pages=1,residuals=T, rug=T)
     dev.off()
@@ -271,8 +271,8 @@ for (aspecies in speciesList) {
 }
 
 
-saveRDS(mainList,file = here::here("output","automate","allModels_k20_ZooplEPU_no100_Year.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","finalModels_k20_ZooplEPU_no100_Year.RDS"))
+saveRDS(mainList,file = here::here("output","automate","test", "allModels_k20_ZooplEPU_test100_Year.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","test", "finalModels_k20_ZooplEPU_test100_Year.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
 #finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
