@@ -140,6 +140,39 @@ SummerSplit1 <- SummerRegimeResults$index[1]
 SummerSplit2 <- SummerRegimeResults$index[2]
 SummerSplit3 <- SummerRegimeResults$index[3]
 
+#Test for regime shifts in spring temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+SpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSpring)
+SpringRegime <- rpart::rpart(AvgTempSpring~YEAR, data=SpringTemp)
+#SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+SpringRegimeResults <- as.data.frame(SpringRegime[["splits"]])
+SpringSplit1 <- SpringRegimeResults$index[1]
+SpringSplit2 <- SpringRegimeResults$index[2]
+SpringSplit3 <- SpringRegimeResults$index[3]
+
+#Test for regime shifts in Fall temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
+FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
+#FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
+FallSplit1 <- FallRegimeResults$index[1]
+FallSplit2 <- FallRegimeResults$index[2]
+FallSplit3 <- FallRegimeResults$index[3]
+
+#Test for regime shifts in Winter temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+WinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempWinter)
+WinterRegime <- rpart::rpart(AvgTempWinter~YEAR, data=WinterTemp)
+#WinterTempRegimePlot <- rpart.plot::rpart.plot(WinterRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+WinterRegimeResults <- as.data.frame(WinterRegime[["splits"]])
+WinterSplit1 <- WinterRegimeResults$index[1]
+WinterSplit2 <- WinterRegimeResults$index[2]
+WinterSplit3 <- WinterRegimeResults$index[3]
+
 #----------------------------------------------------------------------------------
 #Bring in GLORYS bottom temperature data by NEFSC survey strata (mismatch of some strata currently)
 # GLORYSdata <- readr::read_csv(here::here(data.dir, "GLORYS_bottom_temp_STRATA_1993_2018.csv"))
