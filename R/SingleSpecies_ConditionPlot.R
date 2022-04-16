@@ -79,7 +79,11 @@ p2 <- ggplot(AvgSummerTemp, aes(x = YEAR, y = AvgTempSummer)) +
     scale_color_manual(values = c("red", "blue", "green", "orange")) +
     geom_point(aes(color = EPU)) +
     labs(title="Average Summer Bottom Temperature by EPU", y = "Average Summer Bottom Temp") +
-    geom_vline(xintercept=SummerSplit1, color='red') 
+    geom_vline(xintercept=SummerSplit1, color='red') +
+    geom_vline(xintercept=SummerSplit2, color='red') +
+    geom_vline(xintercept=SummerSplit3, color='red') +
+    geom_vline(xintercept=SummerSplit4, color='red') +
+    geom_vline(xintercept=SummerSplit5, color='red') 
 
 ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
@@ -93,7 +97,10 @@ p2 <- ggplot(AvgSpringTemp, aes(x = YEAR, y = AvgTempSpring)) +
     scale_color_manual(values = c("red", "blue", "green", "orange")) +
     geom_point(aes(color = EPU)) +
     labs(title="Average Spring Bottom Temperature by EPU", y = "Average Spring Bottom Temp") +
-    geom_vline(xintercept=SpringSplit1, color='red') 
+    geom_vline(xintercept=SpringSplit1, color='red') +
+    geom_vline(xintercept=SpringSplit2, color='red') +
+    geom_vline(xintercept=SpringSplit3, color='red') +
+    geom_vline(xintercept=SpringSplit4, color='red')
 
 ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
@@ -153,3 +160,31 @@ p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeMagnitude)) +
 
 ggsave(path= here::here(out.dir),"FallBloom_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+#Fall phyoplanktion bloom duration data (from gam_calcs_strata.R):
+FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
+    dplyr::select(YEAR, RangeDuration)
+
+#Line plot of summer temp:
+p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeDuration)) +
+    geom_line(color = "blue") +
+    geom_point(color = "blue") +
+    labs(title="Fall Phytoplankton Bloom Duration", y = "Fall Bloom Duration")
+
+ggsave(path= here::here(out.dir),"FallBloom_duration_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#"TotalCopepods","ZooplanktonBiomass","StomachFullness"
+
+#Total Copopods data (from gam_calcs_strata.R):
+TotCopData <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>%
+    dplyr::select(YEAR, EPU, TotalCopepodsMillions) %>% group_by(EPU)
+
+#Line plot of total copepods:
+p2 <- ggplot(TotCopData, aes(x = YEAR, y = TotalCopepodsMillions)) +
+    geom_line(aes(color = EPU)) + 
+    scale_color_manual(values = c("red", "blue", "green")) +
+    geom_point(aes(color = EPU)) +
+    labs(title="Total Copepods", y = "Total Copepods Millions") +
+    geom_vline(xintercept=TotCopepodsSplit1, color='red') +
+    geom_vline(xintercept=TotCopepodsSplit2, color='red')
+
+ggsave(path= here::here(out.dir),"TotalCopepods_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

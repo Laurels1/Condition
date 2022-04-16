@@ -132,6 +132,8 @@ CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
 SummerRegime <- rpart::rpart(AvgTempSummer~YEAR, data=SummerTemp)
+#Choose simplest tree within one standard error of best tree: xerror +xstd > xerror of next row 
+printcp(SummerRegime) 
 #SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
 
 #Pull regime shift years into new data frame to add to plot:
@@ -139,17 +141,25 @@ SummerRegimeResults <- as.data.frame(SummerRegime[["splits"]])
 SummerSplit1 <- SummerRegimeResults$index[1]
 SummerSplit2 <- SummerRegimeResults$index[2]
 SummerSplit3 <- SummerRegimeResults$index[3]
+SummerSplit4 <- SummerRegimeResults$index[4]
+SummerSplit5 <- SummerRegimeResults$index[5]
 
 #Test for regime shifts in spring temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 SpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSpring)
 SpringRegime <- rpart::rpart(AvgTempSpring~YEAR, data=SpringTemp)
-#SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
+#Choose simplest tree within one standard error of best tree: xerror +xstd < xerror of next row 
+printcp(SpringRegime)
+SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
+#b <- SpringRegime$cptable[which.min(SpringRegime$cptable[, "xerror"]), "CP"]
+#SpringRegimePrune <- prune(SpringRegime, cp = b)
+#SpringTempPlot2 <- rpart.plot::rpart.plot(SpringRegimePrune)
 
 #Pull regime shift years into new data frame to add to plot:
 SpringRegimeResults <- as.data.frame(SpringRegime[["splits"]])
 SpringSplit1 <- SpringRegimeResults$index[1]
 SpringSplit2 <- SpringRegimeResults$index[2]
 SpringSplit3 <- SpringRegimeResults$index[3]
+SpringSplit4 <- SpringRegimeResults$index[4]
 
 #Test for regime shifts in Fall temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
@@ -310,6 +320,16 @@ TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
 
 TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 
+#Test for regime shifts in Total Copepods (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+TotCopepods <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, TotalCopepodsMillions)
+TotCopepodsRegime <- rpart::rpart(TotalCopepodsMillions~YEAR, data=TotCopepods)
+#TotCopepodsRegimePlot <- rpart.plot::rpart.plot(TotCopepodsRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+TotCopepodsRegimeResults <- as.data.frame(TotCopepodsRegime[["splits"]])
+TotCopepodsSplit1 <- TotCopepodsRegimeResults$index[1]
+TotCopepodsSplit2 <- TotCopepodsRegimeResults$index[2]
+
 #--------------------------------------------------------------------------------
 #Bloom time and magnitude data
 Bloom <- readr::read_csv(here::here("data","FallBloom_Chlorophyll.csv"))
@@ -330,6 +350,16 @@ FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
 FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
 FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
 FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
+
+#Test for regime shifts in fall bloom duration (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+FallBloomDur <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeDuration)
+FallBloomDurRegime <- rpart::rpart(RangeDuration~YEAR, data=FallBloomDur)
+#FallBloomDurRegimePlot <- rpart.plot::rpart.plot(FallBloomDurRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+FallBloomDurRegimeResults <- as.data.frame(FallBloomDurRegime[["splits"]])
+FallBloomDurSplit1 <- FallBloomDurRegimeResults$index[1]
+FallBloomDurSplit2 <- FallBloomDurRegimeResults$index[2]
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
