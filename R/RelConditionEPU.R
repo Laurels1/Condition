@@ -494,7 +494,8 @@ ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::selec
 ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
 ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
 
-#Pull regime shift years into new data frame to add to plot:
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+  #within one standard error (xstd) of the best tree (lowest xerror)):
 ButtResults <- as.data.frame(ButtRegime[["splits"]])
 ButtSplit1 <- ButtResults$index[1]
 ButtSplit2 <- ButtResults$index[2]
