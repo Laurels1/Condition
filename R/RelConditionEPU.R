@@ -566,7 +566,16 @@ condYear <- condNSppYear
 
 ####For 2021 SOE: 
 condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
-#readr::write_csv(condYear, here::here(out.dir,"RelCond2020_Year.csv"))
+#readr::write_csv(condYear, here::here(out.dir,"RelCond2021_Year.csv"))
+
+####For Jamie Behan and Lisa Kerr data request: 
+annualcondEPUYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
+  dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% 
+  dplyr::filter(SVSPP==102, nCond>=3) %>% ungroup()
+
+
+condYear <- annualcondEPUYear %>% dplyr::select(Species, SVSPP, EPU, YEAR, MeanCond, StdDevCond)
+readr::write_csv(condYear, here::here(out.dir,"RelCond_AmPl_2021_EPU_Year.csv"))
 
 #Summarize annually by Strata
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
