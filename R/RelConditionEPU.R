@@ -542,6 +542,30 @@ AllSppResults <- as.data.frame(AllSppRegime[["splits"]])
 AllSppSplit1 <- AllSppResults$index[1]
 AllSppSplit2 <- AllSppResults$index[2]
 
+#Summarize annually over all EPUs for mackerel:
+annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count(Species) %>% 
+  dplyr::filter(n >= 20)
+
+#Mean mackerel condition for line plot (SingleSpecies_ConditionPlot.R):
+MackCondPlot <- condNSpp %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(MeanCond, YEAR)
+
+#Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+MackCond <- cond.epu %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(RelCond, YEAR)
+MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
+MackPlot <- rpart.plot::rpart.plot(MackRegime)
+#Outputs pruning tree table:
+#printcp(MackRegime)
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+MackResults <- as.data.frame(MackRegime[["splits"]])
+MackSplit1 <- MackResults$index[1]
+MackSplit2 <- MackResults$index[2]
+MackSplit3 <- MackResults$index[3]
+
+
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
