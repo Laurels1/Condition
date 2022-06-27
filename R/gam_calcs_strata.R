@@ -232,19 +232,19 @@ ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.
   dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
 
 ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
-                                 ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
+                                                        ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
 
- SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
-   dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
-   tidyr::spread(season1, CopepodSmallLargeStrata)
- 
- TotCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, TotalCopepodStrata) %>%
-   dplyr::mutate(season1=paste('TotalCopepodStrata', season1, sep="")) %>%
-   tidyr::spread(season1, TotalCopepodStrata)
- 
+SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
+  dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
+  tidyr::spread(season1, CopepodSmallLargeStrata)
+
+TotCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, TotalCopepodStrata) %>%
+  dplyr::mutate(season1=paste('TotalCopepodStrata', season1, sep="")) %>%
+  tidyr::spread(season1, TotalCopepodStrata)
+
 ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, ZooplAbundStrata) %>%
-   dplyr::mutate(season1=paste('ZooplAbundStrata', season1, sep="")) %>%
-   tidyr::spread(season1, ZooplAbundStrata)
+  dplyr::mutate(season1=paste('ZooplAbundStrata', season1, sep="")) %>%
+  tidyr::spread(season1, ZooplAbundStrata)
 
 ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
@@ -259,9 +259,9 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
   dplyr::select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>%
   tidyr::gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
   dplyr::mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
-                       if_else(CalEPU=='SLI.gom', 'GOM',
-                               if_else(CalEPU=='SLI.mab', 'MAB',
-                                       if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
+                              if_else(CalEPU=='SLI.gom', 'GOM',
+                                      if_else(CalEPU=='SLI.mab', 'MAB',
+                                              if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
 CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
 
@@ -430,19 +430,19 @@ Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
 AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
 AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
-         #'StockName', 'Survey',
-        'StockUnit', 
-         'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-         'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
-         'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-         #'CalEPU', 
-         'CopepodSmallLarge',
-   #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
- #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
-    #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
-     #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
-         'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
-          'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
+                #'StockName', 'Survey',
+                'StockUnit', 
+                'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+                'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+                #'CalEPU', 
+                'CopepodSmallLarge',
+                #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+                #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
+                #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+                #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+                'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
+                'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
   distinct()
 
 
@@ -483,50 +483,50 @@ load(here::here("data","stockAssessmentData_05-28-2021.rda"))
 #Also 2019 assessment of GB haddock, 2017 assessment of GOM winter flounder, 2019 assessment of GB YT
 #cusk and blackbelly rosefish don't have n>=3 and years > 20 if only using condition within 1 standard deviation of mean:
 #5/28/2021 pull from StockSMART is missing some StockAreas. Have to use StockName instead:
- StockAssDat <- stockAssessmentData %>%
-   dplyr::filter(StockName %in% c('Spiny dogfish - Atlantic Coast',
-                           'Winter skate - Georges Bank / Southern New England',
-                           'Little skate - Georges Bank / Southern New England',
-                           'Thorny skate - Gulf of Maine',
-                           'Smooth skate - Gulf of Maine',
-                           'Barndoor skate - Georges Bank / Southern New England',
-                           'Clearnose skate - Southern New England / Mid-Atlantic',
-                           'Rosette skate - Southern New England / Mid-Atlantic',
-                           'Atlantic herring - Northwestern Atlantic Coast',
-                           'Silver hake - Gulf of Maine / Northern Georges Bank',
-                           'Silver hake - Southern Georges Bank / Mid-Atlantic',
-                           'Atlantic cod - Gulf of Maine',
-                           'Atlantic cod - Georges Bank',
-                           'Haddock - Gulf of Maine',
-                           'Haddock - Georges Bank',
-                           'Pollock - Gulf of Maine / Georges Bank',
-                           'White hake - Gulf of Maine / Georges Bank',
-                           'Red hake - Gulf of Maine / Northern Georges Bank',
-                           'Red hake - Southern Georges Bank / Mid-Atlantic',
-                           'American plaice - Gulf of Maine / Georges Bank',
-                           'Summer flounder - Mid-Atlantic Coast',
-                           'Yellowtail flounder - Cape Cod / Gulf of Maine',
-                           'Yellowtail flounder - Georges Bank',
-                           'Yellowtail flounder - Southern New England / Mid-Atlantic',
-                           'Winter flounder - Gulf of Maine',
-                           'Winter flounder - Georges Bank',
-                           'Winter flounder - Southern New England / Mid-Atlantic',
-                           'Witch flounder - Northwestern Atlantic Coast',
-                           'Windowpane - Gulf of Maine / Georges Bank',
-                           'Windowpane - Southern New England / Mid-Atlantic',
-                           'Atlantic mackerel - Gulf of Maine / Cape Hatteras',
-                           'Butterfish - Gulf of Maine / Cape Hatteras',
-                           'Bluefish - Atlantic Coast',
-                           'Black sea bass - Mid-Atlantic Coast',
-                           'Scup - Atlantic Coast',
-                           'Acadian redfish - Gulf of Maine / Georges Bank',
-                           'Ocean pout - Northwestern Atlantic Coast',
-                           'Goosefish - Gulf of Maine / Northern Georges Bank',
-                           'Goosefish - Southern Georges Bank / Mid-Atlantic'
-                           ))
- 
- #stockSpp <- distinct(StockAssDat,StockName)
- 
+StockAssDat <- stockAssessmentData %>%
+  dplyr::filter(StockName %in% c('Spiny dogfish - Atlantic Coast',
+                                 'Winter skate - Georges Bank / Southern New England',
+                                 'Little skate - Georges Bank / Southern New England',
+                                 'Thorny skate - Gulf of Maine',
+                                 'Smooth skate - Gulf of Maine',
+                                 'Barndoor skate - Georges Bank / Southern New England',
+                                 'Clearnose skate - Southern New England / Mid-Atlantic',
+                                 'Rosette skate - Southern New England / Mid-Atlantic',
+                                 'Atlantic herring - Northwestern Atlantic Coast',
+                                 'Silver hake - Gulf of Maine / Northern Georges Bank',
+                                 'Silver hake - Southern Georges Bank / Mid-Atlantic',
+                                 'Atlantic cod - Gulf of Maine',
+                                 'Atlantic cod - Georges Bank',
+                                 'Haddock - Gulf of Maine',
+                                 'Haddock - Georges Bank',
+                                 'Pollock - Gulf of Maine / Georges Bank',
+                                 'White hake - Gulf of Maine / Georges Bank',
+                                 'Red hake - Gulf of Maine / Northern Georges Bank',
+                                 'Red hake - Southern Georges Bank / Mid-Atlantic',
+                                 'American plaice - Gulf of Maine / Georges Bank',
+                                 'Summer flounder - Mid-Atlantic Coast',
+                                 'Yellowtail flounder - Cape Cod / Gulf of Maine',
+                                 'Yellowtail flounder - Georges Bank',
+                                 'Yellowtail flounder - Southern New England / Mid-Atlantic',
+                                 'Winter flounder - Gulf of Maine',
+                                 'Winter flounder - Georges Bank',
+                                 'Winter flounder - Southern New England / Mid-Atlantic',
+                                 'Witch flounder - Northwestern Atlantic Coast',
+                                 'Windowpane - Gulf of Maine / Georges Bank',
+                                 'Windowpane - Southern New England / Mid-Atlantic',
+                                 'Atlantic mackerel - Gulf of Maine / Cape Hatteras',
+                                 'Butterfish - Gulf of Maine / Cape Hatteras',
+                                 'Bluefish - Atlantic Coast',
+                                 'Black sea bass - Mid-Atlantic Coast',
+                                 'Scup - Atlantic Coast',
+                                 'Acadian redfish - Gulf of Maine / Georges Bank',
+                                 'Ocean pout - Northwestern Atlantic Coast',
+                                 'Goosefish - Gulf of Maine / Northern Georges Bank',
+                                 'Goosefish - Southern Georges Bank / Mid-Atlantic'
+  ))
+
+#stockSpp <- distinct(StockAssDat,StockName)
+
 #   filter(CommonName %in% c('Spiny dogfish', 'Winter skate', 'Little skate',
 #'                         #'Smooth dogfish' (not enough data when outliers removed)
 #'                         'Thorny skate',
@@ -569,21 +569,21 @@ load(here::here("data","stockAssessmentData_05-28-2021.rda"))
 #' #                        'Blackbelly rosefish',
 #'                         'Atlantic croaker'))
 
-  #                       )) %>%
-  # filter(StockArea %in% c('Atlantic',
-  #                      'Gulf of Maine / Georges Bank',
-  #                      'Northwestern Atlantic Coast',
-  #                      'Gulf of Maine',
-  #                      'Gulf of Maine / Cape Hatteras',
-  #                      'Mid',
-  #                      'Atlantic Coast',
-  #                      'Gulf of Maine / Northern Georges Bank',
-  #                      'Southern Georges Bank / Mid',
-  #                      'Southern Georges Bank / Mid-Atlantic',
-  #                      'Georges Bank',
-  #                      'Georges Bank / Southern New England',
-  #                      'Southern New England / Mid',
-  #                      'Cape Cod / Gulf of Maine'))
+#                       )) %>%
+# filter(StockArea %in% c('Atlantic',
+#                      'Gulf of Maine / Georges Bank',
+#                      'Northwestern Atlantic Coast',
+#                      'Gulf of Maine',
+#                      'Gulf of Maine / Cape Hatteras',
+#                      'Mid',
+#                      'Atlantic Coast',
+#                      'Gulf of Maine / Northern Georges Bank',
+#                      'Southern Georges Bank / Mid',
+#                      'Southern Georges Bank / Mid-Atlantic',
+#                      'Georges Bank',
+#                      'Georges Bank / Southern New England',
+#                      'Southern New England / Mid',
+#                      'Cape Cod / Gulf of Maine'))
 
 
 
@@ -593,10 +593,10 @@ load(here::here("data","stockAssessmentData_05-28-2021.rda"))
 #View(stocksunique)
 
 #by StockName after 5/28/20201 StockSMART pull:
- StockAssDat$StockUnit[StockAssDat$StockName== 'Spiny dogfish - Atlantic Coast'] <- 'Unit'
- StockAssDat$StockUnit[StockAssDat$StockName=='Winter skate - Georges Bank / Southern New England'] <- 'Unit'
- StockAssDat$StockUnit[StockAssDat$StockName=='Little skate - Georges Bank / Southern New England'] <- 'Unit'
- StockAssDat$StockUnit[StockAssDat$StockName=='Thorny skate - Gulf of Maine'] <- 'Unit'
+StockAssDat$StockUnit[StockAssDat$StockName== 'Spiny dogfish - Atlantic Coast'] <- 'Unit'
+StockAssDat$StockUnit[StockAssDat$StockName=='Winter skate - Georges Bank / Southern New England'] <- 'Unit'
+StockAssDat$StockUnit[StockAssDat$StockName=='Little skate - Georges Bank / Southern New England'] <- 'Unit'
+StockAssDat$StockUnit[StockAssDat$StockName=='Thorny skate - Gulf of Maine'] <- 'Unit'
 StockAssDat$StockUnit[StockAssDat$StockName=='Smooth skate - Gulf of Maine'] <- 'Unit'
 StockAssDat$StockUnit[StockAssDat$StockName=='Barndoor skate - Georges Bank / Southern New England'] <- 'Unit'
 StockAssDat$StockUnit[StockAssDat$StockName=='Clearnose skate - Southern New England / Mid-Atlantic'] <- 'Unit'
@@ -632,39 +632,39 @@ StockAssDat$StockUnit[StockAssDat$StockName=='Acadian redfish - Gulf of Maine / 
 StockAssDat$StockUnit[StockAssDat$StockName=='Ocean pout - Northwestern Atlantic Coast'] <- 'Unit'
 StockAssDat$StockUnit[StockAssDat$StockName=='Goosefish - Gulf of Maine / Northern Georges Bank'] <- 'N'
 StockAssDat$StockUnit[StockAssDat$StockName=='Goosefish - Southern Georges Bank / Mid-Atlantic'] <- 'S'
- 
+
 #Reformat StockSmart Regions to merge with StockUnit from stockStrataFall.csv:
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName %in% c(
-     #    'Acadian redfish', 'American plaice', 'Pollock', 'White hake')] <- 'Unit' 
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName == 'Windowpane'] <- 'N'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Northwestern Atlantic Coast'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Mid'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic Coast'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Northern Georges Bank'] <- 'N'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern Georges Bank / Mid'] <- 'S'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank' & StockAssDat$CommonName %in% c(
-     #    'Atlantic cod', 'Haddock', 'Yellowtail flounder', 'Winter flounder')] <- 'GB'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank / Southern New England'] <- 'Unit'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c(
-     #    'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName == 'Windowpane'] <- 'S'
-     #  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
-     # StockAssDat$StockUnit[StockAssDat$StockArea=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName %in% c(
+#    'Acadian redfish', 'American plaice', 'Pollock', 'White hake')] <- 'Unit' 
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Georges Bank' & StockAssDat$CommonName == 'Windowpane'] <- 'N'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Northwestern Atlantic Coast'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Atlantic cod', 'Haddock', 'Winter flounder')] <- 'GOM'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine' & StockAssDat$CommonName %in% c('Thorny skate', 'Smooth skate')] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Cape Hatteras'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Mid'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Atlantic Coast'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Gulf of Maine / Northern Georges Bank'] <- 'N'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern Georges Bank / Mid'] <- 'S'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank' & StockAssDat$CommonName %in% c(
+#    'Atlantic cod', 'Haddock', 'Yellowtail flounder', 'Winter flounder')] <- 'GB'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Georges Bank / Southern New England'] <- 'Unit'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c(
+#    'Yellowtail flounder', 'Winter flounder')] <- 'SNEMA'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName == 'Windowpane'] <- 'S'
+#  StockAssDat$StockUnit[StockAssDat$StockArea=='Southern New England / Mid' & StockAssDat$CommonName %in% c('Clearnose skate', 'Rosette skate')] <- 'Unit'
+# StockAssDat$StockUnit[StockAssDat$StockArea=='Cape Cod / Gulf of Maine'] <- 'CCGOM'
 
 #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment for each year and metric:    
-     # StockAssYear <- StockAssDat %>%
-     #   group_by(Species, Region, Stock, Year, Metric) %>%
-     #   arrange(-AssessmentYear) %>%
-     #   slice(1) %>%
-     #   ungroup()
-     
+# StockAssYear <- StockAssDat %>%
+#   group_by(Species, Region, Stock, Year, Metric) %>%
+#   arrange(-AssessmentYear) %>%
+#   slice(1) %>%
+#   ungroup()
+
 #2019 Opperational assessment for GB haddock only includes 2011-2018, so need to change to 2017 assessment year (not working yet):
-         if(StockAssDat$CommonName== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
-     #From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
+if(StockAssDat$CommonName== 'Haddock' && StockAssDat$StockUnit =="GB" && StockAssDat$AssessmentYear == 2017) {maxAssyr$keep == 'y'}
+#From stockAssessmentData.rda pull with multiple assessment years, select most recent assessment regardless of missing data for metrics:    
 # maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('CommonName'=StockAssDat$CommonName, 'StockArea'=StockAssDat$StockArea),max)
 # names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
 # maxAssyr$keep='y'      
@@ -676,30 +676,30 @@ StockAssDat$StockUnit[StockAssDat$StockName=='Goosefish - Southern Georges Bank 
 #   select(CommonName, StockArea, StockUnit, Year, AssessmentYear, Value, Metric) %>%
 #   spread(Metric, Value) %>%
 #   dplyr::mutate(YEAR = Year) %>%
-  
+
 #for 5/28/2021 data pull, CommonName and StockUnit are missing for many stocks, use StockName:
 maxAssyr=aggregate(StockAssDat$AssessmentYear, by=list('StockName'=StockAssDat$StockName),max)
-  names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
-     maxAssyr$keep='y'      
- 
- say=merge(StockAssDat, maxAssyr, by=c('StockName', 'AssessmentYear'), all.x=T)
- StockAssYear= subset(say, say$keep=='y')       
- 
+names(maxAssyr)[ncol(maxAssyr)]='AssessmentYear' 
+maxAssyr$keep='y'      
+
+say=merge(StockAssDat, maxAssyr, by=c('StockName', 'AssessmentYear'), all.x=T)
+StockAssYear= subset(say, say$keep=='y')       
+
 AssDat <- StockAssYear %>%
   dplyr::select(StockName, StockUnit, Year, AssessmentYear, Value, Metric) %>%
   tidyr::spread(Metric, Value) %>%
   dplyr::mutate(YEAR = Year) %>%
   #Sum total biomass (Abundance) across stocks if running GAMs by unit instead of StockUnit:
-#  group_by(Species, YEAR) %>%
-#  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
+  #  group_by(Species, YEAR) %>%
+  #  dplyr::mutate(TotalBiomass = sum(Abundance, na.rm=TRUE))
   #If by StockUnit:
   dplyr::mutate(TotalBiomass = Abundance) %>%
-#In 5-28-2021 StockSmart pull, have to rename StockName to Species:
+  #In 5-28-2021 StockSmart pull, have to rename StockName to Species:
   #select StockName up to '-' to get Species:
   dplyr::mutate(Species = sub("\\-.*", "", StockName))
 
 
-  #Catch/biomass as index of Fmort for Goosefish for GAMs:
+#Catch/biomass as index of Fmort for Goosefish for GAMs:
 AssDat$FproxyCatch <- (AssDat$Catch/AssDat$Abundance)
 AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort) 
 
@@ -760,49 +760,49 @@ CondColdPool <- dplyr::left_join(CondWAAcoeff, ColdP, by=c('YEAR', 'STRATUM'))
 #CondClean <- CondWAAcoeff
 
 ####If using total biomass (Abundance) or Fmort from StockSMART in GAMs, remove species lacking data: 
- CondClean <- CondColdPool %>%
+CondClean <- CondColdPool %>%
   filter(Species %in% c(
-                    'Smooth dogfish', #(not enough data once outliers removed)
-                      'Spiny dogfish',
-                      'Winter skate',
-                      'Little skate',
-                        'Thorny skate',
-                               'Atlantic herring',
-                                'Silver hake',
-                                'Atlantic cod',
-                        'Haddock',
-                        'Pollock',
-                        'White hake',
-                        'Red hake',
-                   'Spotted hake',
-                        'American plaice',
-                        'Summer flounder',
-                   'Fourspot',
-                        'Yellowtail flounder',
-                        'Winter flounder',
-                        'Witch flounder',
-                        'Windowpane',
-                        'Atlantic mackerel',
-                        'Butterfish',
-                        'Bluefish',
-                        'Black sea bass',
-                        'Scup',
-                    'Weakfish',
-                        'Acadian redfish',
-                   'Sea raven',
-                        'Ocean pout',
-                        'Offshore hake',
-                        'Smooth skate',
-                        'Rosette skate',
-                        'Clearnose skate',
-                        'Barndoor skate',
-                   'Goosefish',
-                   'Atlantic croaker',
-                   'Bluntnose stingray',
-                   'Bullnose ray',
-                  'Longhorn sculpin',
-                   'Roughtail stingray',
-                   'Spiny butterfly ray'))
+    'Smooth dogfish', #(not enough data once outliers removed)
+    'Spiny dogfish',
+    'Winter skate',
+    'Little skate',
+    'Thorny skate',
+    'Atlantic herring',
+    'Silver hake',
+    'Atlantic cod',
+    'Haddock',
+    'Pollock',
+    'White hake',
+    'Red hake',
+    'Spotted hake',
+    'American plaice',
+    'Summer flounder',
+    'Fourspot',
+    'Yellowtail flounder',
+    'Winter flounder',
+    'Witch flounder',
+    'Windowpane',
+    'Atlantic mackerel',
+    'Butterfish',
+    'Bluefish',
+    'Black sea bass',
+    'Scup',
+    'Weakfish',
+    'Acadian redfish',
+    'Sea raven',
+    'Ocean pout',
+    'Offshore hake',
+    'Smooth skate',
+    'Rosette skate',
+    'Clearnose skate',
+    'Barndoor skate',
+    'Goosefish',
+    'Atlantic croaker',
+    'Bluntnose stingray',
+    'Bullnose ray',
+    'Longhorn sculpin',
+    'Roughtail stingray',
+    'Spiny butterfly ray'))
 
 # #Have to remove Atlantic herring, Atlantic cod, YT, Windowpane and mackerel to include AvgStomStrataLag or AvgStomSpringStrata (also removed bluefish) in condition mechanism run:
 #'  CondClean <- CondWAAcoeff %>%      filter(Species %in% c('Smooth dogfish', 'Spiny dogfish', 'Winter skate', 'Little skate',
@@ -885,13 +885,13 @@ EnvirVariables <- CondClean %>%
   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
                 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-               'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-    #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
-  # 'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
-   # 'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
-  # 'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
-              'AvgStomFullStratalag', 
-   #             'Fproxy', 'TotalBiomass', 
+                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
+                #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
+                # 'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+                # 'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+                # 'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+                'AvgStomFullStratalag', 
+                #             'Fproxy', 'TotalBiomass', 
                 'RangeMagnitude','RangeDuration',
                 'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
@@ -899,13 +899,13 @@ EnvirVariables <- CondClean %>%
                 'Winter Temp'= 'AvgTempWinter',
                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
                 'Fall Temp'= 'AvgTempFall', 
-       #         'CopepodSmall_Large'= 'CopepodSmallLarge',
+                #         'CopepodSmall_Large'= 'CopepodSmallLarge',
                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
-        #        'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
-         #       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
-          #      'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
+                #        'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
+                #       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
+                #      'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
                 'Stomach Fullness'= 'AvgStomFullStratalag',  
-            #    'Stock Biomass'= 'TotalBiomass',
+                #    'Stock Biomass'= 'TotalBiomass',
                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
@@ -936,7 +936,7 @@ HabitatAssess <- CondClean %>%
                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
 
- readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
+readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |
@@ -988,34 +988,34 @@ HabitatAssess <- CondClean %>%
 # 
 #Send Andy condSPP:
 condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
-                                       'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
-                                       'WinterTemp'= 'AvgTempWinter',
-                                       'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
-                                       'FallTemp'= 'AvgTempFall', 
-                                       'CopepodSmall_Large'= 'CopepodSmallLarge',
-                                       'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
-                                       #'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
-                                       #'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
-                                       #'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
-                                      'StomachFullness'= 'AvgStomFullStratalag',  
-             #                          'StockBiomass'= 'TotalBiomass',
-                                       'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
-                                       'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
-                                       'AverageLonStrata' = 'AvgLonStrata')
+                                        'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
+                                        'WinterTemp'= 'AvgTempWinter',
+                                        'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
+                                        'FallTemp'= 'AvgTempFall', 
+                                        'CopepodSmall_Large'= 'CopepodSmallLarge',
+                                        'ZooplanktonBiomass'= 'ZooplBiomassAnomaly', 'TotalCopepods'= 'TotalCopepodsMillions', 
+                                        #'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
+                                        #'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
+                                        #'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
+                                        'StomachFullness'= 'AvgStomFullStratalag',  
+                                        #                          'StockBiomass'= 'TotalBiomass',
+                                        'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
+                                        'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
+                                        'AverageLonStrata' = 'AvgLonStrata')
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 
 
- spp <- unique(CondClean$Species)
- datalist = list()
+spp <- unique(CondClean$Species)
+datalist = list()
 
 #}
 ######End code before GAM analyses#####
 
 #Run GAMS by species and StockUnit (not working):
 #SppStockUnit <- unique(CondClean$Species, CondClean$StockUnit)
- 
+
 # 
 # for(sp in spp) {
 #   condSPP <- CondClean %>% dplyr::filter(Species==sp)
@@ -1782,5 +1782,4 @@ saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempSummer2020_AvgCondStrata.csv"))     
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempFall2020_AvgCondStrata.csv"))       
 # #readr::write_csv(AllSPP, here::here(out.dir,"GAM_Summary_AvgTempWinter2020_AvgCondStrata.csv"))   
- 
- 
+
