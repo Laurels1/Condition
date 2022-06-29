@@ -149,48 +149,48 @@ condNSpp <- condN %>% dplyr::add_count(Species) %>%
 #loop over species:
 for (aspecies in speciesList) {  
   print(aspecies)
-
-#Mean species condition for line plot:
-CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
-
-#Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
-Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
-SppPlot <- rpart.plot::rpart.plot(Regime)
-#Outputs pruning tree table:
-printcp(Regime)
-
-#Pull regime shift years into new data frame to add to plot (use the simplest tree 
-#within one standard error (xstd) of the best tree (lowest xerror)):
-Results <- as.data.frame(Regime[["splits"]])
-SppSplit1 <- Results$index[1]
-SppSplit2 <- Results$index[2]
-SppSplit3 <- Results$index[3]
-
-
-annualCondition <- CondPlot 
-
-#change YEAR to continuous numeric for plotting function below:
-annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
-
-speciesNames <- annualCondition
-#    dplyr::filter(sexMF == "F") %>%
-
-
-#See 5 scale colors for viridis:
-#scales::show_col(viridis::viridis_pal()(5))
-#vir <- viridis::viridis_pal()(5)
-
-#Line plot of condition
-p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
-  geom_line()+
-  geom_point() +
-  labs(title= aspecies" Relative Condition", y = "Relative Condition") +
-  geom_vline(xintercept=SppSplit1, color='red')+
-  geom_vline(xintercept=SppSplit2, color='red')+
-  geom_vline(xintercept=SppSplit3, color='red')
-
-ggsave(path= here::here(out.dir),paste0("RelCondition_Regimes_Fall",gsub(aspecies),".jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+  
+  #Mean species condition for line plot:
+  CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
+  
+  #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+  SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
+  Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+  SppPlot <- rpart.plot::rpart.plot(Regime)
+  #Outputs pruning tree table:
+  printcp(Regime)
+  
+  #Pull regime shift years into new data frame to add to plot (use the simplest tree 
+  #within one standard error (xstd) of the best tree (lowest xerror)):
+  Results <- as.data.frame(Regime[["splits"]])
+  SppSplit1 <- Results$index[1]
+  SppSplit2 <- Results$index[2]
+  SppSplit3 <- Results$index[3]
+  
+  
+  annualCondition <- CondPlot 
+  
+  #change YEAR to continuous numeric for plotting function below:
+  annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+  
+  speciesNames <- annualCondition
+  #    dplyr::filter(sexMF == "F") %>%
+  
+  
+  #See 5 scale colors for viridis:
+  #scales::show_col(viridis::viridis_pal()(5))
+  #vir <- viridis::viridis_pal()(5)
+  
+  #Line plot of condition
+  p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+    geom_line()+
+    geom_point() +
+    labs(title= paste0(aspecies, " Relative Condition"), y = "Relative Condition") +
+    geom_vline(xintercept=SppSplit1, color='red')+
+    geom_vline(xintercept=SppSplit2, color='red')+
+    geom_vline(xintercept=SppSplit3, color='red')
+  
+  ggsave(path= here::here(out.dir),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
 ##End automated regime shift plots by species
 
