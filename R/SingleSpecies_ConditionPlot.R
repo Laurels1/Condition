@@ -7,10 +7,10 @@ out.dir="output"
 #Data from RelConditionEPU.R
 #No data available for 2020 due to Covid-19
 #Summarize annually by EPU (use for SOE plots)
-annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
-condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
-  dplyr::filter(n >= 20)
+# annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
+# condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
+#   dplyr::filter(n >= 20)
 
 # #Summarize annually over all EPUs for butterfish WG:
 # annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
@@ -74,37 +74,101 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 # AllSppSplit1 <- AllSppResults$index[1]
 # AllSppSplit2 <- AllSppResults$index[2]
 
+#Single species regime shift plots:
 #Summarize annually over all EPUs for mackerel:
+# annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+# condNSpp <- condN %>% dplyr::add_count(Species) %>% 
+#   dplyr::filter(n >= 20)
+# 
+# #Mean mackerel condition for line plot (SingleSpecies_ConditionPlot.R):
+# MackCondPlot <- condNSpp %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(MeanCond, YEAR)
+# 
+# #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# MackCond <- cond.epu %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(RelCond, YEAR)
+# MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
+# MackPlot <- rpart.plot::rpart.plot(MackRegime)
+# #Outputs pruning tree table:
+# printcp(MackRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot (use the simplest tree 
+# #within one standard error (xstd) of the best tree (lowest xerror)):
+# MackResults <- as.data.frame(MackRegime[["splits"]])
+# MackSplit1 <- MackResults$index[1]
+# MackSplit2 <- MackResults$index[2]
+# #MackSplit3 <- MackResults$index[3]
+# 
+# 
+# #Removed MAB values in 2017 due to low sampling coverage:
+# #annualCondition <- ButtCondPlot 
+# #%>% 
+# #   dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
+# #   dplyr::filter(!(YEAR == 2017)) 
+# 
+# annualCondition <- MackCondPlot 
+# 
+# #change YEAR to continuous numeric for plotting function below:
+# annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+# 
+# speciesNames <- annualCondition
+# #    dplyr::filter(sexMF == "F") %>%
+# 
+# 
+# #See 5 scale colors for viridis:
+# #scales::show_col(viridis::viridis_pal()(5))
+# #vir <- viridis::viridis_pal()(5)
+# 
+# #Line plot of condition
+# p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+#   geom_line()+
+#   geom_point() +
+#   labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
+#   geom_vline(xintercept=MackSplit1, color='red')+
+#   geom_vline(xintercept=MackSplit2, color='red')
+# # +
+# #     geom_vline(xintercept=MackSplit3, color='red')
+# 
+# ggsave(path= here::here(out.dir),"AtlMackerel_Spring_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+
+####Automating regime shift plots by species:
+
+# create a character vector of species names
+speciesList <- cond.epu %>%
+  dplyr::distinct(Species) %>% 
+  dplyr::pull()
+
+
+#Summarize annually over all EPUs:
 annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count(Species) %>% 
   dplyr::filter(n >= 20)
 
-#Mean mackerel condition for line plot (SingleSpecies_ConditionPlot.R):
-MackCondPlot <- condNSpp %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(MeanCond, YEAR)
+#loop over species:
+for (aspecies in speciesList) {  
+  print(aspecies)
+
+#Mean species condition for line plot:
+CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-MackCond <- cond.epu %>% dplyr::filter(Species == 'Atlantic mackerel') %>% dplyr::select(RelCond, YEAR)
-MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
-MackPlot <- rpart.plot::rpart.plot(MackRegime)
+SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
+Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+SppPlot <- rpart.plot::rpart.plot(Regime)
 #Outputs pruning tree table:
-printcp(MackRegime)
+printcp(Regime)
 
 #Pull regime shift years into new data frame to add to plot (use the simplest tree 
 #within one standard error (xstd) of the best tree (lowest xerror)):
-MackResults <- as.data.frame(MackRegime[["splits"]])
-MackSplit1 <- MackResults$index[1]
-MackSplit2 <- MackResults$index[2]
-#MackSplit3 <- MackResults$index[3]
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
 
 
-#Removed MAB values in 2017 due to low sampling coverage:
-#annualCondition <- ButtCondPlot 
-#%>% 
-#   dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) 
-#   dplyr::filter(!(YEAR == 2017)) 
-
-annualCondition <- MackCondPlot 
+annualCondition <- CondPlot 
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
@@ -121,13 +185,16 @@ speciesNames <- annualCondition
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
-  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
-  geom_vline(xintercept=MackSplit1, color='red')+
-  geom_vline(xintercept=MackSplit2, color='red')
-# +
-#     geom_vline(xintercept=MackSplit3, color='red')
+  labs(title= aspecies" Relative Condition", y = "Relative Condition") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')
 
-ggsave(path= here::here(out.dir),"AtlMackerel_Spring_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),paste0("RelCondition_Regimes_Fall",gsub(aspecies),".jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+}
+##End automated regime shift plots by species
+
+
 
 #FEMALE butterfish condition and regime shift:
 # annualCondition <- FemButtCondPlot 
