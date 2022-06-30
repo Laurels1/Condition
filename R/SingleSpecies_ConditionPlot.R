@@ -158,7 +158,8 @@ for (aspecies in speciesList) {
   Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   SppPlot <- rpart.plot::rpart.plot(Regime)
   #Outputs pruning tree table:
-  printcp(Regime)
+  saveRDS(Regime,file = here::here("output","RegimeShifts", paste0(aspecies, "_RelCondition_Regimes_Fall.RDS")))
+ # printcp(Regime)
   
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
   #within one standard error (xstd) of the best tree (lowest xerror)):
@@ -190,7 +191,7 @@ for (aspecies in speciesList) {
     geom_vline(xintercept=SppSplit2, color='red')+
     geom_vline(xintercept=SppSplit3, color='red')
   
-  ggsave(path= here::here(out.dir),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
+  ggsave(path= here::here("output","RegimeShifts"),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
 ##End automated regime shift plots by species
 
