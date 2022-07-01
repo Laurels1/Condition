@@ -154,11 +154,11 @@ for (aspecies in speciesList) {
   CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
   
   #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-  SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
+  SppCond <- cond.epu %>% dplyr::filter(Species == is.na(as.numeric(aspecies))) %>% dplyr::select(RelCond, YEAR)
   Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   SppPlot <- rpart.plot::rpart.plot(Regime)
   #Outputs pruning tree table:
-  saveRDS(Regime,file = here::here("output","RegimeShifts", paste0(aspecies, "_RelCondition_Regimes_Fall.RDS")))
+  saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aspecies, "_RelCondition_Regimes_Fall.RDS")))
  # printcp(Regime)
   
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
