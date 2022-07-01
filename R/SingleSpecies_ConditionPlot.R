@@ -154,13 +154,19 @@ for (aspecies in speciesList) {
   CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
   
   #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-  SppCond <- cond.epu %>% dplyr::filter(Species == is.na(as.numeric(aspecies))) %>% dplyr::select(RelCond, YEAR)
+  SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
   Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   SppPlot <- rpart.plot::rpart.plot(Regime)
   #Outputs pruning tree table:
-  saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aspecies, "_RelCondition_Regimes_Fall.RDS")))
+  saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aspecies,"_RelCondition_Regimes_Fall.RDS")))
  # printcp(Regime)
-  
+ 
+  #Single species example:
+  # SppCond <- cond.epu %>% dplyr::filter(Species == "American plaice") %>% dplyr::select(RelCond, YEAR)
+  # Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+  # saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
+  # readRDS(file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
+   
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
   #within one standard error (xstd) of the best tree (lowest xerror)):
   Results <- as.data.frame(Regime[["splits"]])
@@ -193,6 +199,9 @@ for (aspecies in speciesList) {
   
   ggsave(path= here::here("output","RegimeShifts"),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
+
+#readRDS(file = here::here("output","RegimeShifts", paste0("American plaice_RelCondition_Regimes_Fall.RDS")))
+
 ##End automated regime shift plots by species
 
 
