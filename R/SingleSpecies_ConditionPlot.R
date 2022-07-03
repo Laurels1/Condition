@@ -139,6 +139,12 @@ speciesList <- cond.epu %>%
   dplyr::distinct(Species) %>% 
   dplyr::pull()
 
+numSpecies <- length(speciesList)
+for (i in numSpecies:1) {
+  if (!is.na(as.numeric(speciesList[i]))) {
+    speciesList <-speciesList[-i]
+  }
+}
 
 #Summarize annually over all EPUs:
 annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
