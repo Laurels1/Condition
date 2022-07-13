@@ -139,6 +139,7 @@ speciesList <- cond.epu %>%
   dplyr::distinct(Species) %>% 
   dplyr::pull()
 
+#Only select Species with names that have sufficient data:
 numSpecies <- length(speciesList)
 for (i in numSpecies:1) {
   if (!is.na(as.numeric(speciesList[i]))) {
@@ -162,14 +163,29 @@ for (aspecies in speciesList) {
   #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
   SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
   Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+    #Selecting best fit (gives optimal CP value associated with the minimum error)::
+  # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+  
   SppPlot <- rpart.plot::rpart.plot(Regime)
+  
+# Prettier plot of pruned tree (not currently working):
+# library(rpart.plot)
+# library(RColorBrewer)
+  
+   # ptree<- prune(Regime,
+   #               + cp= Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"])
+   # fancyRpartPlot(ptree, uniform=TRUE,
+   #                  + main="Pruned Classification Tree")
+#plotcp
+  
+  
   #Outputs pruning tree table:
   saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aspecies,"_RelCondition_Regimes_Fall.RDS")))
  # printcp(Regime)
  
   #Single species example:
-  # SppCond <- cond.epu %>% dplyr::filter(Species == "American plaice") %>% dplyr::select(RelCond, YEAR)
-  # Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+   # SppCond <- cond.epu %>% dplyr::filter(Species == "American plaice") %>% dplyr::select(RelCond, YEAR)
+   # Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   # saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
   # readRDS(file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
    
