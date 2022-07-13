@@ -273,6 +273,9 @@ for (aspecies in speciesList) {
     
     # sort models. pick best one, two, five and see how different.
     bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
+    if (length(bestModel) > 1) {
+      bestModel <- bestModel[1]
+    }
     k_suspect <- is_k_suspect(mgcv::k.check(modelResults[[bestModel]]))
     if (k_suspect) {
       print("K is suspect")
@@ -326,7 +329,10 @@ for (aspecies in speciesList) {
 
 # sort models. pick best one, two, five and see how different.
   bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
-
+  if (length(bestModel) > 1) {
+    bestModel <- bestModel[1]
+  }
+  
   finalModels[[aspecies]]$model <- modelResults[[bestModel]]
   finalModels[[aspecies]]$summary <- summary(modelResults[[bestModel]])
   finalModels[[aspecies]]$GCV <- summary(modelResults[[bestModel]])$sp.criterion
