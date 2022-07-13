@@ -15,6 +15,37 @@ source(here::here("R","automate_clean_model.R"))
 
 library(magrittr)
 
+is_k_suspect <- function(model_gamcheck, latlon=FALSE) {
+  
+  EDF_K_RATIO_THRESH <- 0.95
+  P_VALUE_THRESH <- 0.1
+  
+  k_suspect <- 0
+  if (latlon) {
+    edf <- as.numeric(model_gamcheck[2])
+    k <- as.numeric(model_gamcheck[1])
+    p_value <- model_gamcheck[4]
+    edf_k_ratio <- edf / k
+    if ((edf_k_ratio > EDF_K_RATIO_THRESH) && (p_value < P_VALUE_THRESH)) {
+      k_suspect <- 1 
+      print("Suspect K")
+    } 
+  } else {
+    n <- nrow(model_gamcheck)
+    for (i in 1:n) {
+      edf <- model_gamcheck[i,2]
+      k <- model_gamcheck[i,1]
+      p_value <- model_gamcheck[i,4]
+      edf_k_ratio <- edf / k
+      if ((edf_k_ratio > EDF_K_RATIO_THRESH) && (p_value < P_VALUE_THRESH)) {
+        k_suspect <- 1 
+        print("Suspect K")
+      } 
+    }
+  }
+  return(k_suspect)
+}
+
 #na.action = "na.omit" # "na.gam.replace" % mean of column
 NANpropAllowed <- 0.5 # proportion of NA's in an explanatory variable before it is removed from the model
 kstart <- 10
@@ -108,7 +139,6 @@ speciesList <- cond %>%
   dplyr::distinct(Species) %>% 
   dplyr::pull()
 
-
 # Loop over species -------------------------------------------------------
 
 mainList <- list()
@@ -130,106 +160,166 @@ for (aspecies in speciesList) {
 
 
 # Loop over models -----------------------------------------------------
-
-  for (iloop in 1:nrow(modelScenarios)) {
-  #for (iloop in c(113)) {
-   #   message(paste0("model # ",iloop, " for ",aspecies))
-    # pull variable names for the model
-    modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))
-
-    # remove variables identified by data_clean()
-    # modelSpecsPlus contains list of variables for model fitting
-    modelSpecPlus <- automate_clean_model(modelSpecs,df,cleanedData$omittedVars)
-
-    if (is.null(modelSpecPlus$modelSpecs)) { # if null then can not fit model
-      #message("skip")
-      modelResults[[iloop]] <- NA
-      varsUsed[[iloop]] <- NA
-      next
-    } else {
-      modelSpecs <- modelSpecPlus$modelSpecs
-      message(iloop)
-    }
-
-    # pull the variable data
-    if (modelSpecPlus$latlon) { # use lat and lon
+  k_suspect <- TRUE
+  k <- kstart
+  while (k_suspect) {
+    numModels <- nrow(modelScenarios)
+    for (iloop in 1:numModels) {
+      #for (iloop in c(113)) {
+      #   message(paste0("model # ",iloop, " for ",aspecies))
+      # pull variable names for the model
+      modelSpecs <- as.vector(as.matrix(modelScenarios[iloop,]))  
       
-      speciesData <- cleanedData$data %>% 
-        dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs), AverageLonStrata, AverageLatStrata )
+      # remove variables identified by data_clean()
+      # modelSpecsPlus contains list of variables for model fitting
+      modelSpecPlus <- automate_clean_model(modelSpecs,df,cleanedData$omittedVars)
       
-    } else { # dont use lat and lon
-      
-      speciesData <- cleanedData$data %>% 
-        dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs))
-
-    }
-    if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
-      modelResults[[iloop]] <- NA
-      next
-    } 
-    
-    # fit the GAM model
-    # create formula. Each explanatory variable has k = 10.
-    # Add spatialLon, spatialLat jointly
-    
-    # get character vector of explanatory variables
-    explanatoryVariableNames <- speciesData %>% 
-      dplyr::select(-AvgRelCondStrata,-AverageLonStrata,-AverageLatStrata) %>%
-      names()
-    # list all variables used
-    modelSelectedVars <- explanatoryVariableNames
-    
-    
-    while(1) {
-    
-      # create the formula for the model
-      mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," ,bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
-      if (modelSpecPlus$latlon) { # use lat and lon
-        mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
-        modelSelectedVars <- c(modelSelectedVars,"AverageLatStrata","AverageLonStrata")
-      }
-  
-      result <- tryCatch({
-        # fit the GAM
-        modelFit <- mgcv::gam(formula = as.formula(mymodel), data = speciesData) #, na.action = na.action
-      }, error = function(e) {
-        message(paste0(paste0("k = ",k," is too small")))
-        return(NULL)
-      })
-      
-      if (!is.null(result)) {
-        k <- kstart
-        break        
+      if (is.null(modelSpecPlus$modelSpecs)) { # if null then can not fit model
+        #message("skip")
+        modelResults[[iloop]] <- NA
+        varsUsed[[iloop]] <- NA
+        k_suspect <- FALSE
+        next
       } else {
-        if (k < 2*kstart) {
-          k <- k + 1
-          next
-        } else {
-          k <- kstart
-          result <- NULL
-          break
-        }
+        modelSpecs <- modelSpecPlus$modelSpecs
+        message(iloop)
       }
+      
+      # pull the variable data
+      if (modelSpecPlus$latlon) { # use lat and lon
+        
+        speciesData <- cleanedData$data %>% 
+          dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs), AverageLonStrata, AverageLatStrata )
+        
+      } else { # dont use lat and lon
+        
+        speciesData <- cleanedData$data %>% 
+          dplyr::select(AvgRelCondStrata, dplyr::all_of(modelSpecs))
+        
+      }
+      if (nrow(speciesData) < 100) { # too few data points. Should include this in clean function
+        modelResults[[iloop]] <- NA
+        next
+      } 
+      
+      # fit the GAM model
+      # create formula. Each explanatory variable has k = 10.
+      # Add spatialLon, spatialLat jointly
+      
+      # get character vector of explanatory variables
+      explanatoryVariableNames <- speciesData %>% 
+        dplyr::select(-AvgRelCondStrata,-AverageLonStrata,-AverageLatStrata) %>%
+        names()
+      # list all variables used
+      modelSelectedVars <- explanatoryVariableNames
+      
+      while(1) {
+        # create the formula for the model
+        mymodel <- paste("AvgRelCondStrata ", paste0("s(",explanatoryVariableNames," , bs=\"ts\",k=",k,")" ,collapse=" + "), sep="~")
+        if (modelSpecPlus$latlon) { # use lat and lon
+          mymodel <- paste0(mymodel," + s(AverageLatStrata,AverageLonStrata, bs=\"ts\", k=",latlonk,")")
+          modelSelectedVars <- c(modelSelectedVars,"AverageLatStrata","AverageLonStrata")
+        }
+        
+        
+        result <- tryCatch({
+          # fit the GAM
+          modelFit <- mgcv::gam(formula = as.formula(mymodel), data = speciesData) #, na.action = na.action
+        }, error = function(e) {
+          message(paste0(paste0("k = ",k," is too small")))
+          return(NULL)
+        })
+        
+        if (!is.null(result)) {
+          break        
+        } else {
+          if (k < 2*kstart) {
+            k <- k + 1
+            next
+          } else {
+            k <- kstart
+            result <- NULL
+            break
+          }
+        }
+        
+      }
+      
+      
+      
+      #store the results
+      modelResults[[iloop]] <- result
+      # store sp.criterion to select best model
+      if (!is.null(result)) {
+        spcriterion[iloop] <- summary(result)$sp.criterion
+      } else {
+        spcriterion[iloop] <- NA
+      }
+      # list variables used in fit
+      varsUsed[[iloop]] <- modelSelectedVars
+      
+    }
     
-    }
-          
-    #store the results
-    modelResults[[iloop]] <- result
-    # store sp.criterion to select best model
-    if (!is.null(result)) {
-      spcriterion[iloop] <- summary(result)$sp.criterion
+    # store info for each model for later exploration
+    mainList[[aspecies]]$cleaning <- cleanedData # the cleaned version of the data
+    mainList[[aspecies]]$species <- aspecies # species name
+    
+    if (is.null(spcriterion)) { # not enough data for any model
+      finalModels[[aspecies]] <- NULL
+      mainList[[aspecies]]$models <- NULL # the model object
+      next
     } else {
-      spcriterion[iloop] <- NA
+      mainList[[aspecies]]$models <- modelResults
     }
-    # list variables used in fit
-    varsUsed[[iloop]] <- modelSelectedVars
+    
+    # sort models. pick best one, two, five and see how different.
+    bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
+    if (length(bestModel) > 1) {
+      bestModel <- bestModel[1]
+    }
+    k_suspect <- is_k_suspect(mgcv::k.check(modelResults[[bestModel]]))
+    if (k_suspect) {
+      print("K is suspect")
+      if (modelSpecPlus$latlon) {
+        lastRow <- nrow(currentModel)
+        print("Checking lat/lon")
+        currentModel <-mgcv::k.check(modelResults[[bestModel]])
+        print("a")
+        latlon_diagnostics <- currentModel[lastRow,]
+        print("b")
+        k_suspect_lat_lon <- is_k_suspect(latlon_diagnostics, latlon = TRUE)
+        print("c")
+        if (k_suspect_lat_lon) {
+          latlonk <- latlonk * 2
+          print("New latlonk")
+          print(latlonk)
+        } else {
+          k <- k + 2
+        }
+      } else {
+        k <- k + 2
+      }
+      print("New k")
+      print(k)
+    }
 
   }
+  #store the results
+  modelResults[[iloop]] <- result
+  # store sp.criterion to select best model
+  if (!is.null(result)) {
+    spcriterion[iloop] <- summary(result)$sp.criterion
+  } else {
+    spcriterion[iloop] <- NA
+  }
+  # list variables used in fit
+  varsUsed[[iloop]] <- modelSelectedVars
   
+
   # store info for each model for later exploration
   mainList[[aspecies]]$cleaning <- cleanedData # the cleaned version of the data
   mainList[[aspecies]]$species <- aspecies # species name
-
+  
   if (is.null(spcriterion)) { # not enough data for any model
     finalModels[[aspecies]] <- NULL
     mainList[[aspecies]]$models <- NULL # the model object
@@ -238,9 +328,12 @@ for (aspecies in speciesList) {
     mainList[[aspecies]]$models <- modelResults
   }
 
-  # sort models. pick best one, two, five and see how different.
+# sort models. pick best one, two, five and see how different.
   bestModel <- which(min(spcriterion,na.rm=T)==spcriterion)
-
+  if (length(bestModel) > 1) {
+    bestModel <- bestModel[1]
+  }
+  
   finalModels[[aspecies]]$model <- modelResults[[bestModel]]
   finalModels[[aspecies]]$summary <- summary(modelResults[[bestModel]])
   finalModels[[aspecies]]$GCV <- summary(modelResults[[bestModel]])$sp.criterion
@@ -252,6 +345,7 @@ for (aspecies in speciesList) {
   finalModels[[aspecies]]$species <- aspecies
   finalModels[[aspecies]]$variables <- varsUsed[[bestModel]]
   finalModels[[aspecies]]$formula <- modelResults[[bestModel]]$formula
+  
 
   # forward/backward stepwise fit for best model to determine sig variables
   # Stepwise fitting --------------------------------------------------------
