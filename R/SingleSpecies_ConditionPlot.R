@@ -189,6 +189,13 @@ for (aspecies in speciesList) {
   # saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
   # readRDS(file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
    
+  #Select best pruned tree (outputs the row of the cptable that has the number of splits with the lowest error (xerror), 
+  #but not sure how to use that to select the splits below that correspond to the best pruned tree):
+  #e.g. Atlantic menhaden Regimefit shows second row as lowest xerror (2 splits), but Regime$splits includes 4 splits
+ Regimefit <- which.min(Regime$cptable[,"xerror"])
+ #Regime$cptable
+ #Regime$splits
+  
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
   #within one standard error (xstd) of the best tree (lowest xerror)):
   Results <- as.data.frame(Regime[["splits"]])
