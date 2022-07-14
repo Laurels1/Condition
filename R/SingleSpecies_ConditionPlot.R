@@ -202,6 +202,8 @@ for (aspecies in speciesList) {
   SppSplit1 <- Results$index[1]
   SppSplit2 <- Results$index[2]
   SppSplit3 <- Results$index[3]
+  SppSplit4 <- Results$index[4]
+  SppSplit5 <- Results$index[5]
   
   
   annualCondition <- CondPlot 
@@ -224,7 +226,9 @@ for (aspecies in speciesList) {
     labs(title= paste0(aspecies, " Relative Condition"), y = "Relative Condition") +
     geom_vline(xintercept=SppSplit1, color='red')+
     geom_vline(xintercept=SppSplit2, color='red')+
-    geom_vline(xintercept=SppSplit3, color='red')
+    geom_vline(xintercept=SppSplit3, color='red')+
+    geom_vline(xintercept=SppSplit4, color='red')+
+    geom_vline(xintercept=SppSplit5, color='red')
   
   ggsave(path= here::here("output","RegimeShifts"),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
