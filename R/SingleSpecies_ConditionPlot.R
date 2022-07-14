@@ -193,8 +193,12 @@ for (aspecies in speciesList) {
   #but not sure how to use that to select the splits below that correspond to the best pruned tree):
   #e.g. Atlantic menhaden Regimefit shows second row as lowest xerror (2 splits), but Regime$splits includes 4 splits
  Regimefit <- which.min(Regime$cptable[,"xerror"])
- #Regime$cptable
- #Regime$splits
+ 
+ #Test by running single species:
+ SppCond <- cond.epu %>% dplyr::filter(Species == "American plaice") %>% dplyr::select(RelCond, YEAR)
+ Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
+ Regime$cptable
+ Regime$splits
   
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
   #within one standard error (xstd) of the best tree (lowest xerror)):
