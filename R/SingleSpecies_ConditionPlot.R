@@ -285,11 +285,12 @@ p2 <- ggplot(AvgSummerTemp, aes(x = YEAR, y = AvgTempSummer)) +
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
   labs(title="Average Summer Bottom Temperature by EPU", y = "Average Summer Bottom Temp") +
-  geom_vline(xintercept=SummerSplit1, color='red') +
-  geom_vline(xintercept=SummerSplit2, color='red') +
-  geom_vline(xintercept=SummerSplit3, color='red') +
-  geom_vline(xintercept=SummerSplit4, color='red') +
-  geom_vline(xintercept=SummerSplit5, color='red') 
+  geom_vline(xintercept=SummerSplit1, color='red') 
+#+
+  # geom_vline(xintercept=SummerSplit2, color='red') +
+  # geom_vline(xintercept=SummerSplit3, color='red') +
+  # geom_vline(xintercept=SummerSplit4, color='red') +
+  # geom_vline(xintercept=SummerSplit5, color='red') 
 
 ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
@@ -297,16 +298,17 @@ ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU2022.jpg", width = 8
 AvgSpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, AvgTempSpring) %>% group_by(EPU)
 
-#Line plot of summer temp:
+#Line plot of spring temp:
 p2 <- ggplot(AvgSpringTemp, aes(x = YEAR, y = AvgTempSpring)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
   labs(title="Average Spring Bottom Temperature by EPU", y = "Average Spring Bottom Temp") +
-  geom_vline(xintercept=SpringSplit1, color='red') +
-  geom_vline(xintercept=SpringSplit2, color='red') +
-  geom_vline(xintercept=SpringSplit3, color='red') +
-  geom_vline(xintercept=SpringSplit4, color='red')
+  geom_vline(xintercept=SpringSplit1, color='red') 
+#+
+  # geom_vline(xintercept=SpringSplit2, color='red') +
+  # geom_vline(xintercept=SpringSplit3, color='red') +
+  # geom_vline(xintercept=SpringSplit4, color='red')
 
 ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
@@ -314,7 +316,7 @@ ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2022.jpg", width = 8
 AvgFallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, AvgTempFall) %>% group_by(EPU)
 
-#Line plot of summer temp:
+#Line plot of fall temp:
 p2 <- ggplot(AvgFallTemp, aes(x = YEAR, y = AvgTempFall)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
@@ -328,7 +330,7 @@ ggsave(path= here::here(out.dir),"AverageFallBottomTempEPU2022.jpg", width = 8, 
 AvgWinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, AvgTempWinter) %>% group_by(EPU)
 
-#Line plot of summer temp:
+#Line plot of winter temp:
 p2 <- ggplot(AvgWinterTemp, aes(x = YEAR, y = AvgTempWinter)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
@@ -343,7 +345,7 @@ ggsave(path= here::here(out.dir),"AverageWinterBottomTempEPU2022.jpg", width = 8
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
 
-#Line plot of summer temp:
+#Line plot of coppepod small to large index:
 p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
@@ -358,7 +360,7 @@ ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2022.jpg", width = 8, hei
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, RangeMagnitude)
 
-#Line plot of summer temp:
+#Line plot of fall phytoplankton mag:
 p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeMagnitude)) +
   geom_line(color = "blue") +
   geom_point(color = "blue") +
@@ -366,11 +368,11 @@ p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeMagnitude)) +
 
 ggsave(path= here::here(out.dir),"FallBloom_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
-#Fall phyoplanktion bloom duration data (from gam_calcs_strata.R):
+#Fall phytoplankton bloom duration data (from gam_calcs_strata.R):
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, RangeDuration)
 
-#Line plot of summer temp:
+#Line plot of fall phytoplankton duration:
 p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeDuration)) +
   geom_line(color = "blue") +
   geom_point(color = "blue") +
@@ -394,3 +396,228 @@ p2 <- ggplot(TotCopData, aes(x = YEAR, y = TotalCopepodsMillions)) +
   geom_vline(xintercept=TotCopepodsSplit2, color='red')
 
 ggsave(path= here::here(out.dir),"TotalCopepods_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+#Spring Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
+TotalCopSpr <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Spring') %>%
+  dplyr::select(YEAR, TotalCopepodStrata) %>%
+   dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotCop = sum(TotalCopepodStrata)) %>%
+  dplyr::select(YEAR, SumTotCop) %>%
+    dplyr::distinct()
+
+#Regime analysis:
+CopRegime <- TotalCopSpr %>% dplyr::select(SumTotCop, YEAR)
+Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_spr2022.RDS"))
+ printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualCopepods <- CopRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCopepods$YEAR <- as.numeric(as.character(annualCopepods$YEAR))
+
+TotCopRegime <- annualCopepods
+
+#Line plot of condition
+p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Copepods Spring", y = "Total Copepods (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalCondition_Regimes_spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Summer Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
+TotalCopSummer <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Summer') %>%
+  dplyr::select(YEAR, TotalCopepodStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotCop = sum(TotalCopepodStrata)) %>%
+  dplyr::select(YEAR, SumTotCop) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+CopRegime <- TotalCopSummer %>% dplyr::select(SumTotCop, YEAR)
+Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Summer2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualCopepods <- CopRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCopepods$YEAR <- as.numeric(as.character(annualCopepods$YEAR))
+
+TotCopRegime <- annualCopepods
+
+#Line plot of condition
+p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Copepods Summer", y = "Total Copepods (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalCondition_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Fall Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
+TotalCopFall <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Fall') %>%
+  dplyr::select(YEAR, TotalCopepodStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotCop = sum(TotalCopepodStrata)) %>%
+  dplyr::select(YEAR, SumTotCop) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+CopRegime <- TotalCopFall %>% dplyr::select(SumTotCop, YEAR)
+Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Fall2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualCopepods <- CopRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCopepods$YEAR <- as.numeric(as.character(annualCopepods$YEAR))
+
+TotCopRegime <- annualCopepods
+
+#Line plot of condition
+p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Copepods Fall", y = "Total Copepods (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalCondition_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Winter Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
+TotalCopWinter <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Winter') %>%
+  dplyr::select(YEAR, TotalCopepodStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotCop = sum(TotalCopepodStrata)) %>%
+  dplyr::select(YEAR, SumTotCop) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+CopRegime <- TotalCopWinter %>% dplyr::select(SumTotCop, YEAR)
+Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Winter2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualCopepods <- CopRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualCopepods$YEAR <- as.numeric(as.character(annualCopepods$YEAR))
+
+TotCopRegime <- annualCopepods
+
+#Line plot of condition
+p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Copepods Winter", y = "Total Copepods (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalCondition_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
