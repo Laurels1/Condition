@@ -1,7 +1,6 @@
 library(ggplot2)
 library(dplyr)
 
-
 out.dir="output"
 
 #Data from RelConditionEPU.R
@@ -148,7 +147,19 @@ for (i in numSpecies:1) {
 }
 
 #Summarize annually over all EPUs:
-annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+#Filters out numeric Species:
+Sppcond <- cond.epu %>% dplyr::filter(!str_detect(Species,"^\\s*[0-9]*\\s*$")) 
+SDcond <- Sppcond %>%
+  dplyr::group_by(Species, YEAR) %>% 
+   dplyr::summarize(MeanCond = mean(RelCond), 
+                    sd.cond = sd(RelCond, na.rm = TRUE),
+                  nCond = dplyr::n() )
+annualcond <- SDcond %>%
+  mutate(se.cond = sd.cond / sqrt(nCond),
+         lower.ci.cond = MeanCond - qt(1 - (0.05 / 2), nCond - 1) * se.cond,
+         upper.ci.cond = MeanCond + qt(1 - (0.05 / 2), nCond - 1) * se.cond)
+#%>%
+#  mutate(upper.ci = MeanCond+ci, lower.ci = MeanCond-ci)
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count(Species) %>% 
   dplyr::filter(n >= 20)
@@ -158,9 +169,9 @@ for (aspecies in speciesList) {
   print(aspecies)
   
   #Mean species condition for line plot:
-  CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, YEAR)
+  CondPlot <- condNSpp %>% dplyr::filter(Species == aspecies) %>% dplyr::select(MeanCond, upper.ci.cond, lower.ci.cond, YEAR)
   
-  #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+  #Test for regime shifts in each species (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
   SppCond <- cond.epu %>% dplyr::filter(Species == aspecies) %>% dplyr::select(RelCond, YEAR)
   Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   #Selecting best fit (gives optimal CP value associated with the minimum error)::
@@ -222,13 +233,15 @@ for (aspecies in speciesList) {
   #Line plot of condition
   p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
     geom_line()+
+    geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond), colour="black") +
+    geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond)) +
     geom_point() +
     labs(title= paste0(aspecies, " Relative Condition"), y = "Relative Condition") +
     geom_vline(xintercept=SppSplit1, color='red')+
-    geom_vline(xintercept=SppSplit2, color='red')+
-    geom_vline(xintercept=SppSplit3, color='red')+
-    geom_vline(xintercept=SppSplit4, color='red')+
-    geom_vline(xintercept=SppSplit5, color='red')
+    geom_vline(xintercept=SppSplit2, color='orange')+
+    geom_vline(xintercept=SppSplit3, color='green')+
+    geom_vline(xintercept=SppSplit4, color='blue')+
+    geom_vline(xintercept=SppSplit5, color='purple')
   
   ggsave(path= here::here("output","RegimeShifts"),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
