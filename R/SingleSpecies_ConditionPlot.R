@@ -77,7 +77,7 @@ out.dir="output"
 #Summarize annually over all EPUs for mackerel:
 # annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 # condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
-# condNSpp <- condN %>% dplyr::add_count(Species) %>% 
+# condNSpp <- condN %>% dplyr::add_count(Species) %>%
 #   dplyr::filter(n >= 20)
 # 
 # #Mean mackerel condition for line plot (SingleSpecies_ConditionPlot.R):
@@ -198,7 +198,7 @@ for (aspecies in speciesList) {
   # SppCond <- cond.epu %>% dplyr::filter(Species == "American plaice") %>% dplyr::select(RelCond, YEAR)
   # Regime <- rpart::rpart(RelCond~YEAR, data=SppCond)
   # saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
-  # readRDS(file = here::here("output","RegimeShifts", paste0("AmPl_RelCondition_Regimes_Fall.RDS")))
+  # readRDS(file = here::here("output","RegimeShifts", paste0("Atlantic sharpnose shark_RelCondition_Regimes_Fall.RDS")))
   
   #Select best pruned tree (outputs the row of the cptable that has the number of splits with the lowest error (xerror)
   # Used rpart::prune
@@ -238,10 +238,12 @@ for (aspecies in speciesList) {
     geom_point() +
     labs(title= paste0(aspecies, " Relative Condition"), y = "Relative Condition") +
     geom_vline(xintercept=SppSplit1, color='red')+
-    geom_vline(xintercept=SppSplit2, color='orange')+
-    geom_vline(xintercept=SppSplit3, color='green')+
-    geom_vline(xintercept=SppSplit4, color='blue')+
-    geom_vline(xintercept=SppSplit5, color='purple')
+    geom_vline(xintercept=SppSplit2, color='red')+
+    geom_vline(xintercept=SppSplit3, color='red')+
+    geom_vline(xintercept=SppSplit4, color='red')+
+    geom_vline(xintercept=SppSplit5, color='red')+
+    ylim(0.85, 1.21)+
+    xlim(1992, 2021)
   
   ggsave(path= here::here("output","RegimeShifts"),paste0(aspecies, "_RelCondition_Regimes_Fall.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
 }
@@ -363,7 +365,7 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
-  labs(title="Copepod Small/Large Ratio by EPU", y = "Copepod Small/Large Ratio") +
+  labs(title="Copepod Size Index by EPU", y = "Copepod Size Index") +
   geom_vline(xintercept=CopepodEPUSplit1, color='red') +
   geom_vline(xintercept=CopepodEPUSplit2, color='red')
 
@@ -634,3 +636,230 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit5, color='red')
 
 ggsave(path= here::here("output"),"TotalCondition_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
+TotalZoopSpr <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Spring') %>%
+  dplyr::select(YEAR, ZooplAbundStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotalZooSpr = sum(ZooplAbundStrata), na.rm = TRUE) %>%
+  dplyr::select(YEAR, SumTotalZooSpr) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+ZooRegime <- TotalZoopSpr %>% dplyr::select(SumTotalZooSpr, YEAR)
+Regime <- rpart::rpart(SumTotalZooSpr~YEAR, data=ZooRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Spring2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualZoopl <- ZooRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualZoopl$YEAR <- as.numeric(as.character(annualZoopl$YEAR))
+
+TotZooRegime <- annualZoopl
+
+#Line plot of condition
+p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooSpr)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Zooplankton Abundance Spring", y = "Total Zooplankton Abundance (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalZoopl_Regimes_Spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+#Summer Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
+TotalZoopSummer <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Summer') %>%
+  dplyr::select(YEAR, ZooplAbundStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotalZooSummer = sum(ZooplAbundStrata), na.rm = TRUE) %>%
+  dplyr::select(YEAR, SumTotalZooSummer) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+ZooRegime <- TotalZoopSummer %>% dplyr::select(SumTotalZooSummer, YEAR)
+Regime <- rpart::rpart(SumTotalZooSummer~YEAR, data=ZooRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Summer2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualZoopl <- ZooRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualZoopl$YEAR <- as.numeric(as.character(annualZoopl$YEAR))
+
+TotZooRegime <- annualZoopl
+
+#Line plot of condition
+p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooSummer)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Zooplankton Abundance Summer", y = "Total Zooplankton Abundance (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalZoopl_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+#Fall Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
+TotalZoopFall <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Fall') %>%
+  dplyr::select(YEAR, ZooplAbundStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotalZooFall = sum(ZooplAbundStrata), na.rm = TRUE) %>%
+  dplyr::select(YEAR, SumTotalZooFall) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+ZooRegime <- TotalZoopFall %>% dplyr::select(SumTotalZooFall, YEAR)
+Regime <- rpart::rpart(SumTotalZooFall~YEAR, data=ZooRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Fall2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualZoopl <- ZooRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualZoopl$YEAR <- as.numeric(as.character(annualZoopl$YEAR))
+
+TotZooRegime <- annualZoopl
+
+#Line plot of condition
+p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooFall)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Zooplankton Abundance Fall", y = "Total Zooplankton Abundance (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalZoopl_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Winter Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
+TotalZoopWinter <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Winter') %>%
+  dplyr::select(YEAR, ZooplAbundStrata) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::mutate(SumTotalZooWinter = sum(ZooplAbundStrata), na.rm = TRUE) %>%
+  dplyr::select(YEAR, SumTotalZooWinter) %>%
+  dplyr::distinct()
+
+#Regime analysis:
+ZooRegime <- TotalZoopWinter %>% dplyr::select(SumTotalZooWinter, YEAR)
+Regime <- rpart::rpart(SumTotalZooWinter~YEAR, data=ZooRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Winter2022.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+annualZoopl <- ZooRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+annualZoopl$YEAR <- as.numeric(as.character(annualZoopl$YEAR))
+
+TotZooRegime <- annualZoopl
+
+#Line plot of condition
+p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooWinter)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Total Zooplankton Abundance Winter", y = "Total Zooplankton Abundance (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"TotalZoopl_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
