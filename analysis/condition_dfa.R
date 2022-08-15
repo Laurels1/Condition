@@ -6,7 +6,7 @@ library(ggplot2)
 library(dplyr)
 library(future)
 # library(rstan)
-source("R/helper_functions.R")
+source("R/helper_functions.r")
 
 # condition_dat <- readRDS(here::here("data/condSPP.rds")) %>%
 #   select(year = YEAR,
@@ -18,7 +18,13 @@ possibly_dfa_mod <- purrr::possibly(dfa_mod, otherwise = NA_character_)
 ## Load in data
 # cond_year <- readRDS(here::here("data/condSPP_Year.rds"))
 
-sp_list <- ecodata::species_groupings %>% 
+# githubURL <- "https://github.com/NOAA-EDAB/ecodata/raw/master/data/species_groupings.rda"
+# download.file(githubURL,"myfile")
+# load("myfile")
+# write.csv(x = species_groupings, file = "data/species_groupings.csv", row.names = FALSE)
+
+
+sp_list <- read.csv("data/species_groupings.csv") %>% 
   select(common_name = COMNAME,
          # sci_name = SCINAME,
          SVSPP) %>% 
@@ -28,7 +34,7 @@ sp_list <- ecodata::species_groupings %>%
 cond_epu <- readRDS(here::here("data/condSPP_EPU.rds")) %>% 
   filter(!is.na(EPU),
          nCond > 2) %>% 
-  left_join(sp_list) %>% 
+  left_join(sp_list, by = "SVSPP") %>% 
   mutate(EPU = factor(EPU, levels = c("SS", "GB", "GOM", "MAB")),
          cond =  scale(MeanCond, scale = TRUE, center = TRUE),
          common_name = gsub("[[:space:]]", "_", common_name)) %>% 
@@ -55,10 +61,10 @@ epu_long <- cond_epu %>%
             by = "EPU")
 
 
-plan(multisession, workers = parallelly::availableCores() -1)
+# plan(multisession, workers = parallelly::availableCores() -1)
+plan(multisession, workers = 8)
 dfa_out_epu <- epu_long %>%
   group_by(EPU) %>%
-  # head(1) %>%
   mutate(mod = furrr::future_pmap(.l = list(data, m, R, covariate),
                                   .f = function(data, m, R, covariate) dfa_mod(dat = data, m = m, R = R, covariate = covariate,
                                                                                just_testing = TRUE, 
@@ -67,6 +73,8 @@ dfa_out_epu <- epu_long %>%
   arrange(AICc)
 
 plan(sequential)
+
+saveRDS(dfa_out_epu, file = "analysis/condition_dfa_epu.rds")
 
 # epu_wide <- cond_epu %>% 
 #   tidyr::pivot_wider(names_from = YEAR, values_from = cond) %>%
