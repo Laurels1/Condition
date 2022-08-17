@@ -62,12 +62,13 @@ epu_long <- cond_epu %>%
 
 
 # plan(multisession, workers = parallelly::availableCores() -1)
-plan(multisession, workers = 8)
+plan(multisession, workers = 4)
 dfa_out_epu <- epu_long %>%
-  group_by(EPU) %>%
+  # group_by(EPU) %>%
+  # head(2) %>% 
   mutate(mod = furrr::future_pmap(.l = list(data, m, R, covariate),
                                   .f = function(data, m, R, covariate) dfa_mod(dat = data, m = m, R = R, covariate = covariate,
-                                                                               just_testing = TRUE, 
+                                                                               just_testing = TRUE,
                                                                                data_wide = FALSE)),
          AICc = purrr::map(mod, "AICc")) %>%
   arrange(AICc)
@@ -182,7 +183,7 @@ dfa_out <- dfa_mat %>%
 
 plan(sequential)
 
-
+dfa_out <- dfa_out_epu
 best_mod <- dfa_out %>%
   tidyr::unnest(AICc) %>%
   arrange(AICc) %>%
@@ -191,7 +192,8 @@ best_mod <- dfa_out %>%
 
 
 table_mod <- dfa_out %>%
-  select(-mod) %>%
+  select(-mod,
+         -data) %>%
   tidyr::unnest(AICc) %>%
   arrange(AICc)
 

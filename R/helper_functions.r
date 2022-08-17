@@ -14,9 +14,10 @@ dfa_mod <- function(dat, m, R, covariate, just_testing = TRUE, data_wide = TRUE,
 
   
   if(just_testing) {
-    cntl.list = list(minit = 200, 
-                     maxit = 40000, allow.degen = TRUE,
-                     abstol = 0.0001, conv.test.slope.tol = 0.5)
+    cntl.list <- list(minit = 200, maxit = 5200, allow.degen = TRUE, conv.test.slope.tol = 0.5)
+    # cntl.list = list(minit = 200, 
+    #                  maxit = 40000, allow.degen = TRUE,
+    #                  abstol = 0.0001, conv.test.slope.tol = 0.5)
   }
   if(!just_testing){
     cntl.list <- list(minit = 200, maxit = 60000, allow.degen = FALSE,
@@ -29,10 +30,6 @@ dfa_mod <- function(dat, m, R, covariate, just_testing = TRUE, data_wide = TRUE,
       as.matrix
   }
   
-  ## control parameters if just testing convergence tolerance
-
-  #
-  # cntl.list <- list(minit = 200, maxit = 5200, allow.degen = TRUE, conv.test.slope.tol = 0.01)
   mod_list <- list(m = m, R = R)
   
   if(covariate == "none"){
