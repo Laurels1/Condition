@@ -138,14 +138,14 @@ load("survbio.Rdata")
 #fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
  #                                                      LAT = BEGLAT, LON = BEGLON)
 
-#Using survdat data (chance SEX== NA to sex == 0)
-fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#Using survdat data (change SEX== NA to sex == 0)
+#fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
   
 #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
 #Spring survey data to be used for herring, mackerel and OP:
-#spring <- survbio %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+spring <- survbio %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
 
@@ -227,49 +227,49 @@ LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.cha
                                       if_else(Season == 'Spring', as.character('SPRING'), 
                                       if_else(Season == 'Winter', as.character('WINTER'),'NA'))))))))
 
-LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
-#LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
+#LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
+LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
 
 #By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
 # Rob's code
-LWfall_orig <- LWfall
-LWfall <- LWfall[-c(1:nrow(LWfall)),]
-speciesList <- unique(LWfall_orig$SpeciesName)
-numSpecies <- length(speciesList)
-for (spp in 1:numSpecies) {
-  sppTibble <- filter(LWfall_orig,SpeciesName == speciesList[spp])
-  if (nrow(sppTibble) == 1) {
-    LWfall <- rbind(LWfall,sppTibble)
-    newRow <- sppTibble[1,]
-    newRow$Gender <- "Male"
-    LWfall <- rbind(LWfall,newRow)
-    newRow <- sppTibble[1,]
-    newRow$Gender <- "Female"
-    LWfall <- rbind(LWfall,newRow)
-  } else if (nrow(sppTibble) == 3) {
-    LWfall <- rbind(LWfall,sppTibble)
-  }
-}
-
-#spring:
-# LWspring_orig <- LWspring
-# LWspring <- LWspring[-c(1:nrow(LWspring)),]
-# speciesList <- unique(LWspring_orig$SpeciesName)
+# LWfall_orig <- LWfall
+# LWfall <- LWfall[-c(1:nrow(LWfall)),]
+# speciesList <- unique(LWfall_orig$SpeciesName)
 # numSpecies <- length(speciesList)
 # for (spp in 1:numSpecies) {
-#   sppTibble <- filter(LWspring_orig,SpeciesName == speciesList[spp])
+#   sppTibble <- filter(LWfall_orig,SpeciesName == speciesList[spp])
 #   if (nrow(sppTibble) == 1) {
-#     LWspring <- rbind(LWspring,sppTibble)
+#     LWfall <- rbind(LWfall,sppTibble)
 #     newRow <- sppTibble[1,]
 #     newRow$Gender <- "Male"
-#     LWspring <- rbind(LWspring,newRow)
+#     LWfall <- rbind(LWfall,newRow)
 #     newRow <- sppTibble[1,]
 #     newRow$Gender <- "Female"
-#     LWspring <- rbind(LWspring,newRow)
+#     LWfall <- rbind(LWfall,newRow)
 #   } else if (nrow(sppTibble) == 3) {
-#     LWspring <- rbind(LWspring,sppTibble)
+#     LWfall <- rbind(LWfall,sppTibble)
 #   }
 # }
+
+#spring:
+LWspring_orig <- LWspring
+LWspring <- LWspring[-c(1:nrow(LWspring)),]
+speciesList <- unique(LWspring_orig$SpeciesName)
+numSpecies <- length(speciesList)
+for (spp in 1:numSpecies) {
+  sppTibble <- filter(LWspring_orig,SpeciesName == speciesList[spp])
+  if (nrow(sppTibble) == 1) {
+    LWspring <- rbind(LWspring,sppTibble)
+    newRow <- sppTibble[1,]
+    newRow$Gender <- "Male"
+    LWspring <- rbind(LWspring,newRow)
+    newRow <- sppTibble[1,]
+    newRow$Gender <- "Female"
+    LWspring <- rbind(LWspring,newRow)
+  } else if (nrow(sppTibble) == 3) {
+    LWspring <- rbind(LWspring,sppTibble)
+  }
+}
 
 #Add rows to assign SEX when Gender == Combined in Wigley et al ref (didn't work):
 # LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
@@ -277,8 +277,8 @@ for (spp in 1:numSpecies) {
 #   mutate(SEX = as.character(rep(0:2, length.out = n())))
 
 #Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
-#LWpar_sexed <- LWspring %>%
-LWpar_sexed <- LWfall %>% 
+LWpar_sexed <- LWspring %>%
+#LWpar_sexed <- LWfall %>% 
   dplyr::mutate(sex = if_else(Gender == 'Combined', as.character(0),
                       if_else(Gender == 'Unsexed', as.character(0),
                       if_else(Gender == 'Male', as.character(1),
@@ -295,10 +295,10 @@ LWpar_spp <- LWpar_sex %>% mutate(SVSPP = as.numeric(LW_SVSPP))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
+#mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-#mergedata <- left_join(spring, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
+mergedata <- left_join(spring, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
@@ -520,6 +520,14 @@ condEPUlen <- condNSppEPUlen
 #Output for socio-economic models (by year):
 annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
+
+saveRDS(annualcondYear,file = here::here("other",paste0("condSPP_Year.rds")))
+
+#Output for Dynamic Factor Analysis (Scott Large):
+annualcondEPU <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
+  dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
+
+saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppYear <- annualcondYear %>% dplyr::add_count(Species) 
 #%>% 

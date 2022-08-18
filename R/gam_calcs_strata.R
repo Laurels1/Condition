@@ -87,14 +87,26 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 # distinct(AvgRelCondStrata, .keep_all = T)
 
 #Using Survdat:
-#Creating Average Relative Condition by strata, species, sex
-AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
-         AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
-         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
-  distinct(AvgRelCondStrata, .keep_all = T)
+#Creating Average Relative Condition by strata, species, sex (for 2022 ICES Regime shifts and 2021 GAMs)
+# AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
+#   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
+#          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
+#          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
+#   distinct(AvgRelCondStrata, .keep_all = T)
 
+#Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
+# AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>% 
+#   mutate(AvgRelCondYear=(mean(RelCond)), AvgRelCondYearSD = (sd(RelCond)), AvgExpcatchwtYear = (mean(BIOMASS)),
+#          AvgExpcatchnumYear= (mean(ABUNDANCE)), AvgLatYear = (mean(LAT)), 
+#          AvgLonYear = (mean(LON)), AvgBottomTempYear = (mean(BOTTEMP)), AvgSurfaceTempYear = (mean(SURFTEMP))) %>%
+#   distinct(AvgRelCondYear, .keep_all = T)
 
+#Creating Average Relative Condition by Year and EPu, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
+AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>% 
+  mutate(AvgRelCondEPU=(mean(RelCond)), AvgRelCondEPUSD = (sd(RelCond)), AvgExpcatchwtEPU = (mean(BIOMASS)),
+         AvgExpcatchnumEPU= (mean(ABUNDANCE)), AvgLatEPU = (mean(LAT)), 
+         AvgLonEPU = (mean(LON)), AvgBottomTempEPU = (mean(BOTTEMP)), AvgSurfaceTempEPU = (mean(SURFTEMP))) %>%
+  distinct(AvgRelCondEPU, .keep_all = T)
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
 #Couldn't run mechanisms model because data too sparse:
@@ -127,7 +139,7 @@ AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringForma
 AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
   dplyr::mutate_at(c("AvgTempWinter", "AvgTempSpring", "AvgTempSummer", "AvgTempFall"), as.numeric)
 
-CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
+CondAvgTemp <- dplyr::left_join(AvgEPUCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
@@ -403,7 +415,8 @@ stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
 #merge by strata for Condition GAM and multi-model dataset:
-AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
+#*******
+#AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #spring stomach fullness merge by strata for Condition GAM lag:
 # AvgStomSpr <- dplyr::left_join(FallBloomCond, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
@@ -432,8 +445,11 @@ AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","
   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
                 #'StockName', 'Survey',
                 'StockUnit', 
-                'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-                'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+                # Use for condition data by strata:
+                # 'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+                # 'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+                'AvgRelCondYear', 'AvgRelCondYearSD', 'AvgExpcatchwtYear', 'AvgExpcatchnumYear',
+                'AvgLatYear', 'AvgLonYear', 'AvgBottomTempYear', 'AvgSurfaceTempYear',
                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
                 #'CalEPU', 
                 'CopepodSmallLarge',
@@ -707,8 +723,11 @@ AssDat$Fproxy <- ifelse(is.na(AssDat$Fmort),AssDat$FproxyCatch,AssDat$Fmort)
 #readr::write_csv(AssDat, here::here(out.dir,"StockAssessmentData.csv"))
 AssDat2 <- tibble::as_tibble(AssDat) %>%
   dplyr::mutate(Species = trimws(Species))
-#Using Average stomach fullness lagged 1 year:
-CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
+#Using Average stomach fullness lagged 1 year: 
+#***********
+#CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
+
+CondStockAss <- dplyr::left_join(FallBloomCond, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 
@@ -860,13 +879,19 @@ CondClean <- CondColdPool %>%
 #remove yellowtail with AvgExpcatchnumStrata > 600
 # CondCleanTotCop <- CondClean %>%
 #   dplyr::filter((is.na(TotalCopepodsMillions) | TotalCopepodsMillions < 10000))
+#***********
+# CondCleanSpDogWt <- CondClean %>%
+#   dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
+# 
+# CondClean <- CondCleanSpDogWt %>%
+#   dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
+
 
 CondCleanSpDogWt <- CondClean %>%
-  dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
+  dplyr::filter(is.na(AvgExpcatchwtYear) | (!(Species == "Spiny dogfish" & AvgExpcatchwtYear >1500)))
 
 CondClean <- CondCleanSpDogWt %>%
-  dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
-
+  dplyr::filter(is.na(AvgExpcatchnumYear) | (!(Species == "Windowpane" & AvgExpcatchnumYear >250)))
 
 
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
@@ -880,63 +905,63 @@ CondClean <- CondCleanSpDogWt %>%
 
 #Test for colinearity of environmental data:
 # select variables:
-EnvirVariables <- CondClean %>%
-  ungroup() %>%
-  dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-                'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
-                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-                #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
-                # 'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
-                # 'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
-                # 'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
-                'AvgStomFullStratalag', 
-                #             'Fproxy', 'TotalBiomass', 
-                'RangeMagnitude','RangeDuration',
-                'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
-  dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
-                'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp'= 'AvgSurfaceTempStrata',
-                'Winter Temp'= 'AvgTempWinter',
-                'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
-                'Fall Temp'= 'AvgTempFall', 
-                #         'CopepodSmall_Large'= 'CopepodSmallLarge',
-                'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
-                #        'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
-                #       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
-                #      'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
-                'Stomach Fullness'= 'AvgStomFullStratalag',  
-                #    'Stock Biomass'= 'TotalBiomass',
-                'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
-                'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
-                'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
-
+# EnvirVariables <- CondClean %>%
+#   ungroup() %>%
+#   dplyr::select('AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+#                 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+#                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+#                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
+#                 #            'CopepodSmallLargeSprStrata', 'CopepodSmallLargeFallStrata', 'CopepodSmallLargeAnnualStrata',
+#                 # 'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+#                 # 'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+#                 # 'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+#                 'AvgStomFullStratalag', 
+#                 #             'Fproxy', 'TotalBiomass', 
+#                 'RangeMagnitude','RangeDuration',
+#                 'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata', 'YEAR') %>%
+#   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+#                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp'= 'AvgSurfaceTempStrata',
+#                 'Winter Temp'= 'AvgTempWinter',
+#                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+#                 'Fall Temp'= 'AvgTempFall', 
+#                 #         'CopepodSmall_Large'= 'CopepodSmallLarge',
+#                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
+#                 #        'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
+#                 #       'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
+#                 #      'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
+#                 'Stomach Fullness'= 'AvgStomFullStratalag',  
+#                 #    'Stock Biomass'= 'TotalBiomass',
+#                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+#                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
+#                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
+# 
 #Correlation matrix:
 #EnVarCor <- cor(EnvirVariables, use = "complete.obs")
 #::write_csv(as.data.frame(EnVarCor), here::here(out.dir,"Corr_Env.csv"))
 
 #Environmental covariates for NRHA:
 #
-#Environmental covariates for NRHA:
-HabitatAssess <- CondClean %>%
-  ungroup() %>%
-  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'SVSPP', 'sex', 'StockName', 'StockUnit',
-                'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-                'AvgBottomTempStrata','AvgSurfaceTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
-                'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
-                'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata') %>%
-  dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
-                'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata', 
-                'Winter Temp'= 'AvgTempWinter',
-                'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
-                'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
-                'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
-                'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass',
-                'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
-                'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
-                'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
-
-readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
+# #Environmental covariates for NRHA:
+# HabitatAssess <- CondClean %>%
+#   ungroup() %>%
+#   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON', 'Species', 'SVSPP', 'sex', 'StockName', 'StockUnit',
+#                 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+#                 'AvgBottomTempStrata','AvgSurfaceTempStrata','AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+#                 'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions', 
+#                 'AvgStomFullStratalag', 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+#                 'PropColumnColdPool', 'AvgLatStrata', 'AvgLonStrata') %>%
+#   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+#                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata', 
+#                 'Winter Temp'= 'AvgTempWinter',
+#                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+#                 'Fall Temp'= 'AvgTempFall', 'Copepod Small/Large'= 'CopepodSmallLarge',
+#                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions', 
+#                 'Stomach Fullness'= 'AvgStomFullStratalag',  'Stock Biomass'= 'TotalBiomass',
+#                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+#                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Average Lat by Strata' = 'AvgLatStrata',
+#                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
+# 
+# readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |
@@ -987,8 +1012,12 @@ readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan20
 # dev.off()
 # 
 #Send Andy condSPP:
-condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
-                                        'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
+condSPP <-  CondClean %>% dplyr::rename(
+                                        # 'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
+                                        # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
+                                        # by Year:
+                                        'LocalBiomass'='AvgExpcatchwtYear', 'LocalAbundance'= 'AvgExpcatchnumYear',
+                                        'LocalBottomTemp'= 'AvgBottomTempYear','LocalSurfaceTemp'='AvgSurfaceTempYear',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
                                         'FallTemp'= 'AvgTempFall', 
@@ -997,15 +1026,21 @@ condSPP <-  CondClean %>% dplyr::rename('LocalBiomass'='AvgExpcatchwtStrata', 'L
                                         #'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
                                         #'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
                                         #'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
-                                        'StomachFullness'= 'AvgStomFullStratalag',  
+                                       # 'StomachFullness'= 'AvgStomFullStratalag',  
                                         #                          'StockBiomass'= 'TotalBiomass',
                                         'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
-                                        'PropColumnColdPool'= 'PropColumnColdPool', 'AverageLatStrata' = 'AvgLatStrata',
-                                        'AverageLonStrata' = 'AvgLonStrata')
+                                        'PropColumnColdPool'= 'PropColumnColdPool', 
+                                       # 'AverageLatStrata' = 'AvgLatStrata',
+                                       #  'AverageLonStrata' = 'AvgLonStrata'
+                                       # by year:
+                                       'AverageLatYear' = 'AvgLatYear',
+                                       'AverageLonYear' = 'AvgLonYear')
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
-saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
+#*********
+#saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 
+saveRDS(condSPP,file = here::here("other",paste0("condSPP_Year.rds")))
 
 spp <- unique(CondClean$Species)
 datalist = list()
