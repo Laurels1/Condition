@@ -262,6 +262,22 @@ ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
 ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
 
+#Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
+ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU) %>% 
+  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring)),
+                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer)),
+                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall)),
+                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter)),
+                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring)),
+                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer)),
+                 TotCopFallEPU=(sum(TotalCopepodStrataFall)),
+                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter)),
+              ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring)), 
+              ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer)), 
+              ZoopAbundFallEPU=(sum(ZooplAbundStrataFall)), 
+              ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter)), 
+              )
+
 #Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
 load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
@@ -962,6 +978,31 @@ CondClean <- CondCleanSpDogWt %>%
 #                 'Average Lon by Strata' = 'AvgLonStrata', 'Year' = 'YEAR')
 # 
 # readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
+
+# #Environmental covariates for Scott Large Dynamic Factor Analysis:
+DFAdata <- CondClean %>%
+  ungroup() %>%
+  dplyr::select('YEAR', 'CRUISE6', 'EPU', 'SEASON', 'Species', 'SVSPP', 'StockName', 'StockUnit',
+                'AvgRelCondEPU', 'AvgRelCondEPUSD',
+                'AvgExpcatchwtEPU', 'AvgExpcatchnumEPU',
+                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions',
+                'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+                'PropColumnColdPool') 
+# %>%
+#   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+#                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata',
+#                 'Winter Temp'= 'AvgTempWinter',
+#                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+#                 'Fall Temp'= 'AvgTempFall', 'Copepod Small-Large'= 'CopepodSmallLarge',
+#                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions',
+#                 'Stock Biomass'= 'TotalBiomass',
+#                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+#                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Year' = 'YEAR')
+
+readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA.csv"))
+saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA.rds")))
+
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |
