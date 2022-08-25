@@ -2,11 +2,20 @@
 library(MARSS)
 library(tidyr)
 # library(bayesdfa)
+library(patchwork)
 library(ggplot2)
 library(dplyr)
 library(future)
 # library(rstan)
 source("R/helper_functions.r")
+
+# ## Use 75% of the cores on the system but never more than four
+# options(parallelly.availableCores.custom = function() {
+#   ncores <- max(parallel::detectCores(), 1L, na.rm = TRUE)
+#   ncores <- min(as.integer(0.75 * ncores), 4L)
+#   max(1L, ncores)
+# })
+# message(paste("Number of cores available:", availableCores()))
 
 # condition_dat <- readRDS(here::here("data/condSPP.rds")) %>%
 #   select(year = YEAR,
@@ -47,7 +56,9 @@ cond_epu <- readRDS(here::here("data/condSPP_EPU.rds")) %>%
          -MeanCond,
          -StdDevCond,
          -nCond,
-         -SVSPP) 
+         -SVSPP)
+
+
 
 epu_long <- cond_epu %>% 
   group_by(EPU, common_name) %>%
@@ -55,107 +66,30 @@ epu_long <- cond_epu %>%
   ungroup() %>% 
   nest(data = -EPU) %>%
   left_join(expand_grid(EPU = c("SS", "GB", "GOM", "MAB"), 
-                        m = 1:2,
+                        m = 1:3,
                         R = c("diagonal and unequal", "diagonal and equal", "unconstrained" )[1:2],
                         covariate = "none"),
             by = "EPU")
 
 
-# plan(multisession, workers = parallelly::availableCores() -1)
-plan(multisession, workers = 4)
+
+# plan(multisession, workers = availableCores())
 dfa_out_epu <- epu_long %>%
-  # group_by(EPU) %>%
-  # head(2) %>% 
-  mutate(mod = furrr::future_pmap(.l = list(data, m, R, covariate),
-                                  .f = function(data, m, R, covariate) dfa_mod(dat = data, m = m, R = R, covariate = covariate,
-                                                                               just_testing = TRUE,
-                                                                               data_wide = FALSE)),
-         AICc = purrr::map(mod, "AICc")) %>%
+  mutate(
+    mod = purrr::pmap(.l = list(data, m, R, covariate),
+                      .f = function(data, m, R, covariate) possibly_dfa_mod(dat = data, m = m, R = R, covariate = covariate,
+                                                                            just_testing = TRUE,
+                                                                            data_wide = FALSE)),
+    AICc = purrr::map(mod, "AICc")) %>%
   arrange(AICc)
 
-plan(sequential)
+# plan(sequential)
 
 saveRDS(dfa_out_epu, file = "analysis/condition_dfa_epu.rds")
-
-# epu_wide <- cond_epu %>% 
-#   tidyr::pivot_wider(names_from = YEAR, values_from = cond) %>%
-#   nest(data = -c(EPU)) %>%
-#   mutate(data = purrr::map(data, ~  tibble::column_to_rownames(.data = .x, var = "common_name")),
-#          data = purrr::map(data, ~  as.matrix(x = .x)))
 
 
 dat_time <- as.double(unique(cond_epu$YEAR))
 dat_name <- as.character(unique(cond_epu$common_name))
-
-
-# tt <- cond_epu %>% 
-#   nest_by(EPU) %>% 
-#   left_join(expand_grid(EPU = c("SS", "GB", "GOM", "MAB"), 
-#                         m = 1:2,
-#                         R = c("diagonal and unequal", "diagonal and equal", "unconstrained" )[1:2],
-#                         covariate = "none"))
-#   
-
-# 
-# dfa_mat_epu <- epu_wide %>% 
-#   left_join(expand_grid(EPU = c("SS", "GB", "GOM", "MAB"), 
-#                            m = 1:2,
-#                            R = c("diagonal and unequal", "diagonal and equal", "unconstrained" )[1:2],
-#                            covariate = "none"))
-
-
-# plan(multisession, workers = parallelly::availableCores() -1)
-dfa_out_epu <- dfa_mat_epu %>%
-  # group_by(EPU) %>%
-  # mutate(dat = purrr::map(EPU, function(x) epu_wide %>% filter(EPU == .))) %>% 
-  # unnest(cols = dat)
-  # group_by(epu) %>% 
-  head(1) %>%
-  mutate(mod = furrr::future_pmap(.l = list(data, m, R, covariate),
-                                  # .f = function(data, m, R, covariate) dfa_mod(dat = data, m = m, R = R, covariate = covariate, just_testing = TRUE))
-                                  .f = function(data, m, R, covariate) paste0(dat = data, m = m, R = R, covariate = covariate, just_testing = TRUE)),
-         AICc = purrr::map(mod, "AICc")) %>%
-  arrange(AICc)
-
-plan(sequential)
-
-
-
-ggplot(cond_epu, aes(x = YEAR, y = cond, color = common_name)) +
-  geom_line(show.legend = FALSE) +
-  geom_point(show.legend = FALSE) +
-  facet_wrap(~EPU, ncol = 1)
-# 
-# # load(here::here("data/fishcondition.rda"))
-# dat <- fishCondition %>% 
-#   dplyr::mutate(name = gsub(" ", "_", tolower(Species))) %>% 
-#   dplyr::group_by(name, sex, YEAR) %>% 
-#   dplyr::summarize(MeanCond = mean(RelCond),
-#                    nCond = n()) %>% 
-#   dplyr::ungroup() %>% 
-#   dplyr::filter(nCond > 2,
-#                 sex == "F") %>% 
-#   dplyr::select(year = YEAR,
-#                 MeanCond,
-#                 name) %>% 
-#   dplyr::group_by(name) %>% 
-#   dplyr::mutate(MeanCond = scale(MeanCond, scale = TRUE, center = TRUE)) %>% 
-#   tidyr::complete(year = tidyr::full_seq(year, 1)) %>% 
-#   dplyr::arrange(year)
-# 
-# temp_wide <- dat %>% 
-#   tidyr::pivot_wider(names_from = year, values_from = MeanCond) %>%
-#   # tidyr::pivot_wider(values_from = MeanCond) %>% 
-#   ungroup() %>%
-#   dplyr::select(-name) %>%
-#   # t() %>% 
-#   as.matrix()
-# 
-# dat_time <- as.double(unique(dat$year))
-# dat_name <- as.character(unique(dat$name))
-# 
-# row.names(temp_wide) <- dat_name
-
 
 
 t1 <- ggplot(dat, aes(x = year, y = MeanCond, group = name, color = name)) +
@@ -167,111 +101,162 @@ t1 <- ggplot(dat, aes(x = year, y = MeanCond, group = name, color = name)) +
        y = expression(z-scored~condition))
 ggsave(filename = "condition_zscore.png", t1)
 
-dfa_mat <- expand_grid(m = 1:2,#1:nrow(dat),
-                       R = c("diagonal and unequal", "diagonal and equal", "unconstrained" )[1:2],
-                       covariate = "none")
-
-possibly_dfa_mod <- purrr::possibly(dfa_mod, otherwise = NA_character_)
-
-plan(multisession, workers = parallelly::availableCores() -1)
-dfa_out <- dfa_mat %>%
-  # head(1) %>%
-  mutate(mod = furrr::future_pmap(.l = list(m, R, covariate), 
-                                  .f = function(m, R, covariate) possibly_dfa_mod(m = m, R = R, covariate = covariate, just_testing = TRUE)),
-         AICc = purrr::map(mod, "AICc")) %>%
-  arrange(AICc)
-
-plan(sequential)
 
 dfa_out <- dfa_out_epu
 best_mod <- dfa_out %>%
   tidyr::unnest(AICc) %>%
-  arrange(AICc) %>%
-  head(1) %>%
-  pull(mod)
-
+  group_by(EPU) %>% 
+  arrange(AICc, .by_group = TRUE) %>%
+  slice_min(order_by = AICc)
 
 table_mod <- dfa_out %>%
   select(-mod,
          -data) %>%
   tidyr::unnest(AICc) %>%
-  arrange(AICc)
+  group_by(EPU) %>% 
+  arrange(AICc, .by_group = TRUE) %>% 
+  slice_min(order_by = AICc)
 
-best_mod <- best_mod[[1]]
+# best_mod <- best_mod[[1]]
 
-###  make plot of states and CIs
-# “model.ytT”, “xtT”, “model.resids”, “state.resids”, “qqplot.model.resids”, “qqplot.state.resids”, “ytT”, “acf.model.resids”
-autoplot(best_mod,
-         plot.type = "xtT",
-         form = "dfa",
-         rotate = TRUE) +
-  theme_minimal() -> s_plot
+plot_tibble <- best_mod %>% 
+  mutate(
 
-ggsave(filename = here::here("dfa_condition.png"), s_plot)
-
-### Plot of observations
-autoplot(best_mod,
-         plot.type = "model.ytT", #"ytT",
-         form = "dfa",
-         rotate = TRUE)
-
-### Plot of residuals
-autoplot(best_mod,
-         plot.type = "acf.model.resids",
-         form = "dfa",
-         rotate = TRUE)
-
-best_mod <- MARSSparamCIs(best_mod)
-# the rotation matrix for the Z
-z <- coef(best_mod, type = "Z")
-H.inv <- varimax(z)$rotmat
-
-# Get the Z, upZ, lowZ
-# Z.up <- coef
-z.low <- coef(best_mod, type = "Z", what="par.lowCI")
-z.up <- coef(best_mod, type = "Z", what="par.upCI")
-
-z.rot <- z %*% H.inv
-z.rot.up <- z.up %*% H.inv
-z.rot.low <- z.low %*% H.inv
-
-df <- data.frame(name_code = rep(row.names(temp_wide), table_mod$m[1]),
-                 trend = rep(1:table_mod$m[1], each = length(dat_name)),
-                 Z = as.vector(z),
-                 Zup = as.vector(z.up),
-                 Zlow = as.vector(z.low)) %>%
-  mutate(epu = gsub("^.*_(.*)",  "\\1", name_code),
-         spp = gsub("^(.*)_.*$",  "\\1", name_code))
+         fitted.ytT = purrr::map(.x = mod, function(x) autoplot.marssMLE(x,
+                                                                  plot.type = "fitted.ytT",
+                                                                  form = "dfa",
+                                                                  rotate = TRUE,
+                                                                  silent = TRUE)),
+    dfa_plot = purrr::pmap(.l = list(object = mod, EPU = EPU),
+                           .f = function(object, EPU) dfa_plot(object = object, EPU = EPU))) %>% 
+  select(-mod,
+         -data)
 
 
 
-l_plot <- ggplot(data = df,
-       aes(x = name_code,
-           ymin = Zlow,
-           ymax = Zup,
-           y = Z,
-           color = epu)) +
-  geom_hline(yintercept = 0, color = "black") +
-  geom_pointrange(show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
-  facet_wrap(~trend) +
-  coord_flip() +
-  theme_bw()
+dfa_plot <- function(object, EPU = NULL) {
+  
+  marss_obj <- MARSSparamCIs(object)
+  
+  name_code <- rownames(object$marss$data)
+  m <- nrow(object$states.se)
+  
+  if(!is.null(EPU)){
+    title_name <- switch(EPU, 
+                         GOM = "Gulf of Maine",
+                         MAB = "Mid-Atlantic Bight",
+                         SS = "Scotian Shelf",
+                         GB = "Georges Bank")
+  }
+  if(is.null(EPU)){
+    title_name = ""
+  }
+  
+  # the rotation matrix for the Z
+  z <- coef(marss_obj, type = "Z")
+  H.inv <- varimax(z)$rotmat
+  
+  # Get the Z, upZ, lowZ
+  z.low <- coef(marss_obj, type = "Z", what="par.lowCI")
+  z.up <- coef(marss_obj, type = "Z", what="par.upCI")
+  
+  z.rot <- z %*% H.inv
+  z.rot.up <- z.up %*% H.inv
+  z.rot.low <- z.low %*% H.inv
+  
+  factor_df <- data.frame(name_code = rep(name_code, m),
+                   trend = rep(paste0("Trend ", 1:m), each = length(name_code)),
+                   Z = as.vector(z),
+                   Zup = as.vector(z.up),
+                   Zlow = as.vector(z.low)) %>%
+    mutate(spp = gsub("_",  " ", name_code),
+           spp = ifelse(grepl("america?|atlant?|acadia?", spp),
+                        stringr::str_to_sentence(spp),
+                        spp),
+           shape_id = ifelse(Zup <0 | Zlow > 0, 19, 1),
+           fill_id = ifelse(Zup <0 | Zlow > 0, "black", "grey70"),
+           color_id = fill_id
+    ) %>% 
+    arrange(desc(spp)) %>% 
+    mutate(spp = factor(spp, levels = unique(spp)))
+  
+  
+fplot <-  ggplot(data = factor_df,
+         aes(x = spp,
+             ymin = Zlow,
+             ymax = Zup,
+             y = Z)) +
+    geom_hline(yintercept = 0, color = "black") +
+    geom_pointrange(aes(shape = shape_id, fill = fill_id, color = color_id), show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
+    facet_wrap(~trend) +
+    coord_flip() +
+    scale_shape_identity() +
+    scale_fill_identity() +
+    scale_color_identity() +
+    labs(title = title_name,
+         x = "", y = "factor loadings") +
+    theme_minimal()
+  
+  
+  trend_df <- tsSmooth(object, type = "xtT", interval = "confidence", 
+                       level = .95) %>% 
+    mutate(
+      trend = gsub(pattern = "^X", "Trend ", .rownames),
+      year = rep(as.numeric(colnames(object$marss$data)), m))
+  
+  
+tplot <- ggplot(data = trend_df,
+         aes(x = year,
+             ymin = .conf.low,
+             ymax = .conf.up,
+             y = .estimate)) +
+    geom_hline(yintercept = 0, color = "black", alpha = 0.5) +
+    geom_line() +
+    geom_ribbon(alpha = 0.4, show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
+    facet_wrap(~ trend, ncol = m) +
+    labs(x = "", y = "Estimate") +
+    theme_minimal()
+  
+  
+return(fplot/tplot)
+
+} 
+
+
+mds <- coef(best_mod$mod[[4]], type = "R") %>% 
+  dist() %>%        
+  abs() %>%
+  # MASS::isoMDS() %>%
+  # .$points %>%
+  cmdscale() %>%
+  data.frame()
+
+colnames(mds) <- c("d_1", "d_2")
+mds$spp <- rownames(mds)
+
+
+# Plot MDS
+ggplot(data = mds, aes(x = d_1, y = d_2, label = spp)) +
+  geom_point() +
+  geom_text_repel(min.segment.length = 0, box.padding = 0.3, max.overlaps = Inf)
+  
 
 
 
-ggplot(data = df,
-       aes(x = spp,
-           ymin = Zlow,
-           ymax = Zup,
-           y = Z,
-           color = as.factor(trend))) +
-  geom_hline(yintercept = 0, color = "black") +
-  geom_pointrange(show.legend = TRUE, position = position_dodge(width = 0.5)) +
-  facet_wrap(~epu) +
-  labs(color = "State",
-       x = "",
-       y = "factor loadings") +
-  coord_flip() +
-  theme_bw() -> l_plot
+best_mod$mod[[3]]
 
-ggsave(filename = here::here("dfa_condition_loadings.png"), l_plot)
+object <- best_mod$mod[[1]]
+
+object$coef
+
+class(object)
+
+autoplot.marssMLE(best_mod$mod[[1]], plot.type = "xtT", conf.int=TRUE, conf.level=0.95)
+
+head(df)
+
+m <- nrow(object$states.se)
+
+# trend_df <- fitted(object, type = "xtT", interval = "confidence", 
+#             level = .95) %>% 
+
