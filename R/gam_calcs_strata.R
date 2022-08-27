@@ -278,8 +278,9 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU) %>%
               ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter)), 
               )
 
-#Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
-load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
+#Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
+load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
+#load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
 Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)

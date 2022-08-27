@@ -377,7 +377,7 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_vline(xintercept=CopepodEPUSplit1, color='red') +
   geom_vline(xintercept=CopepodEPUSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2019.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Fall phyoplanktion bloom magnitude data (from gam_calcs_strata.R):
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
