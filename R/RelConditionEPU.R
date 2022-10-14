@@ -489,6 +489,12 @@ cond.epu$Species[cond.epu$SVSPP=='101'] <- 'Atlantic halibut'
 
 count(cond.epu, is.na(EPU))
 
+#Output GOM raw condition data for Kim Bastile:
+# RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%
+#   dplyr::select('YEAR', 'EPU', 'Species', 'SVSPP', 
+#                 'RelCond')
+# readr::write_csv(RawCondGOM, here::here(out.dir,"StrataRelCond2021_GOM.csv"))
+
 #Summarize annually and filter based on count of condition data by species
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
@@ -565,16 +571,16 @@ condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>%
 # #readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
 #
 condSS <- condNSppEPU %>% dplyr::filter(EPU == "SS")
-# #readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2019_SS.csv"))
+#readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2021_SS.csv"))
 #
 condGOM <- condNSppEPU %>% dplyr::filter(EPU == "GOM")
-# #readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2019_GOM.csv"))
+#readr::write_csv(condGOM, here::here(out.dir,"AnnualRelCond2021_GOM.csv"))
 #
 condGB <- condNSppEPU %>% dplyr::filter(EPU == "GB")
-# #readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2019_GB.csv"))
+#readr::write_csv(condGB,here::here(out.dir, "AnnualRelCond2021_GB.csv"))
 # #
 condMAB <- condNSppEPU %>% dplyr::filter(EPU == "MAB")
-# # readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2019_MAB.csv"))
+# readr::write_csv(condMAB, here::here(out.dir,"AnnualRelCond2021_MAB.csv"))
 
 
 #select fluke annual condition data:

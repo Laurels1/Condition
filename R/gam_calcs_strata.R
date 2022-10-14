@@ -115,12 +115,12 @@ AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>%
 #  distinct(AvgRelCondEPU, .keep_all = T)
 #---------------------------------------------------------------
 
-#Bringing in average temperature data
+#Bringing in average temperature data from Chris Melrose (e.g. Data For Laurel- Sep 1 2022.xlsx saved as files below)
 #***Before reading EcoMon data, have to change all NaN values to NAs
-AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2020.csv"))
-AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2020.csv"))
-AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2020.csv"))
-AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2020.csv"))
+AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2021.csv"))
+AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2021.csv"))
+AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2021.csv"))
+AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2021.csv"))
 
 AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
@@ -228,7 +228,8 @@ WinterSplit3 <- WinterRegimeResults$index[3]
 
 #--------------------------------------------------------------------------------
 #Bringing in small/large copepods, total copepods and zooplankton abundance anomaly by strata from Harvey Walsh:
-ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData_BTSMeanAbundance.csv"))
+#Change NaN's to NA's before importing
+ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv"), col_names = T)
 
 #****have to separate out into 4 seasons to merge with condition data
 ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%

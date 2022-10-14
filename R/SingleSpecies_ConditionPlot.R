@@ -475,7 +475,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCondition_Regimes_spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"TotalCopepods_Regimes_spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Summer Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopSummer <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Summer') %>%
@@ -531,7 +531,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCondition_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"TotalCopepods_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Fall Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopFall <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Fall') %>%
@@ -587,7 +587,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCondition_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"TotalCopepods_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Winter Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopWinter <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Winter') %>%
@@ -643,7 +643,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCondition_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"TotalCopepods_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Spring Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
 TotalZoopSpr <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Spring') %>%
