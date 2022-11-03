@@ -77,7 +77,7 @@ out.dir="output"
 #Summarize annually over all EPUs for mackerel:
 #USE SPRING SURVEY
 #Do sensitivity tests for maturity cut-offs between 23-29cm and then run for mature and immature fish separately:
-annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23)  %>%
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 28)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 # condNSpp <- condN %>%
@@ -91,7 +91,7 @@ MackCondPlot <- condN %>%
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
-MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23) %>% 
+MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 28) %>% 
   dplyr::select(RelCond, YEAR)
 MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
 MackPlot <- rpart.plot::rpart.plot(MackRegime)
@@ -135,7 +135,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
 # +
 #     geom_vline(xintercept=MackSplit3, color='red')
 
-ggsave(path= here::here(out.dir),"AtlMackerel_Spring_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"AtlMackerel_Spring_Mature28_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
@@ -871,3 +871,58 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooWinter)) +
 
 ggsave(path= here::here("output"),"TotalZoopl_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+
+#Regime shifts in surface temp:
+Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, SURFTEMP) %>%
+  dplyr::filter(!is.na(SURFTEMP)) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::summarize(AvgSurfTemp = mean(SURFTEMP)) 
+
+#Regime analysis:
+SurfRegime <- Surfdata %>% dplyr::select(AvgSurfTemp, YEAR)
+Regime <- rpart::rpart(AvgSurfTemp~YEAR, data=SurfRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#annualZoopl <- SurfRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+SurfRegime$YEAR <- as.numeric(as.character(SurfRegime$YEAR))
+
+AnnualSurfRegime <- SurfRegime
+
+#Line plot of condition
+p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Average Spring Surface Temperature", y = "Average Surface Temperature") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
