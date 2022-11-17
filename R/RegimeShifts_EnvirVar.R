@@ -1,3 +1,4 @@
+
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -7,11 +8,8 @@ out.dir="output"
 
 #Automate zooplankton regime shifts from Harvey's data: EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv from gam_calcs_strata.R
 #Dataset of zooplankton for regime shift
-ZoopSeasonEPU <- ZoopDataEPU %>% dplyr::select(YEAR, EPU,
-                                               CopepodSmLgSpringEPU,CopepodSmLgSummmerEPU,CopepodSmLgFallEPU,
-                                               CopepodSmLgWinterEPU,TotCopSpringEPU,TotCopSummerEPU,
-                                               TotCopFallEPU,TotCopWinterEPU,ZoopAbundSpringEPU, 
-                                               ZoopAbundSummerEPU,ZoopAbundFallEPU,ZoopAbundWinterEPU) %>%
+ZoopSeasonEPU <- ZoopDataEPU %>% dplyr::select(YEAR, EPU, SEASON,
+                                               CopepodSmLgEPU,TotCopEPU,ZoopAbundEPU) %>%
   dplyr::filter(!is.na(EPU)) %>%
   dplyr::distinct()
 Zoop1 <- ZoopSeasonEPU %>%
@@ -19,9 +17,9 @@ Zoop1 <- ZoopSeasonEPU %>%
   #       CopepodSmLgWinterEPU,TotCopSpringEPU,TotCopSummerEPU,
   #       TotCopFallEPU,TotCopWinterEPU,ZoopAbundSpringEPU, 
   #       ZoopAbundSummerEPU,ZoopAbundFallEPU,ZoopAbundWinterEPU)
-  tidyr::gather(key= 'ZoopName', value = 'ZoopData', -YEAR, -EPU)
+  tidyr::gather(key= 'ZoopName', value = 'ZoopData', -YEAR, -EPU, -SEASON)
 
-Zoop <- Zoop1 %>% dplyr::select(YEAR, EPU, ZoopName, ZoopData) %>%
+Zoop <- Zoop1 %>% dplyr::select(YEAR, EPU, SEASON, ZoopName, ZoopData) %>%
   dplyr::mutate(ZoopIndex=paste(ZoopName, EPU, sep="_")) 
 
 ####Automating regime shift plots for zooplankton data by EPU:
@@ -45,12 +43,12 @@ for (aZoop in ZoopList) {
   
 
   #Test for regime shifts in each zooplankton index (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-  ZoopRegDat <- Zoop %>% dplyr::filter(Species == aZoop) %>% dplyr::select(ZoopData, YEAR)
+  ZoopRegDat <- Zoop %>% dplyr::filter(ZoopIndex == aZoop) %>% dplyr::select(ZoopData, ZoopIndex, YEAR, SEASON) 
   Regime <- rpart::rpart(ZoopData~YEAR, data=ZoopRegDat)
   #Selecting best fit (gives optimal CP value associated with the minimum error)::
   # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
   
-  SppPlot <- rpart.plot::rpart.plot(Regime)
+  ZoopRegimePlot <- rpart.plot::rpart.plot(Regime)
   
   # Prettier plot of pruned tree (not currently working):
   # library(rpart.plot)
@@ -73,7 +71,8 @@ for (aZoop in ZoopList) {
   optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
   Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
   Regime <- Regime_pruned
-
+  
+  
   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
   #within one standard error (xstd) of the best tree (lowest xerror)):
   Results <- as.data.frame(Regime[["splits"]])
@@ -89,14 +88,18 @@ for (aZoop in ZoopList) {
   #change YEAR to continuous numeric for plotting function below:
  ZoopDat$YEAR <- as.numeric(as.character(ZoopDat$YEAR))
 
-  
+ ZoopIndexRegime <- ZoopDat %>% dplyr::filter(YEAR >= 1992) %>%
+   dplyr::select(YEAR, SEASON, ZoopData) %>% group_by(SEASON)
+ 
+
   #Line plot of condition
   p2 <- ggplot(ZoopDat, aes(x = YEAR, y = ZoopData)) +
-     geom_line()+
+   geom_line(aes(color = SEASON)) + 
+   scale_color_manual(values = c("red", "blue", "green", "orange")) +
     # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond), colour="black") +
     # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond)) +
-    geom_point() +
-    labs(title= paste0(aZoop, " Regime Shifts"), y = "aZoop") +
+    geom_point(aes(color = SEASON)) +
+    labs(title= paste0(aZoop, " Regime Shifts by Season"), y = "aZoop") +
     geom_vline(xintercept=SppSplit1, color='red')+
     geom_vline(xintercept=SppSplit2, color='red')+
     geom_vline(xintercept=SppSplit3, color='red')+
