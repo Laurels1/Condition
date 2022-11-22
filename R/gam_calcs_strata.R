@@ -273,6 +273,18 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
               ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)), 
               )
 
+#Zooplankton data separately for regime shift:
+ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER', 
+                                                       ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
+
+ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
+
+ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>% 
+  dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
+                 TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
+                 ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)), 
+  )
+
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
 load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
 #load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
