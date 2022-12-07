@@ -78,9 +78,12 @@ out.dir="output"
 #Summarize annually over all EPUs for mackerel:
 #USE SPRING SURVEY
 #Do sensitivity tests for maturity cut-offs between 23-29cm and then run for mature and immature fish separately:
-annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 28)  %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_spring.csv"))
+
 # condNSpp <- condN %>%
 #   dplyr::add_count(Species) %>%
 #   dplyr::filter(n >= 20)
@@ -92,7 +95,7 @@ MackCondPlot <- condN %>%
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
-MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 28) %>% 
+MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23) %>% 
   dplyr::select(RelCond, YEAR)
 MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
 MackPlot <- rpart.plot::rpart.plot(MackRegime)

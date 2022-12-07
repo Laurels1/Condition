@@ -366,14 +366,14 @@ TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
 TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 
 #Test for regime shifts in Total Copepods (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-TotCopepods <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, EPU, TotalCopepodsMillions)
-TotCopepodsRegime <- rpart::rpart(TotalCopepodsMillions~YEAR, data=TotCopepods)
-#TotCopepodsRegimePlot <- rpart.plot::rpart.plot(TotCopepodsRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-TotCopepodsRegimeResults <- as.data.frame(TotCopepodsRegime[["splits"]])
-TotCopepodsSplit1 <- TotCopepodsRegimeResults$index[1]
-TotCopepodsSplit2 <- TotCopepodsRegimeResults$index[2]
+# TotCopepods <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, EPU, TotalCopepodsMillions)
+# TotCopepodsRegime <- rpart::rpart(TotalCopepodsMillions~YEAR, data=TotCopepods)
+# #TotCopepodsRegimePlot <- rpart.plot::rpart.plot(TotCopepodsRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# TotCopepodsRegimeResults <- as.data.frame(TotCopepodsRegime[["splits"]])
+# TotCopepodsSplit1 <- TotCopepodsRegimeResults$index[1]
+# TotCopepodsSplit2 <- TotCopepodsRegimeResults$index[2]
 
 #--------------------------------------------------------------------------------
 #Bloom time and magnitude data
@@ -387,24 +387,24 @@ Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 FallBloomCond <- dplyr::left_join(TotCop, Fallbloom, by = "YEAR")
 
 #Test for regime shifts in fall bloom magnitude (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-FallBloomMag <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeMagnitude)
-FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
-#FallBloomMagRegimePlot <- rpart.plot::rpart.plot(FallBloomMagRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
-FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
-FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
-
-#Test for regime shifts in fall bloom duration (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-FallBloomDur <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeDuration)
-FallBloomDurRegime <- rpart::rpart(RangeDuration~YEAR, data=FallBloomDur)
-#FallBloomDurRegimePlot <- rpart.plot::rpart.plot(FallBloomDurRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-FallBloomDurRegimeResults <- as.data.frame(FallBloomDurRegime[["splits"]])
-FallBloomDurSplit1 <- FallBloomDurRegimeResults$index[1]
-FallBloomDurSplit2 <- FallBloomDurRegimeResults$index[2]
+# FallBloomMag <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeMagnitude)
+# FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
+# #FallBloomMagRegimePlot <- rpart.plot::rpart.plot(FallBloomMagRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
+# FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
+# FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
+# 
+# #Test for regime shifts in fall bloom duration (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# FallBloomDur <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeDuration)
+# FallBloomDurRegime <- rpart::rpart(RangeDuration~YEAR, data=FallBloomDur)
+# #FallBloomDurRegimePlot <- rpart.plot::rpart.plot(FallBloomDurRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# FallBloomDurRegimeResults <- as.data.frame(FallBloomDurRegime[["splits"]])
+# FallBloomDurSplit1 <- FallBloomDurRegimeResults$index[1]
+# FallBloomDurSplit2 <- FallBloomDurRegimeResults$index[2]
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
