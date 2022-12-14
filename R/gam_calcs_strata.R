@@ -115,12 +115,12 @@ AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>%
 #  distinct(AvgRelCondEPU, .keep_all = T)
 #---------------------------------------------------------------
 
-#Bringing in average temperature data
+#Bringing in average temperature data from Chris Melrose (e.g. Data For Laurel- Sep 1 2022.xlsx saved as files below)
 #***Before reading EcoMon data, have to change all NaN values to NAs
-AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2020.csv"))
-AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2020.csv"))
-AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2020.csv"))
-AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2020.csv"))
+AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2021.csv"))
+AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2021.csv"))
+AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2021.csv"))
+AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2021.csv"))
 
 AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=Year) %>%
   gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
@@ -142,58 +142,58 @@ AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
 CondAvgTemp <- dplyr::left_join(AvgEPUCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
-SummerRegime <- rpart::rpart(AvgTempSummer~YEAR, data=SummerTemp)
-#Choose simplest tree within one standard error of best tree: xerror +xstd > xerror of next row 
-printcp(SummerRegime) 
-#SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-SummerRegimeResults <- as.data.frame(SummerRegime[["splits"]])
-SummerSplit1 <- SummerRegimeResults$index[1]
-SummerSplit2 <- SummerRegimeResults$index[2]
-SummerSplit3 <- SummerRegimeResults$index[3]
-SummerSplit4 <- SummerRegimeResults$index[4]
-SummerSplit5 <- SummerRegimeResults$index[5]
-
-#Test for regime shifts in spring temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-SpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSpring)
-SpringRegime <- rpart::rpart(AvgTempSpring~YEAR, data=SpringTemp)
-#Choose simplest tree within one standard error of best tree: xerror +xstd < xerror of next row 
-printcp(SpringRegime)
-SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
-#b <- SpringRegime$cptable[which.min(SpringRegime$cptable[, "xerror"]), "CP"]
-#SpringRegimePrune <- prune(SpringRegime, cp = b)
-#SpringTempPlot2 <- rpart.plot::rpart.plot(SpringRegimePrune)
-
-#Pull regime shift years into new data frame to add to plot:
-SpringRegimeResults <- as.data.frame(SpringRegime[["splits"]])
-SpringSplit1 <- SpringRegimeResults$index[1]
-SpringSplit2 <- SpringRegimeResults$index[2]
-SpringSplit3 <- SpringRegimeResults$index[3]
-SpringSplit4 <- SpringRegimeResults$index[4]
-
-#Test for regime shifts in Fall temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
-FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
-#FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
-FallSplit1 <- FallRegimeResults$index[1]
-FallSplit2 <- FallRegimeResults$index[2]
-FallSplit3 <- FallRegimeResults$index[3]
-
-#Test for regime shifts in Winter temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-WinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempWinter)
-WinterRegime <- rpart::rpart(AvgTempWinter~YEAR, data=WinterTemp)
-#WinterTempRegimePlot <- rpart.plot::rpart.plot(WinterRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-WinterRegimeResults <- as.data.frame(WinterRegime[["splits"]])
-WinterSplit1 <- WinterRegimeResults$index[1]
-WinterSplit2 <- WinterRegimeResults$index[2]
-WinterSplit3 <- WinterRegimeResults$index[3]
+# SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
+# SummerRegime <- rpart::rpart(AvgTempSummer~YEAR, data=SummerTemp)
+# #Choose simplest tree within one standard error of best tree: xerror +xstd > xerror of next row 
+# printcp(SummerRegime) 
+# #SummerTempRegimePlot <- rpart.plot::rpart.plot(SummerRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# SummerRegimeResults <- as.data.frame(SummerRegime[["splits"]])
+# SummerSplit1 <- SummerRegimeResults$index[1]
+# SummerSplit2 <- SummerRegimeResults$index[2]
+# SummerSplit3 <- SummerRegimeResults$index[3]
+# SummerSplit4 <- SummerRegimeResults$index[4]
+# SummerSplit5 <- SummerRegimeResults$index[5]
+# 
+# #Test for regime shifts in spring temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# SpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSpring)
+# SpringRegime <- rpart::rpart(AvgTempSpring~YEAR, data=SpringTemp)
+# #Choose simplest tree within one standard error of best tree: xerror +xstd < xerror of next row 
+# printcp(SpringRegime)
+# SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
+# #b <- SpringRegime$cptable[which.min(SpringRegime$cptable[, "xerror"]), "CP"]
+# #SpringRegimePrune <- prune(SpringRegime, cp = b)
+# #SpringTempPlot2 <- rpart.plot::rpart.plot(SpringRegimePrune)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# SpringRegimeResults <- as.data.frame(SpringRegime[["splits"]])
+# SpringSplit1 <- SpringRegimeResults$index[1]
+# SpringSplit2 <- SpringRegimeResults$index[2]
+# SpringSplit3 <- SpringRegimeResults$index[3]
+# SpringSplit4 <- SpringRegimeResults$index[4]
+# 
+# #Test for regime shifts in Fall temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
+# FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
+# #FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
+# FallSplit1 <- FallRegimeResults$index[1]
+# FallSplit2 <- FallRegimeResults$index[2]
+# FallSplit3 <- FallRegimeResults$index[3]
+# 
+# #Test for regime shifts in Winter temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# WinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempWinter)
+# WinterRegime <- rpart::rpart(AvgTempWinter~YEAR, data=WinterTemp)
+# #WinterTempRegimePlot <- rpart.plot::rpart.plot(WinterRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# WinterRegimeResults <- as.data.frame(WinterRegime[["splits"]])
+# WinterSplit1 <- WinterRegimeResults$index[1]
+# WinterSplit2 <- WinterRegimeResults$index[2]
+# WinterSplit3 <- WinterRegimeResults$index[3]
 
 #----------------------------------------------------------------------------------
 #Bring in GLORYS bottom temperature data by NEFSC survey strata (mismatch of some strata currently)
@@ -228,23 +228,27 @@ WinterSplit3 <- WinterRegimeResults$index[3]
 
 #--------------------------------------------------------------------------------
 #Bringing in small/large copepods, total copepods and zooplankton abundance anomaly by strata from Harvey Walsh:
-ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData_BTSMeanAbundance.csv"))
+#Change NaN's to NA's before importing
+ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv"), col_names = T)
 
 #****have to separate out into 4 seasons to merge with condition data
 ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%
-  dplyr::filter(LgCalanoida != 0) %>%
-  dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
   dplyr::mutate(TotalCopepodStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
   dplyr::mutate(ZooplAbundStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
                                      Cirripedia+Cnidaria+Cyclopoida+Decapoda+
                                      Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
                                      Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
                                      Protozoa+Thecosomata+Tunicata)/1000) %>%
+  dplyr::filter(LgCalanoida != 0) %>%
+  dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
   dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) %>%
   dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
 
-ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
-                                                        ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
+ ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
+                                                         ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
+
+#ZooSeason <- ZoopStr %>% dplyr::mutate(SEASON = ifelse(Seasons == '1', 'WINTER', 
+#                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
 
 SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
   dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
@@ -263,23 +267,38 @@ ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
 
 #Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
-ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU) %>% 
-  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring)),
-                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer)),
-                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall)),
-                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter)),
-                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring)),
-                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer)),
-                 TotCopFallEPU=(sum(TotalCopepodStrataFall)),
-                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter)),
-              ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring)), 
-              ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer)), 
-              ZoopAbundFallEPU=(sum(ZooplAbundStrataFall)), 
-              ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter)), 
+ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
+  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
+                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
+                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
+                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
+                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
+                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
+                 TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
+                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
+                 ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)), 
+                 ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)), 
+                 ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)), 
+                 ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)), 
               )
 
-#Bringing in ratio of small to large copepods (by EPU from Ryan Morse):
-load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
+#readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2021.csv")) 
+
+#Zooplankton data separately for regime shift:
+# ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER', 
+#                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
+# 
+# ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
+# 
+# ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>% 
+#   dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
+#                  TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
+#                  ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)), 
+#   )
+# 
+#Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
+load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
+#load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #View(Zooplankton_Primary_Prod)
 Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
@@ -291,7 +310,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
                                       if_else(CalEPU=='SLI.mab', 'MAB',
                                               if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
 
-CondCal <- dplyr::left_join(CondAvgTemp, CalfinFormat, by=c("YEAR", "EPU"))
+CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
@@ -349,14 +368,14 @@ TotalCopepods <- readr::read_csv(here::here("data","TotalCopepods2020.csv"))
 TotCop <- dplyr::left_join(CondZoo, TotalCopepods, by = c("YEAR", "EPU"))
 
 #Test for regime shifts in Total Copepods (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-TotCopepods <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, TotalCopepodsMillions)
-TotCopepodsRegime <- rpart::rpart(TotalCopepodsMillions~YEAR, data=TotCopepods)
-#TotCopepodsRegimePlot <- rpart.plot::rpart.plot(TotCopepodsRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-TotCopepodsRegimeResults <- as.data.frame(TotCopepodsRegime[["splits"]])
-TotCopepodsSplit1 <- TotCopepodsRegimeResults$index[1]
-TotCopepodsSplit2 <- TotCopepodsRegimeResults$index[2]
+# TotCopepods <- TotalCopepods %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, EPU, TotalCopepodsMillions)
+# TotCopepodsRegime <- rpart::rpart(TotalCopepodsMillions~YEAR, data=TotCopepods)
+# #TotCopepodsRegimePlot <- rpart.plot::rpart.plot(TotCopepodsRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# TotCopepodsRegimeResults <- as.data.frame(TotCopepodsRegime[["splits"]])
+# TotCopepodsSplit1 <- TotCopepodsRegimeResults$index[1]
+# TotCopepodsSplit2 <- TotCopepodsRegimeResults$index[2]
 
 #--------------------------------------------------------------------------------
 #Bloom time and magnitude data
@@ -370,24 +389,24 @@ Fallbloom <- Bloom %>% dplyr::mutate(YEAR = RecruitmentYear)
 FallBloomCond <- dplyr::left_join(TotCop, Fallbloom, by = "YEAR")
 
 #Test for regime shifts in fall bloom magnitude (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-FallBloomMag <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeMagnitude)
-FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
-#FallBloomMagRegimePlot <- rpart.plot::rpart.plot(FallBloomMagRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
-FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
-FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
-
-#Test for regime shifts in fall bloom duration (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-FallBloomDur <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeDuration)
-FallBloomDurRegime <- rpart::rpart(RangeDuration~YEAR, data=FallBloomDur)
-#FallBloomDurRegimePlot <- rpart.plot::rpart.plot(FallBloomDurRegime)
-
-#Pull regime shift years into new data frame to add to plot:
-FallBloomDurRegimeResults <- as.data.frame(FallBloomDurRegime[["splits"]])
-FallBloomDurSplit1 <- FallBloomDurRegimeResults$index[1]
-FallBloomDurSplit2 <- FallBloomDurRegimeResults$index[2]
+# FallBloomMag <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeMagnitude)
+# FallBloomMagRegime <- rpart::rpart(RangeMagnitude~YEAR, data=FallBloomMag)
+# #FallBloomMagRegimePlot <- rpart.plot::rpart.plot(FallBloomMagRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# FallBloomMagRegimeResults <- as.data.frame(FallBloomMagRegime[["splits"]])
+# FallBloomMagSplit1 <- FallBloomMagRegimeResults$index[1]
+# FallBloomMagSplit2 <- FallBloomMagRegimeResults$index[2]
+# 
+# #Test for regime shifts in fall bloom duration (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+# FallBloomDur <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, RangeDuration)
+# FallBloomDurRegime <- rpart::rpart(RangeDuration~YEAR, data=FallBloomDur)
+# #FallBloomDurRegimePlot <- rpart.plot::rpart.plot(FallBloomDurRegime)
+# 
+# #Pull regime shift years into new data frame to add to plot:
+# FallBloomDurRegimeResults <- as.data.frame(FallBloomDurRegime[["splits"]])
+# FallBloomDurSplit1 <- FallBloomDurRegimeResults$index[1]
+# FallBloomDurSplit2 <- FallBloomDurRegimeResults$index[2]
 
 #-------------------------------------------------------------------------------- 
 #Average stomach fullness by Species, YEAR, EPU and sex for the year before
@@ -450,32 +469,32 @@ stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
 #Lagged stomach index by strata for Condition GAM:
-A <- AvgStom %>% dplyr::select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
-B <- unique(A)
-C <- B %>% dplyr::mutate(YEARstom= YEAR)
-D <- C %>% dplyr::ungroup()
-E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
-Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
-AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
-                #'StockName', 'Survey',
-                'StockUnit', 
-                # Use for condition data by strata:
-                # 'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-                # 'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
-                'AvgRelCondYear', 'AvgRelCondYearSD', 'AvgExpcatchwtYear', 'AvgExpcatchnumYear',
-                'AvgLatYear', 'AvgLonYear', 'AvgBottomTempYear', 'AvgSurfaceTempYear',
-                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                #'CalEPU', 
-                'CopepodSmallLarge',
-                #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
-                #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
-                #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
-                #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
-                'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
-                'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
-  distinct()
+#' A <- AvgStom %>% dplyr::select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
+#' B <- unique(A)
+#' C <- B %>% dplyr::mutate(YEARstom= YEAR)
+#' D <- C %>% dplyr::ungroup()
+#' E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
+#' Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+#' AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
+#' AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
+#'   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
+#'                 #'StockName', 'Survey',
+#'                 'StockUnit', 
+#'                 # Use for condition data by strata:
+#'                 # 'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+#'                 # 'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+#'                 'AvgRelCondYear', 'AvgRelCondYearSD', 'AvgExpcatchwtYear', 'AvgExpcatchnumYear',
+#'                 'AvgLatYear', 'AvgLonYear', 'AvgBottomTempYear', 'AvgSurfaceTempYear',
+#'                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+#'                 #'CalEPU', 
+#'                 'CopepodSmallLarge',
+#'                 #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+#'                 #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
+#'                 #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+#'                 #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+#'                 'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
+#'                 'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
+#'   distinct()
 
 
 #Lagged stomach index by tow for multi-model dataset:
@@ -979,16 +998,19 @@ CondClean <- CondCleanSpDogWt %>%
 # 
 # readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
 
-# #Environmental covariates for Scott Large Dynamic Factor Analysis:
-DFAdata <- CondClean %>%
+# #Environmental covariates by EPU for Scott Large Dynamic Factor Analysis:
+DFAdata <- ZoopDataEPU %>%
   ungroup() %>%
-  dplyr::select('YEAR', 'CRUISE6', 'EPU', 'SEASON', 'Species', 'SVSPP', 'StockName', 'StockUnit',
+  dplyr::select('YEAR', 'CRUISE6', 'EPU', 'SEASON', 'Species', 'SVSPP', 
                 'AvgRelCondEPU', 'AvgRelCondEPUSD',
                 'AvgExpcatchwtEPU', 'AvgExpcatchnumEPU',
                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                'CopepodSmallLarge','ZooplBiomassAnomaly', 'TotalCopepodsMillions',
-                'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
-                'PropColumnColdPool') 
+                'CopepodSmLgSpringEPU','CopepodSmLgSummmerEPU','CopepodSmLgFallEPU',
+                'CopepodSmLgWinterEPU', 'TotCopSpringEPU','TotCopSummerEPU',
+                'TotCopFallEPU','TotCopWinterEPU', 'ZoopAbundSpringEPU', 
+                'ZoopAbundSummerEPU', 'ZoopAbundFallEPU', 'ZoopAbundWinterEPU')
+                # 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+                # 'PropColumnColdPool') 
 # %>%
 #   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
 #                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata',
@@ -1000,8 +1022,8 @@ DFAdata <- CondClean %>%
 #                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
 #                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Year' = 'YEAR')
 
-readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA.csv"))
-saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA.rds")))
+readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
+saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA2022.rds")))
 
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
