@@ -7,7 +7,7 @@ library(ggplot2)
 library(dplyr)
 library(future)
 # library(rstan)
-source("R/helper_functions.r")
+source(here::here("R/helper_functions.r"))
 
 # ## Use 75% of the cores on the system but never more than four
 # options(parallelly.availableCores.custom = function() {
@@ -33,7 +33,7 @@ possibly_dfa_mod <- purrr::possibly(dfa_mod, otherwise = NA_character_)
 # write.csv(x = species_groupings, file = "data/species_groupings.csv", row.names = FALSE)
 
 
-sp_list <- read.csv("data/species_groupings.csv") %>% 
+sp_list <- read.csv(here::here("data/species_groupings.csv")) %>% 
   select(common_name = COMNAME,
          # sci_name = SCINAME,
          SVSPP) %>% 
@@ -58,8 +58,7 @@ cond_epu <- readRDS(here::here("data/condSPP_EPU.rds")) %>%
          -nCond,
          -SVSPP)
 
-
-
+## First check out the base models without covariates
 epu_long <- cond_epu %>% 
   group_by(EPU, common_name) %>%
   filter(!all(is.na(cond))) %>%
@@ -67,14 +66,12 @@ epu_long <- cond_epu %>%
   nest(data = -EPU) %>%
   left_join(expand_grid(EPU = c("SS", "GB", "GOM", "MAB"), 
                         m = 1:3,
-                        R = c("diagonal and unequal", "diagonal and equal", "unconstrained" )[1:2],
+                        R = c("diagonal and unequal", "diagonal and equal", "unconstrained" ),
                         covariate = "none"),
             by = "EPU")
 
 
-
-# plan(multisession, workers = availableCores())
-dfa_out_epu <- epu_long %>%
+dfa_out <- epu_long %>%
   mutate(
     mod = purrr::pmap(.l = list(data, m, R, covariate),
                       .f = function(data, m, R, covariate) possibly_dfa_mod(dat = data, m = m, R = R, covariate = covariate,
@@ -83,26 +80,25 @@ dfa_out_epu <- epu_long %>%
     AICc = purrr::map(mod, "AICc")) %>%
   arrange(AICc)
 
-# plan(sequential)
-
-saveRDS(dfa_out_epu, file = "analysis/condition_dfa_epu.rds")
+saveRDS(dfa_out, file = "analysis/condition_dfa_epu.rds")
 
 
-dat_time <- as.double(unique(cond_epu$YEAR))
-dat_name <- as.character(unique(cond_epu$common_name))
+# dat_time <- as.double(unique(cond_epu$YEAR))
+# dat_name <- as.character(unique(cond_epu$common_name))
+# 
+# 
+# t1 <- ggplot(dat, aes(x = year, y = MeanCond, group = name, color = name)) +
+#   geom_line(show.legend = FALSE) +
+#   theme_minimal() +
+#   labs(title = "Condition",
+#        subtitle = "n = 24 fish taxa",
+#        x = "Year",
+#        y = expression(z-scored~condition))
+# ggsave(filename = "condition_zscore.png", t1)
 
+dfa_out <- readRDS(here::here("analysis/condition_dfa_epu.rds"))
 
-t1 <- ggplot(dat, aes(x = year, y = MeanCond, group = name, color = name)) +
-  geom_line(show.legend = FALSE) +
-  theme_minimal() +
-  labs(title = "Condition",
-       subtitle = "n = 24 fish taxa",
-       x = "Year",
-       y = expression(z-scored~condition))
-ggsave(filename = "condition_zscore.png", t1)
-
-
-dfa_out <- dfa_out_epu
+# dfa_out <- dfa_out_epu
 best_mod <- dfa_out %>%
   tidyr::unnest(AICc) %>%
   group_by(EPU) %>% 
@@ -118,6 +114,44 @@ table_mod <- dfa_out %>%
   slice_min(order_by = AICc)
 
 # best_mod <- best_mod[[1]]
+
+
+## Add covariate matrix
+cov_dat <- readRDS(here::here("data/dfa_covariates.rds")) %>% 
+  mutate(value = ifelse(is.nan(value), NA, value)) %>% 
+  filter(!all(is.na(value)))
+           
+
+epu_long_cov <- cond_epu %>% 
+  group_by(EPU, common_name) %>%
+  filter(!all(is.na(cond))) %>%
+  ungroup() %>% 
+  nest(data = -EPU) %>%
+  left_join(table_mod, by = "EPU") %>% 
+  select(-covariate,
+         -AICc) %>%
+  left_join(expand_grid(covariate = c("amo_2", "nao_2", "copepod_index", "zoop_biomass", "zoop_abundance"),
+                        EPU = c("SS", "GB", "GOM", "MAB")),
+            by = "EPU") %>% 
+  mutate(cov_v = purrr::pmap(.l = list(EPU, covariate), 
+                               .f = function(epu, covariate) cov_dat %>% filter(EPU == epu, 
+                                                                                cov == covariate) %>% pull(value)),
+         len = purrr::map(cov_v, length),
+         data = ifelse(len == 0, NA, data)) %>% 
+  select(-len)
+
+
+dfa_out_cov <- epu_long_cov %>%
+  mutate(
+         mod = purrr::pmap(.l = list(data, m, R, cov_v),
+                           .f = function(data, m, R, cov_v) possibly_dfa_mod(dat = data, m = m, R = R, cov_v = cov_v,
+                                                                             just_testing = TRUE,
+                                                                             data_wide = FALSE)),
+         AICc = purrr::map(mod, "AICc")) %>%
+  arrange(AICc)
+
+saveRDS(dfa_out_cov, file = "analysis/condition_dfa_epu_cov.rds")
+
 
 plot_tibble <- best_mod %>% 
   mutate(

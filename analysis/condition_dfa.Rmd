@@ -1,130 +1,133 @@
 ---
 title: "Common trends in the condition of northwest Atlantic finfish"
-author: "Scott Large"
-date: "November 7, 2019"
+author: "Scott Large, ..."
 output: html_document
+bibliography: references.bib  
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r load-packages, warnings = FALSE}
-library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE)
 library(dplyr)
-# remotes::install_github("fate-ewi/bayesdfa")
-library(bayesdfa)
-library(rstan)
-
-## Set up multicore
-options(mc.cores = parallel::detectCores()-1)
+library(tidyr)
 
 ```
 
 
 > I just dropped in to see what condition my condition was in...
-> -- Kenny Rogers
+> -- Milton Sims "Mickey" Newbury Jr.
 
-Load the data
 
-```{r load-data}
-## Load in data
-load(here::here("data/fishcondition.rda"))
+```{r raw-data, include = FALSE}
 
-dat <- fishCondition %>% 
-  dplyr::mutate(name = gsub(" ", "_", tolower(Species))) %>% 
-  dplyr::group_by(name, EPU, sex, YEAR) %>% 
-  dplyr::summarize(MeanCond = mean(RelCond),
-                   nCond = n()) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::filter(nCond > 2,
-                !name %in% c("atl_herring", "haddock", "mackerel", "sea_raven", "white_hake",
-                             "ocean_pout", "witch_flounder"),
-                EPU == "MAB",
-                sex == "F") %>% 
-  dplyr::select(YEAR,
-                MeanCond,
-                name) %>% 
-  dplyr::group_by(name) %>% 
-  dplyr::mutate(MeanCond = scale(MeanCond, scale = TRUE, center = TRUE)) %>% 
-  dplyr::arrange(YEAR)
+sp_list <- read.csv(here::here("data/species_groupings.csv")) %>% 
+  select(common_name = COMNAME,
+         # sci_name = SCINAME,
+         SVSPP) %>% 
+  distinct(.keep_all = TRUE) %>% 
+  mutate(common_name = tolower(common_name))
 
-dat_wide <- dat %>% 
-  tidyr::pivot_wider(values_from = MeanCond) %>% 
-  dplyr::select(-YEAR) %>%
-  t() %>% 
-  as.matrix()
+cond_epu <- readRDS(here::here("data/condSPP_EPU.rds")) %>% 
+  filter(!is.na(EPU),
+         nCond > 2) %>% 
+  left_join(sp_list, by = "SVSPP") %>% 
+  mutate(EPU = factor(EPU, levels = c("SS", "GB", "GOM", "MAB")),
+         cond =  scale(MeanCond, scale = TRUE, center = TRUE),
+         common_name = gsub("[[:space:]]", "_", common_name)) %>% 
+  group_by(common_name, SVSPP) %>% 
+  tidyr::complete(YEAR = 1992:2021,
+                  EPU = c("SS", "GB", "GOM", "MAB")) %>% 
+  dplyr::arrange(YEAR) %>%
+  filter(!all(is.na(cond))) %>%
+  ungroup() %>% 
+  select(-Species,
+         -MeanCond,
+         -StdDevCond,
+         -nCond,
+         -SVSPP) %>% 
+  mutate(spp = gsub("_",  " ", common_name),
+         spp = ifelse(grepl("america?|atlant?|acadia?", spp),
+                      stringr::str_to_sentence(spp),
+                      spp),
+         EPU = case_when(EPU == "SS" ~ "Scotian Shelf",
+                         EPU == "GOM" ~ "Gulf of Maine",
+                         EPU == "GB" ~ "Georges Bank",
+                         EPU == "MAB" ~ "Mid-Atlantic Bight",
+                         TRUE ~ NA_character_),
+         EPU = factor(EPU, levels = c("Scotian Shelf", "Gulf of Maine", "Georges Bank", "Mid-Atlantic Bight")))
 
-dat_time <- as.integer(unique(dat$YEAR))
-dat_name <- as.character(unique(dat$name))
+spp_loadings <- readRDS(here::here("analysis/condition_spp_loadings.rds"))
+
+epu_string <- paste(levels(cond_epu$EPU), collapse = ", ")
+epu_string <- sub(",([^,]*)$", ", and\\1", epu_string)
+
 
 ```
+## Abstract
+This study analyzed `r sprintf("%i yr (%i-%i)", max(cond_epu$YEAR) - min(cond_epu$YEAR), min(cond_epu$YEAR), max(cond_epu$YEAR))` of fisheries-independent trawl survey data to evaluate trends in condition for `r length(unique(cond_epu$spp))` fish taxa within `r english::english(length(unique(cond_epu$EPU)))` ecoregions of the Northeast U.S. Continental Shelf Large Marine Ecosystem (`r epu_string`). Dynamic factor analysis (DFA) was used to identify common patterns among and drivers of annual trends in condition across all taxa. 
 
 
-```{r test-dfa, message = FALSE, warning = FALSE}
+## Introduction
+
+1. Condition is used to assess the general well-being of fish populations.   
+  + Relative condition (Kn) was introduced by @Cren1951a as a way to remove the influence of length on condition, and @Blackwell2000 noted that Kn may be useful in detecting prolonged physical stress on a fish populations. 
+1. Fish condition can also be used as an indicator of ecosystem status.  
+1. Evidence of regime shifts in NEUS ecosystem.  
+1. DFA is a useful tool to reveal coherence among many time-series of fish condition to identify common or latent trends.  
 
 
-matplot(t(dat_wide),
-  type = "l",
-  ylab = "Response", xlab = "Time"
-)
 
+## Materials and Methods
+### Fish condition data
 
-m <- find_dfa_trends(y = dat_wide, 
-                     iter = 2000, 
-                     zscore = FALSE,
-                     kmin = 1, 
-                     kmax = 4, 
-                     chains = 4, 
-                     compare_normal = TRUE,
-                     variance = c("equal", "unequal"))
-saveRDS(m, here::here("analysis/best_model_test.rds"))
+The Northeast Fisheries Science Center has conducted standardized bottom trawl surveys in the autumn and spring since 1963 and 1968. Fish species are enumerated per tow and calibrated using the Survdat R package (add link/source). Individual fish lengths (to the nearest 0.5 cm) and weights (grams) were collected on the NEFSC bottom trawl surveys from 1992-present. Relative condition was calculated as $$Kn = W/W',$$ where $W$ is the weight of an individual fish and $W'$ is the predicted length-specific mean weight for the fish population in a given ecoregion. Mean $W'$ for each ecoregion was calculated and scaled and centered to create z-scores.
 
-# m <- readRDS(here::here("analysis/best_model_test.rds"))
-
-
-f1 <- m$best_model
-r <- rotate_trends(f1)
-
-plot_trends(r, years = dat_time) + theme_minimal()
-plot_fitted(f1, names = dat_name) + theme_minimal()
-plot_loadings(r, names = dat_name, violin = FALSE) + theme_minimal()
+```{r raw-condition, message = FALSE, warning = FALSE, fig.cap = ""}
+knitr::include_graphics(here::here("analysis/figures/raw_condition.png"))
 ```
 
+### covariates
 
-<!-- f1 <- fit_dfa( -->
-<!--   y = sim_dat$y_sim, num_trends = 1, zscore = TRUE, -->
-<!--   iter = 200, chains = 1, thin = 1 -->
-<!-- ) -->
-<!-- is_converged(f1, threshold = 1.05) -->
+Several regional climate indexes (AMO and NAO) and several ecological indexes (small/large copepod ratio, zooplankton abundance, zooplankton biomass) were calculated.
+
+add plot of covariates
+
+## Analysis
+The goal is to identify common patterns . I used dynamic factor analysis (DFA) to concentrate the variance from 
+
+Dynamic factor analysis is a dimension reducing technique that yadd ayadda yadda. For each ecoregion, I first created a "null" model that did not include covariates. I wanted to explore a reasonable space for `m` and `R`, so I iterated through all combinations of `m = 1:4` and diagonal and equal and diagonal and unequal variance/covariance matrices (R). Using AICc, I selected the model with the lowest AICc value and iterated through several environmental/ecosystem covariates.
+
+```{r aicc-dfa, message = FALSE, warning = FALSE}
+knitr::include_graphics(here::here("analysis/figures/aicc_condition.png"))
+```
+
+## Results 
+
+### Scotian Shelf
+The "best" model included two common trends (\@ref(fig:aicc-dfa) ) and the small/large copepod index. The first trend (blue) starts high and transitions to low around 2009 (\@ref(fig:ss-trends)). `r spp_loadings %>% filter(EPU == "SS", trend == "Trend 1", loadings == "positive_sig") %>% pull(spp_list)` American shad, Atlantic herring, little skate, winter flounder, winter skate, and yellowtail flounder all had positive loadings on that index. Atlantic wolfish had positive loadings on that index, but the estimate is below the |0.2| cutoff that generally suggests a strong relationship. The second trend (red) starts low and transitions to high around 2007. Alewife, American plaice, blackbelly rosefish, fourspot flounder, red hake, and smooth skate all had positive loadings on that index. Atlantic cod, ocean pout, spiny dogfish, and white hake had estimates below the |0.2| cutoff. Scup has a negative loading to that index.The small/large copepod index is was included as a covariate in this model. 
+
+```{r ss-trends, message = FALSE, warning = FALSE, fig.cap = "Factor loadings and 95% CI for each species in the Scotian Shelf ecoregion (upper panel). Loadings with 95% CI that overlap zero are shaded dark. Loadings greater than |0.2| identify time-series of condition that had a relatively strong influence on the common trends. Estimated common trends (line) and 95% CI (shaded regions) generated from dynamic factor analysis (DFA) using estimated annual mean condition values. Colors (red and blue) of the factor loadings in the upper panel correspond with the estimated common trends in the lower panel."}
+knitr::include_graphics(here::here("analysis/figures/ss_condition.png"))
+```
+
+### Gulf of Maine
+The "best" model included two common trends (\@ref(fig:aicc-dfa)). The first trend (blue) starts high and transitions to low around 2002 and increases towards the time-series mean around 2012 (\@ref(fig:gom-trends)). Acadian redfish, American plaice, black sea bass, blackbelly rosefish, bluefish, butterfish, cunner, goosefish, haddock, pollock, scup, sea raven, spotted hake, winter flounder, and yellowtail flounder all had positive factor loadings on that index. Atlantic cod, Atlantic herring, cusk, spiny dogfish, and white hake had positive factor loadings on that index, but the estimate is below the |0.2| cutoff that generally suggests a strong relationship. Atlantic torpedo and ocean pout had negative factor loadings on the first trend. The second trend (red) remains at or slighly below the time-series mean and transitions to high around 2010. American plaice, butterfish, longhorn sculpin, red hake, smooth skate, and windowpane all had positive factor loadings on that index. Atlantic cod, haddock, ocean pout, silver hake, smooth dogfish, thorny skate, and witch flounder had positive loadings on that index, but the estimates were below the |0.2| cutoff that suggests a strong relationship. Atlantic torpedo and goosefish had negative factor loadings on the second trend. Atlantic herring and yellowtail flounder had negative factor loadings that were be low the |0.2| cutoff.
 
 
-<!-- r <- rotate_trends(f1) -->
-<!-- names(r) -->
-<!-- plot_trends(r) -->
-<!-- plot_fitted(f1) -->
+```{r gom-trends, message = FALSE, warning = FALSE, fig.cap = "Factor loadings and 95% CI for each species in the Gulf of Maine ecoregion (upper panel). Loadings with 95% CI that overlap zero are shaded dark. Loadings greater than |0.2| identify time-series of condition that had a relatively strong influence on the common trends. Estimated common trends (line) and 95% CI (shaded regions) generated from dynamic factor analysis (DFA) using estimated annual mean condition values. Colors (red and blue) of the factor loadings in the upper panel correspond with the estimated common trends in the lower panel."}
+knitr::include_graphics(here::here("analysis/figures/gom_condition.png"))
+```
 
-<!-- f2 <- fit_dfa( -->
-<!--   y = sim_dat$y_sim, num_trends = 2, zscore = TRUE, -->
-<!--   iter = 200, chains = 1, thin = 1 -->
-<!-- ) -->
-<!-- r2 <- rotate_trends(f2) -->
-<!-- f3 <- fit_dfa( -->
-<!--   y = sim_dat$y_sim, num_trends = 3, zscore = TRUE, -->
-<!--   iter = 200, chains = 1, thin = 1 -->
-<!-- ) -->
-<!-- r3 <- rotate_trends(f3) -->
+### Georges Bank
+The "best" model included two common trends ( \@ref(fig:aicc-dfa) ).  (\@ref(fig:gb-trends).
+```{r gb-trends, message = FALSE, warning = FALSE, fig.cap = "Factor loadings and 95% CI for each species in the Georges Bank ecoregion (upper panel). Loadings with 95% CI that overlap zero are shaded dark. Loadings greater than |0.2| identify time-series of condition that had a relatively strong influence on the common trends. Estimated common trends (line) and 95% CI (shaded regions) generated from dynamic factor analysis (DFA) using estimated annual mean condition values. Colors (red and blue) of the factor loadings in the upper panel correspond with the estimated common trends in the lower panel."}
+knitr::include_graphics(here::here("analysis/figures/gb_condition.png"))
+```
 
-<!-- plot_fitted(f2) -->
-<!-- round(r2$Z_rot_mean, 2) -->
-<!-- plot_loadings(r2) -->
+### Mid-Atlantic Bight
+The "best" model included two common trends (\@ref(fig:aicc-dfa)). (\@ref(fig:mab-trends).
+```{r mab-trends, message = FALSE, warning = FALSE, fig.cap = "Factor loadings and 95% CI for each species in the Mid-Atlantic Bight ecoregion (upper panel). Loadings with 95% CI that overlap zero are shaded dark. Loadings greater than |0.2| identify time-series of condition that had a relatively strong influence on the common trends. Estimated common trends (line) and 95% CI (shaded regions) generated from dynamic factor analysis (DFA) using estimated annual mean condition values. Colors (red and blue) of the factor loadings in the upper panel correspond with the estimated common trends in the lower panel."}
+knitr::include_graphics(here::here("analysis/figures/mab_condition.png"))
+```
 
-<!-- loo1 <- loo(f1) -->
-<!-- loo1$estimates -->
-
-<!-- m <- find_dfa_trends( -->
-<!--   y = s$y_sim, iter = 180, -->
-<!--   kmin = 1, kmax = 5, chains = 1, compare_normal = TRUE, -->
-<!--   variance = c("equal", "unequal") -->
-<!-- ) -->
+## Literature Cited
 
