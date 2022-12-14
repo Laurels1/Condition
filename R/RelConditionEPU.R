@@ -20,7 +20,7 @@
 #source("R/StomFullnessData_allfh.R")
 
 #Required packages
-#library(devtools)
+library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
@@ -68,7 +68,7 @@ gis.dir  <- "gis"
 
 #laptop:
 #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
-#sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE)
+sole <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
 
 #   #comment out if not running as function
 # if (pullNewData == T) {
@@ -91,7 +91,7 @@ gis.dir  <- "gis"
 #Currently missing smooth and spiny dogfish prior to 2001
 #  data <- readRDS(here::here(data.dir, "survdatBio.rds"))
 
-#Data pull used in AFS 2019 GAM analyes, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
+#Data pull used in AFS 2019 GAM analyses, adding filters for purpose_code, SHG, TOGA and survdat door/vessel/gear/Bigelow conversions (not lenght conversions):
 #RDS file isn't working:
 #survey <- readRDS(here::here(data.dir, "SurveyData.rds"))
 

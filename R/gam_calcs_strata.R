@@ -282,6 +282,8 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
                  ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)), 
               )
 
+#readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2021.csv")) 
+
 #Zooplankton data separately for regime shift:
 # ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER', 
 #                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
