@@ -56,7 +56,20 @@ dfa_mod <- function(dat, m, R, cov_v = NA, just_testing = TRUE, data_wide = TRUE
   return(m1)
 }
 
-
+bayesdfa_mod <- function(data, m, trend_model, knots, iter = 50, chains = 4) {
+  data %>% 
+    tidyr::pivot_wider(names_from = time, values_from = obs) %>%
+    tibble::column_to_rownames(var = "ts") %>% 
+    as.matrix %>% 
+    bayesdfa::fit_dfa(y = .,
+                      num_trends = m,
+                      iter = iter,
+                      trend_model = trend_model,
+                      n_knots = knots,
+                      scale = "none",
+                      chains = chains,
+                      data_shape = "wide")
+}
 
 
 Z_maker <- function(n, m, nsites = 1) {
