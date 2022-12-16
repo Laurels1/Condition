@@ -95,6 +95,8 @@ Z_maker <- function(n, m, nsites = 1) {
 
 
 
+
+
 dfa_plot <- function(object, EPU = NULL) {
   
   marss_obj <- MARSSparamCIs(object)
@@ -112,19 +114,34 @@ dfa_plot <- function(object, EPU = NULL) {
   if(is.null(EPU)){
     title_name = ""
   }
-
-  # the rotation matrix for the Z
-  z <- coef(marss_obj, type = "Z")
-  H.inv <- varimax(z)$rotmat
   
+  # the rotation matrix for the Z
   # Get the Z, upZ, lowZ
+  z <- coef(marss_obj, type = "Z")
   z.low <- coef(marss_obj, type = "Z", what="par.lowCI")
   z.up <- coef(marss_obj, type = "Z", what="par.upCI")
   
-  z.rot <- z %*% H.inv
-  z.rot.up <- z.up %*% H.inv
-  z.rot.low <- z.low %*% H.inv
-
+  if(m > 1) {
+    H.inv <- varimax(z)$rotmat
+    z.rot <- z %*% H.inv
+    z.rot.up <- z.up %*% H.inv
+    z.rot.low <- z.low %*% H.inv
+    
+    if(m == 2){
+      color_ramp <- c("#E41A1C", "#377EB8") 
+    }
+    if(m > 2){
+      color_ramp <- RColorBrewer::brewer.pal(n = m, name = "Set1")  
+    }
+  }
+  
+  if(m == 1){
+    z.rot <- z
+    z.rot.up <- z.up
+    z.rot.low <- z.low
+    
+    color_ramp <- "#36454F"
+  }
   
   factor_df <- data.frame(name_code = rep(name_code, m),
                           trend = as.factor(rep(paste0("Trend ", 1:m), each = length(name_code))),
@@ -145,10 +162,8 @@ dfa_plot <- function(object, EPU = NULL) {
     mutate(spp = factor(spp, levels = unique(spp)))
   
   
-  color_ramp <- RColorBrewer::brewer.pal(n = m, name = "Set1")
+  # color_ramp <- RColorBrewer::brewer.pal(n = m, name = "Set1")
   names(color_ramp) <- levels(factor_df$trend)
-  scale_colour_manual(values = color_ramp)
-  
   
   fplot <-  ggplot(data = factor_df,
                    aes(x = spp,
@@ -168,15 +183,15 @@ dfa_plot <- function(object, EPU = NULL) {
          x = "", y = "factor loadings") +
     theme_minimal()
   
-  colnames(object$marss$data)[1] <- 1991 ### THIS IS WRONG, FIX IT
+  # colnames(object$marss$data)[1] <- 1991 ### THIS IS WRONG, FIX IT
   
   trend_df <- tsSmooth(object, type = "xtT", interval = "confidence", 
                        level = .95) %>% 
     mutate(
       trend = gsub(pattern = "^X", "Trend ", .rownames),
       year = rep(as.numeric(colnames(object$marss$data)), m))#,
-      # fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
-      # color_id = fill_id)
+  # fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
+  # color_id = fill_id)
   
   
   tplot <- ggplot(data = trend_df,
@@ -185,7 +200,7 @@ dfa_plot <- function(object, EPU = NULL) {
                       ymax = .conf.up,
                       y = .estimate)) +
     geom_hline(yintercept = 0, color = "black", alpha = 0.5) +
-    geom_line(aes(color = trend)) +
+    geom_line(aes(color = trend), show.legend = FALSE) +
     geom_ribbon(aes(fill = trend), alpha = 0.6, show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
     # facet_wrap(~ trend, ncol = m) +
     labs(x = "", y = "Estimate") +
@@ -198,6 +213,7 @@ dfa_plot <- function(object, EPU = NULL) {
   return(tfplot)
   
 }
+
 
 loadings_df <- function(object){
 
