@@ -99,7 +99,7 @@ dfa_plot <- function(object, EPU = NULL) {
   if(is.null(EPU)){
     title_name = ""
   }
-  
+
   # the rotation matrix for the Z
   z <- coef(marss_obj, type = "Z")
   H.inv <- varimax(z)$rotmat
@@ -111,9 +111,10 @@ dfa_plot <- function(object, EPU = NULL) {
   z.rot <- z %*% H.inv
   z.rot.up <- z.up %*% H.inv
   z.rot.low <- z.low %*% H.inv
+
   
   factor_df <- data.frame(name_code = rep(name_code, m),
-                          trend = rep(paste0("Trend ", 1:m), each = length(name_code)),
+                          trend = as.factor(rep(paste0("Trend ", 1:m), each = length(name_code))),
                           Z = as.vector(z),
                           Zup = as.vector(z.up),
                           Zlow = as.vector(z.low)) %>%
@@ -123,12 +124,17 @@ dfa_plot <- function(object, EPU = NULL) {
                         spp),
            shape_id = 19, #ifelse(Zup < 0 | Zlow > 0, 19, 1),
            # fill_id = ifelse(Zup < 0 | Zlow > 0, "black", "grey70"),
-           fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
-           color_id = fill_id,
+           # fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
+           # color_id = fill_id,
            alpha_id = ifelse(Zup < 0 | Zlow > 0, .9, .8),
     ) %>% 
     arrange(desc(spp)) %>% 
     mutate(spp = factor(spp, levels = unique(spp)))
+  
+  
+  color_ramp <- RColorBrewer::brewer.pal(n = m, name = "Set1")
+  names(color_ramp) <- levels(factor_df$trend)
+  scale_colour_manual(values = color_ramp)
   
   
   fplot <-  ggplot(data = factor_df,
@@ -139,23 +145,25 @@ dfa_plot <- function(object, EPU = NULL) {
     geom_hline(yintercept = 0, color = "black") +
     geom_hline(yintercept = 0.2, color = "grey60", linetype = "dashed") +
     geom_hline(yintercept = -0.2, color = "grey60", linetype = "dashed") +
-    geom_pointrange(aes(shape = shape_id, fill = fill_id, color = color_id, alpha = alpha_id), show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
+    geom_pointrange(aes(shape = shape_id, fill = trend, color = trend, alpha = alpha_id), show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
     # facet_wrap(~trend) +
     coord_flip() +
     scale_shape_identity() +
-    scale_fill_identity() +
-    scale_color_identity() +
+    scale_fill_manual(values = color_ramp) +
+    scale_color_manual(values = color_ramp) +
     labs(title = title_name,
          x = "", y = "factor loadings") +
     theme_minimal()
+  
+  colnames(object$marss$data)[1] <- 1991 ### THIS IS WRONG, FIX IT
   
   trend_df <- tsSmooth(object, type = "xtT", interval = "confidence", 
                        level = .95) %>% 
     mutate(
       trend = gsub(pattern = "^X", "Trend ", .rownames),
-      year = rep(as.numeric(colnames(object$marss$data)), m),
-      fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
-      color_id = fill_id)
+      year = rep(as.numeric(colnames(object$marss$data)), m))#,
+      # fill_id = ifelse(trend == "Trend 1", "#264CFF", "#FF420E"), 
+      # color_id = fill_id)
   
   
   tplot <- ggplot(data = trend_df,
@@ -164,12 +172,12 @@ dfa_plot <- function(object, EPU = NULL) {
                       ymax = .conf.up,
                       y = .estimate)) +
     geom_hline(yintercept = 0, color = "black", alpha = 0.5) +
-    geom_line(aes(color = color_id)) +
-    geom_ribbon(aes(fill = fill_id), alpha = 0.6, show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
+    geom_line(aes(color = trend)) +
+    geom_ribbon(aes(fill = trend), alpha = 0.6, show.legend = FALSE)+ #, position = position_dodge(width = 0.5)) +
     # facet_wrap(~ trend, ncol = m) +
     labs(x = "", y = "Estimate") +
-    scale_fill_identity() +
-    scale_color_identity() +
+    scale_fill_manual(values = color_ramp) +
+    scale_color_manual(values = color_ramp) +
     theme_minimal()
   
   tfplot <- fplot/tplot + plot_layout(heights = c(3, 1))
