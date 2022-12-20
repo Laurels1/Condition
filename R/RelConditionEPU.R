@@ -22,6 +22,9 @@
 #Required packages
 library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
+#updated install of Survdat (2022):
+#library(remotes)
+#remotes::install_github('NOAA-EDAB/Survdat', force=T)
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
 #remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
@@ -67,8 +70,11 @@ gis.dir  <- "gis"
 
 
 #laptop:
-#source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
-sole <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
+# source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+ channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
+# #getBio for individual weights:
+ survey <- survdat::get_survdat_data(channel, getBio = T)
+survdat <- survey$survdat
 
 #   #comment out if not running as function
 # if (pullNewData == T) {
@@ -104,7 +110,7 @@ sole <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
 
 # survey <- get_survdat_data(channel, getBio = T)
 # 
-# survbio=as.data.frame(survey[['survdat']])
+#survbio=as.data.frame(survey[['survdat']])
 # 
 # #save survbio object so RData data doesn't need to be pulled each time:
 #  save(survbio, file='survbio.RData')
@@ -120,7 +126,8 @@ sole <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
 ###end data pull
 
  
-load("survbio.Rdata")
+#load("survbio.Rdata")
+#load(file.path(data.dir, "Survdat.RData"))
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
@@ -139,9 +146,11 @@ load("survbio.Rdata")
  #                                                      LAT = BEGLAT, LON = BEGLON)
 
 #Using survdat data (change SEX== NA to sex == 0)
-fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-  
-#about 1/4 of fish with indwt have sex = 0:
+#fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+
+ #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
 #Spring survey data to be used for herring, mackerel and OP:
@@ -544,7 +553,7 @@ condYear <- condNSppYear
 
 ####For 2021 SOE: 
 condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
-#readr::write_csv(condYear, here::here(out.dir,"RelCond2021_Year.csv"))
+readr::write_csv(condYear, here::here(out.dir,"RelCond2022_Year.csv"))
 
 ####For Jamie Behan and Lisa Kerr data request: 
 # annualcondEPUYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
