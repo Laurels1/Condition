@@ -12,13 +12,13 @@ out.dir="output"
 # for use in butterfish plots:
 #annualCondition <- condNSpp
 #Condition full shelf
-annualCondition <- condNshelfSpp
+#annualCondition <- condNshelfSpp
 #For SOE plots:
-#annualCondition <- condGOM 
+annualCondition <- condGOM 
 #annualCondition <- condGB 
-#annualCondition <- condMAB %>% 
-#    dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
- #   dplyr::filter(!(YEAR == 2017)) 
+# annualCondition <- condMAB %>% 
+#     dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
+#     dplyr::filter(!(YEAR == 2017)) 
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
@@ -57,7 +57,7 @@ Regime <- rpart::rpart(MeanCond~YEAR, data=CondRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "CondShelf_Regimes_2021.RDS"))
+saveRDS(Regime[["cptable"]],file = here::here("output", "Cond_GOM_Regimes_2022.RDS"))
 printcp(Regime)
 
 
@@ -95,9 +95,10 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     coord_equal() +
     theme_bw() +
     scale_fill_manual(values=vir) +
-    guides(fill = guide_legend(reverse = TRUE)) +
-    # geom_vline(xintercept=SppSplit1, color='red')+
-    # geom_vline(xintercept=SppSplit2, color='red')+
+     guides(fill = guide_legend(reverse = TRUE)) +
+    #  geom_vline(xintercept=SppSplit1, color='red')+
+    #  geom_vline(xintercept=SppSplit2, color='red')+
+    # geom_vline(xintercept=SppSplit3, color='red')+
     #scale_x_discrete works if don't need to pad final year for missing data. Changed Year to numeric above and this works:
     scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
     theme(legend.position = "right", legend.box = "vertical", legend.title = element_text(size = 8),
@@ -105,8 +106,9 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
           axis.title = element_blank(), axis.text.x = element_text(size = 6),
           axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
+# +
+#      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
+#      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)+
+#         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
 
-#     geom_vline(xintercept=AllSppSplit1, color='red', size = 1.2)+
-#     geom_vline(xintercept=AllSppSplit2, color='red', linetype = 2, size = 1.2)
-
-ggsave(path= here::here(out.dir),"Shelf_Condition_allsex_2022_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"GOM_Condition_allsex_2023_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

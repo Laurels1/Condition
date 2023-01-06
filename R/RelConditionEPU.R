@@ -58,7 +58,7 @@ gis.dir  <- "gis"
 #Turn off the function when running outside of function to test new code
 #RelConditionEPU <- function(pullNewData=F,out.dir="output") {
 #RelConditionEPU <- function(out.dir,data.dir,gis.dir) {
-# create output directory if it doesnt exist
+# create output directory if it doesn't exist
 #  if (!dir.exists(out.dir)) dir.create(out.dir)
 
 
@@ -69,13 +69,24 @@ gis.dir  <- "gis"
 #It requires a current Oracle connection, permission to access the database and a user name/password. 
 
 
-#laptop:
-# source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
- channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
+#laptop (for 2023 SOE condition data):
+ #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+ #channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
 # #getBio for individual weights:
- survey <- survdat::get_survdat_data(channel, getBio = T)
-survdat <- survey$survdat
+ #survey <- survdat::get_survdat_data(channel, getBio = T)
+ #Gets hung up on either of these two lines when trying to run Jan 6, 2023:
+ #survdat <- survey$survdat
+ #survbio=as.data.frame(survey[['survdat']])
 
+ #Strata sets
+ # EPU <- c('MAB', 'GB', 'GOM', 'SS')
+ # MAB <- c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510)
+ # GB  <- c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550)
+ # GOM <- c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)
+ # SS  <- c(1300:1352, 3840:3990)
+ # 
+ # survey.data <- c()
+ 
 #   #comment out if not running as function
 # if (pullNewData == T) {
 #   # grabs data from oracle
@@ -84,12 +95,14 @@ survdat <- survey$survdat
 #   survey <- pull_from_svdbs(uid) 
 #   # save data pull
 #   dateOfPull <- format(Sys.time(), "%m-%d-%y")
-#   saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
-# #  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_8-15-19.rds")))
+# saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_",dateOfPull,".rds")))
+#  saveRDS(survey,file = here::here(out.dir,paste0("NEFSC_survey_data_1-5-2023.rds")))
 # } else {
 # Otherwise, load data below:
-#If not pulling from SVDBS, load NEFSC survey data:
-#load(file.path(data.dir, 'NEFSC_survey_data_8-15-19.RData', sep = ''))
+#If not pulling from SVDBS, load NEFSC survey data (2023 SOE Condition Data):
+#When trying to load on Jan 6th, 2023, got error in load: bad restore file magic number:
+ #load(file.path(data.dir, 'NEFSC_survey_data_1-5-2023.rds', sep = ''))
+
 #or if that doesn't work:
 #Used for AFS 2019 GAM analyses from direct SVDBS data pull (no calibration coefficients and selecting all tows not just representative tows):
 #survey <-  readRDS(file.path(data.dir, 'NEFSC_survey_data_02-13-20.rds', sep = ''))
@@ -127,7 +140,8 @@ survdat <- survey$survdat
 
  
 #load("survbio.Rdata")
-#load(file.path(data.dir, "Survdat.RData"))
+#Got survdat.RData from Sean Lucey on Jan 6th, 2023 for 2023 SOE because it stalled out and wouldn't load from my data pull.
+load(file.path(data.dir, "survdat.RData"))
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
