@@ -14,11 +14,11 @@ out.dir="output"
 #Condition full shelf
 #annualCondition <- condNshelfSpp
 #For SOE plots:
-annualCondition <- condGOM 
-#annualCondition <- condGB 
-# annualCondition <- condMAB %>% 
-#     dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
-#     dplyr::filter(!(YEAR == 2017)) 
+#annualCondition <- condGOM
+# annualCondition <- condGB
+  annualCondition <- condMAB %>% 
+     dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
+     dplyr::filter(!(YEAR == 2017)) 
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
@@ -35,7 +35,8 @@ speciesNames <- speciesNames %>%
                                                               "Below Average",
                                                               "Neutral",
                                                               "Above Average",
-                                                              "Good Condition")))
+                                                              "Good Condition"), 
+                          include.lowest = TRUE))
 
 sortNames <- speciesNames %>% 
     filter(YEAR <= 2014) %>%
@@ -57,7 +58,7 @@ Regime <- rpart::rpart(MeanCond~YEAR, data=CondRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "Cond_GOM_Regimes_2022.RDS"))
+saveRDS(Regime[["cptable"]],file = here::here("output", "Cond_MAB_Regimes_2022.RDS"))
 printcp(Regime)
 
 
@@ -111,4 +112,4 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
 #      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)+
 #         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
 
-ggsave(path= here::here(out.dir),"GOM_Condition_allsex_2023_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"MAB_Condition_allsex_2023_viridis.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

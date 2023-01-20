@@ -557,6 +557,8 @@ annualcondEPU <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>%
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 
 saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
+#CondEPU <-  readRDS(file.path("other", 'condSPP_EPU.rds', sep = ''))
+
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppYear <- annualcondYear %>% dplyr::add_count(Species) 
 #%>% 
