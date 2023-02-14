@@ -45,9 +45,9 @@ library(data.table)
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata))
 
@@ -88,11 +88,11 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex (for 2022 ICES Regime shifts and 2021 GAMs)
-# AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>% 
-#   mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
-#          AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)), 
-#          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
-#   distinct(AvgRelCondStrata, .keep_all = T)
+AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
+  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
+         AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)),
+         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
+  distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
 # AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>% 

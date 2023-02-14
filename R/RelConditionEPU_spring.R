@@ -120,7 +120,9 @@ gis.dir  <- "gis"
 ###end data pull
 
  
-load("survbio.Rdata")
+#load("survbio.Rdata")
+#Got survdat.RData from Sean Lucey on Jan 6th, 2023 for 2023 SOE because it stalled out and wouldn't load from my data pull.
+load(file.path(data.dir, "survdat.RData"))
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
@@ -145,7 +147,9 @@ load("survbio.Rdata")
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
 #Spring survey data to be used for herring, mackerel and OP:
-spring <- survbio %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#spring <- survbio %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#Need to reference survdat for Jan 6th data set from Sean's survdat.RData 
+spring <- survdat %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
 

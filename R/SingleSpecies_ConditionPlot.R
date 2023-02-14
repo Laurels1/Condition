@@ -82,7 +82,7 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH
   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_spring.csv"))
+readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_spring2022.csv"))
 
 # condNSpp <- condN %>%
 #   dplyr::add_count(Species) %>%
@@ -139,7 +139,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
 # +
 #     geom_vline(xintercept=MackSplit3, color='red')
 
-ggsave(path= here::here(out.dir),"AtlMackerel_Spring_Mature28_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"AtlMackerel_Spring_Mature23_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
