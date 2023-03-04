@@ -5,6 +5,61 @@ library(tidyr)
 
 out.dir="output"
 
+#Mean zooplankton abundance anomalies from Ryan Morse (GOM_mean_seasonal_anomalies.csv)
+GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
+
+GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Spring') %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, mlucens_100m3, pseudo_100m3)) %>%
+  dplyr::select(year, SumZoop)
+
+#Regime analysis:
+GOMZoopRegime <- GOMsummerZoop %>% dplyr::select(SumZoop, year)
+Regime <- rpart::rpart(SumZoop~year, data=GOMZoopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "GOMspringZoop_Regimes_2021.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+GOMZoopRegime$year <- as.numeric(as.character(GOMZoopRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "GOM Spring Zooplankton Abundance Anomalies", y = "Total Abundance (millions)") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"GOMspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+
+
 
 #Automate zooplankton regime shifts from Harvey's data: EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv from gam_calcs_strata.R
 #Dataset of zooplankton for regime shift
@@ -192,7 +247,7 @@ p2 <- ggplot(AvgSpringTemp, aes(x = YEAR, y = AvgTempSpring)) +
   # geom_vline(xintercept=SpringSplit3, color='red') +
   # geom_vline(xintercept=SpringSplit4, color='red')
 
-ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgFallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -785,4 +840,4 @@ p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

@@ -78,7 +78,7 @@ out.dir="output"
 #Summarize annually over all EPUs for mackerel:
 #USE SPRING SURVEY
 #Do sensitivity tests for maturity cut-offs between 23-29cm and then run for mature and immature fish separately:
-annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23)  %>%
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
@@ -133,7 +133,7 @@ speciesNames <- annualCondition
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
-  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
+  labs(title="Immature Atlantic Mackerel Spring Relative Condition (<=23cm)", y = "Relative Condition") +
   geom_vline(xintercept=MackSplit1, color='red')+
   geom_vline(xintercept=MackSplit2, color='red')
 # +

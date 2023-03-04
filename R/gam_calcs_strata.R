@@ -95,11 +95,11 @@ AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
-# AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>% 
-#   mutate(AvgRelCondYear=(mean(RelCond)), AvgRelCondYearSD = (sd(RelCond)), AvgExpcatchwtYear = (mean(BIOMASS)),
-#          AvgExpcatchnumYear= (mean(ABUNDANCE)), AvgLatYear = (mean(LAT)), 
-#          AvgLonYear = (mean(LON)), AvgBottomTempYear = (mean(BOTTEMP)), AvgSurfaceTempYear = (mean(SURFTEMP))) %>%
-#   distinct(AvgRelCondYear, .keep_all = T)
+AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>%
+  mutate(AvgRelCondYear=(mean(RelCond)), AvgRelCondYearSD = (sd(RelCond)), AvgExpcatchwtYear = (mean(BIOMASS)),
+         AvgExpcatchnumYear= (mean(ABUNDANCE)), AvgLatYear = (mean(LAT)),
+         AvgLonYear = (mean(LON)), AvgBottomTempYear = (mean(BOTTEMP)), AvgSurfaceTempYear = (mean(SURFTEMP))) %>%
+  distinct(AvgRelCondYear, .keep_all = T)
 
 #Creating Average Relative Condition by Year and EPu, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
 AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>% 
@@ -923,10 +923,10 @@ CondClean <- CondColdPool %>%
 
 
 CondCleanSpDogWt <- CondClean %>%
-  dplyr::filter(is.na(AvgExpcatchwtYear) | (!(Species == "Spiny dogfish" & AvgExpcatchwtYear >1500)))
+  dplyr::filter(is.na(BIOMASS) | (!(Species == "Spiny dogfish" & BIOMASS >1500)))
 
 CondClean <- CondCleanSpDogWt %>%
-  dplyr::filter(is.na(AvgExpcatchnumYear) | (!(Species == "Windowpane" & AvgExpcatchnumYear >250)))
+  dplyr::filter(is.na(ABUNDANCE) | (!(Species == "Windowpane" & ABUNDANCE >250)))
 
 
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
@@ -999,31 +999,31 @@ CondClean <- CondCleanSpDogWt %>%
 # readr::write_csv(HabitatAssess, here::here(out.dir,"EnvirCov_HabitatAssess_Jan2022.csv"))
 
 # #Environmental covariates by EPU for Scott Large Dynamic Factor Analysis:
-DFAdata <- ZoopDataEPU %>%
-  ungroup() %>%
-  dplyr::select('YEAR', 'CRUISE6', 'EPU', 'SEASON', 'Species', 'SVSPP', 
-                'AvgRelCondEPU', 'AvgRelCondEPUSD',
-                'AvgExpcatchwtEPU', 'AvgExpcatchnumEPU',
-                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-                'CopepodSmLgSpringEPU','CopepodSmLgSummmerEPU','CopepodSmLgFallEPU',
-                'CopepodSmLgWinterEPU', 'TotCopSpringEPU','TotCopSummerEPU',
-                'TotCopFallEPU','TotCopWinterEPU', 'ZoopAbundSpringEPU', 
-                'ZoopAbundSummerEPU', 'ZoopAbundFallEPU', 'ZoopAbundWinterEPU')
-                # 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
-                # 'PropColumnColdPool') 
-# %>%
-#   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
-#                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata',
-#                 'Winter Temp'= 'AvgTempWinter',
-#                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
-#                 'Fall Temp'= 'AvgTempFall', 'Copepod Small-Large'= 'CopepodSmallLarge',
-#                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions',
-#                 'Stock Biomass'= 'TotalBiomass',
-#                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
-#                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Year' = 'YEAR')
-
-readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
-saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA2022.rds")))
+# DFAdata <- ZoopDataEPU %>%
+#   ungroup() %>%
+#   dplyr::select('YEAR', 'CRUISE6', 'EPU', 'SEASON', 'Species', 'SVSPP', 
+#                 'AvgRelCondEPU', 'AvgRelCondEPUSD',
+#                 'AvgExpcatchwtEPU', 'AvgExpcatchnumEPU',
+#                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+#                 'CopepodSmLgSpringEPU','CopepodSmLgSummmerEPU','CopepodSmLgFallEPU',
+#                 'CopepodSmLgWinterEPU', 'TotCopSpringEPU','TotCopSummerEPU',
+#                 'TotCopFallEPU','TotCopWinterEPU', 'ZoopAbundSpringEPU', 
+#                 'ZoopAbundSummerEPU', 'ZoopAbundFallEPU', 'ZoopAbundWinterEPU')
+#                 # 'Fproxy', 'TotalBiomass', 'RangeMagnitude','RangeDuration',
+#                 # 'PropColumnColdPool') 
+# # %>%
+# #   dplyr::rename('Local Biomass'='AvgExpcatchwtStrata', 'Local Abundance'= 'AvgExpcatchnumStrata',
+# #                 'Local Bottom Temp'= 'AvgBottomTempStrata', 'Local Surface Temp' = 'AvgSurfaceTempStrata',
+# #                 'Winter Temp'= 'AvgTempWinter',
+# #                 'Spring Temp'= 'AvgTempSpring', 'Summer Temp'= 'AvgTempSummer',
+# #                 'Fall Temp'= 'AvgTempFall', 'Copepod Small-Large'= 'CopepodSmallLarge',
+# #                 'Zooplankton Biomass'= 'ZooplBiomassAnomaly', 'Total Copepods'= 'TotalCopepodsMillions',
+# #                 'Stock Biomass'= 'TotalBiomass',
+# #                 'Fall Bloom Magnitude'= 'RangeMagnitude', 'Fall Bloom Duration'= 'RangeDuration',
+# #                 'Prop Column Cold Pool'= 'PropColumnColdPool', 'Year' = 'YEAR')
+# 
+# readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
+# saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA2022.rds")))
 
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
@@ -1079,7 +1079,7 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         # 'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
                                         # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
-                                        'LocalBiomass'='AvgExpcatchwtYear', 'LocalAbundance'= 'AvgExpcatchnumYear',
+                                        'LocalBiomass'='BIOMASS', 'LocalAbundance'= 'ABUNDANCE',
                                         'LocalBottomTemp'= 'AvgBottomTempYear','LocalSurfaceTemp'='AvgSurfaceTempYear',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
