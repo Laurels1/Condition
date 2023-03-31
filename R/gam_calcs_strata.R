@@ -47,7 +47,7 @@ library(data.table)
 #by stock (fall BTS stock designations from StockStrataFall.csv):
 StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata))
 
@@ -139,7 +139,7 @@ AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringForma
 AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
   dplyr::mutate_at(c("AvgTempWinter", "AvgTempSpring", "AvgTempSummer", "AvgTempFall"), as.numeric)
 
-CondAvgTemp <- dplyr::left_join(AvgEPUCond, AvgTemp, by=c("YEAR", "EPU"))
+CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 # SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
@@ -1080,7 +1080,7 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
                                         'LocalBiomass'='BIOMASS', 'LocalAbundance'= 'ABUNDANCE',
-                                        'LocalBottomTemp'= 'AvgBottomTempEPU','LocalSurfaceTemp'='AvgSurfaceTempEPU',
+                                        'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
                                         'FallTemp'= 'AvgTempFall', 
@@ -1096,8 +1096,8 @@ condSPP <-  CondClean %>% dplyr::rename(
                                        # 'AverageLatStrata' = 'AvgLatStrata',
                                        #  'AverageLonStrata' = 'AvgLonStrata'
                                        # by year:
-                                       'AverageLatYear' = 'AvgLatEPU',
-                                       'AverageLonYear' = 'AvgLonEPU')
+                                       'AverageLatYear' = 'AvgLatStrata',
+                                       'AverageLonYear' = 'AvgLonStrata')
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 #*********
