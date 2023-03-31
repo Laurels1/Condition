@@ -45,7 +45,7 @@ library(data.table)
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
 StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
@@ -89,23 +89,23 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex (for 2022 ICES Regime shifts and 2021 GAMs)
 AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
-  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
-         AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)),
-         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
+  mutate(AvgRelCondStrata=(mean(!is.na(RelCond))), AvgRelCondStrataSD = (sd(!is.na(RelCond))), AvgExpcatchwtStrata = (mean(!is.na(BIOMASS))),
+         AvgExpcatchnumStrata= (mean(!is.na(ABUNDANCE))), AvgLatStrata = (mean(!is.na(LAT))),
+         AvgLonStrata = (mean(!is.na(LON))), AvgBottomTempStrata = (mean(!is.na(BOTTEMP))), AvgSurfaceTempStrata = (mean(!is.na(SURFTEMP)))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
 AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>%
-  mutate(AvgRelCondYear=(mean(RelCond)), AvgRelCondYearSD = (sd(RelCond)), AvgExpcatchwtYear = (mean(BIOMASS)),
-         AvgExpcatchnumYear= (mean(ABUNDANCE)), AvgLatYear = (mean(LAT)),
-         AvgLonYear = (mean(LON)), AvgBottomTempYear = (mean(BOTTEMP)), AvgSurfaceTempYear = (mean(SURFTEMP))) %>%
+  mutate(AvgRelCondYear=(mean(!is.na(RelCond))), AvgRelCondYearSD = (sd(!is.na(RelCond))), AvgExpcatchwtYear = (mean(!is.na(BIOMASS))),
+         AvgExpcatchnumYear= (mean(!is.na(ABUNDANCE))), AvgLatYear = (mean(!is.na(LAT))),
+         AvgLonYear = (mean(!is.na(LON))), AvgBottomTempYear = (mean(!is.na(BOTTEMP))), AvgSurfaceTempYear = (mean(!is.na(SURFTEMP)))) %>%
   distinct(AvgRelCondYear, .keep_all = T)
 
 #Creating Average Relative Condition by Year and EPu, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
 AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>% 
-  mutate(AvgRelCondEPU=(mean(RelCond)), AvgRelCondEPUSD = (sd(RelCond)), AvgExpcatchwtEPU = (mean(BIOMASS)),
-         AvgExpcatchnumEPU= (mean(ABUNDANCE)), AvgLatEPU = (mean(LAT)), 
-         AvgLonEPU = (mean(LON)), AvgBottomTempEPU = (mean(BOTTEMP)), AvgSurfaceTempEPU = (mean(SURFTEMP))) %>%
+  mutate(AvgRelCondEPU=(mean(!is.na(RelCond))), AvgRelCondEPUSD = (sd(!is.na(RelCond))), AvgExpcatchwtEPU = (mean(!is.na(BIOMASS))),
+         AvgExpcatchnumEPU= (mean(!is.na(ABUNDANCE))), AvgLatEPU = (mean(!is.na(LAT))), 
+         AvgLonEPU = (mean(!is.na(LON))), AvgBottomTempEPU = (mean(!is.na(BOTTEMP))), AvgSurfaceTempEPU = (mean(!is.na(SURFTEMP)))) %>%
   distinct(AvgRelCondEPU, .keep_all = T)
 
 #Creating Average Relative Condition and Average Stomach Fullness by EPU, species, sex
@@ -1080,7 +1080,7 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
                                         'LocalBiomass'='BIOMASS', 'LocalAbundance'= 'ABUNDANCE',
-                                        'LocalBottomTemp'= 'AvgBottomTempYear','LocalSurfaceTemp'='AvgSurfaceTempYear',
+                                        'LocalBottomTemp'= 'AvgBottomTempEPU','LocalSurfaceTemp'='AvgSurfaceTempEPU',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
                                         'FallTemp'= 'AvgTempFall', 
@@ -1096,8 +1096,8 @@ condSPP <-  CondClean %>% dplyr::rename(
                                        # 'AverageLatStrata' = 'AvgLatStrata',
                                        #  'AverageLonStrata' = 'AvgLonStrata'
                                        # by year:
-                                       'AverageLatYear' = 'AvgLatYear',
-                                       'AverageLonYear' = 'AvgLonYear')
+                                       'AverageLatYear' = 'AvgLatEPU',
+                                       'AverageLonYear' = 'AvgLonEPU')
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 #*********
