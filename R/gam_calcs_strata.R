@@ -89,9 +89,9 @@ CondStockMissing <- CondStockjoin %>% filter(is.na(Stock))
 #Using Survdat:
 #Creating Average Relative Condition by strata, species, sex (for 2022 ICES Regime shifts and 2021 GAMs)
 AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
-  mutate(AvgRelCondStrata=(mean(!is.na(RelCond))), AvgRelCondStrataSD = (sd(!is.na(RelCond))), AvgExpcatchwtStrata = (mean(!is.na(BIOMASS))),
-         AvgExpcatchnumStrata= (mean(!is.na(ABUNDANCE))), AvgLatStrata = (mean(!is.na(LAT))),
-         AvgLonStrata = (mean(!is.na(LON))), AvgBottomTempStrata = (mean(!is.na(BOTTEMP))), AvgSurfaceTempStrata = (mean(!is.na(SURFTEMP)))) %>%
+  mutate(AvgRelCondStrata=(mean(RelCond)), AvgRelCondStrataSD = (sd(RelCond)), AvgExpcatchwtStrata = (mean(BIOMASS)),
+         AvgExpcatchnumStrata= (mean(ABUNDANCE)), AvgLatStrata = (mean(LAT)),
+         AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
 #Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
@@ -416,27 +416,27 @@ stomdata <- stom
 
 #Creating Average Fall Stomach Fullness by year, STRATUM, species, sex
 #Currently used for Condition GAM analyses and multi-model dataset:
-AvgStomFullStrata <- stomdata %>% dplyr::filter(season == "FALL") %>%
+AvgStomStrata <- stomdata %>% dplyr::filter(season == "FALL") %>%
   group_by(year, STRATUM, Species, pdsex) %>% 
   mutate(AvgStomFullStrata=(mean(stom_full)))
 
 #Creating Average Fall Stomach Fullness by year, EPU, species, sex
-AvgStomFullEPU <- stomdata %>% dplyr::filter(season == "FALL") %>%
-  group_by(year, EPU, Species, pdsex) %>% 
-  mutate(AvgStomFullEPU=(mean(stom_full)))
-
-#Test for GAMs analysis to see if spring stomach fullness predicts fall condition:
+# AvgStomFullEPU <- stomdata %>% dplyr::filter(season == "FALL") %>%
+#   group_by(year, EPU, Species, pdsex) %>% 
+#   mutate(AvgStomFullEPU=(mean(stom_full)))
+# 
+# #Test for GAMs analysis to see if spring stomach fullness predicts fall condition:
 #Creating Average Spring Stomach Fullness by year, STRATUM, species, sex
 AvgStomFullSpringStrata <- stom %>% dplyr::filter(season == "SPRING") %>%
-  group_by(year, STRATUM, Species, pdsex) %>% 
+  group_by(year, STRATUM, Species, pdsex) %>%
   mutate(AvgStomFullSpringStrata=(mean(stom_full)))
 
-# change stomach data variables to merge with condition data: 
-stom.data.EPU <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
-  dplyr::distinct(YEAR, EPU, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, EPU, Species, SEASON, SEX, AvgStomFullEPU)
+# change stomach data variables to merge with condition data:
+# stom.data.EPU <- AvgStomFullEPU %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
+#   dplyr::distinct(YEAR, EPU, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, EPU, Species, SEASON, SEX, AvgStomFullEPU)
 
 #Fall stomach data by strata:
-stom.data.strata <- AvgStomFullStrata %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
+stom.data.strata <- AvgStomStrata %>% dplyr::mutate(YEAR = year, SEASON = season, INDID = pdid, SEX = pdsex, INDWT = pdwgt) %>%
   dplyr::distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, STRATUM, EPU, Species, SEASON, SEX, AvgStomFullStrata)
 
 #Spring stomach data by strata as test for lagging in GAM:
@@ -444,14 +444,14 @@ stom.spring.strata <- AvgStomFullSpringStrata %>% dplyr::mutate(YEAR = year, IND
   dplyr::distinct(YEAR, STRATUM, Species, SEX, .keep_all = TRUE) %>% dplyr::select(YEAR, STRATUM, EPU, Species, SEX, AvgStomFullSpringStrata)
 
 
-stom.data.strata$SEX <- as.factor(stom.data.strata$SEX) 
-stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX) 
+stom.data.strata$SEX <- as.factor(stom.data.strata$SEX)
+stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 
 #merge stomach fullness into condition data:
 #make sure allfh data includes STRATUM as factor with leading zero for merge
 #merge by strata for Condition GAM and multi-model dataset:
 #*******
-#AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
+AvgStom <- dplyr::left_join(FallBloomCond, stom.data.strata, by = c('YEAR', 'SEASON', 'STRATUM', 'EPU', 'Species', 'SEX'))
 
 #spring stomach fullness merge by strata for Condition GAM lag:
 # AvgStomSpr <- dplyr::left_join(FallBloomCond, stom.spring.strata, by = c('YEAR', 'STRATUM', 'EPU', 'Species', 'SEX')) %>%
@@ -469,56 +469,56 @@ stom.spring.strata$SEX <- as.factor(stom.spring.strata$SEX)
 #AvgStomLag <- AvgStom %>% dplyr::lag(AvgStomLag1=(AvgStomFull, n=1)
 #Clunky way of lagging but it works:
 #Lagged stomach index by strata for Condition GAM:
-#' A <- AvgStom %>% dplyr::select(YEAR, Species, STRATUM, EPU, sex, AvgStomFullStrata)
-#' B <- unique(A)
-#' C <- B %>% dplyr::mutate(YEARstom= YEAR)
-#' D <- C %>% dplyr::ungroup()
-#' E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, sex, AvgStomFullStratalag=AvgStomFullStrata)
-#' Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-#' AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
-#' AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "sex")) %>%
-#'   dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','sex', 
-#'                 #'StockName', 'Survey',
-#'                 'StockUnit', 
-#'                 # Use for condition data by strata:
-#'                 # 'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
-#'                 # 'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
-#'                 'AvgRelCondYear', 'AvgRelCondYearSD', 'AvgExpcatchwtYear', 'AvgExpcatchnumYear',
-#'                 'AvgLatYear', 'AvgLonYear', 'AvgBottomTempYear', 'AvgSurfaceTempYear',
-#'                 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-#'                 #'CalEPU', 
-#'                 'CopepodSmallLarge',
-#'                 #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
-#'                 #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
-#'                 #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
-#'                 #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
-#'                 'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
-#'                 'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
-#'   distinct()
+A <- AvgStom %>% dplyr::select(YEAR, Species, STRATUM, EPU, SEX, AvgStomFullStrata)
+B <- unique(A)
+C <- B %>% dplyr::mutate(YEARstom= YEAR)
+D <- C %>% dplyr::ungroup()
+E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEX, AvgStomFullStratalag=AvgStomFullStrata)
+Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
+AvgStomStrataLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("Species", "YEAR","STRATUM", "EPU", "SEX")) %>%
+  dplyr::select('YEAR', 'CRUISE6', 'STRATUM', 'EPU', 'SEASON','Species', 'SVSPP','SEX',
+                #'StockName', 'Survey',
+                'StockUnit',
+                # Use for condition data by strata:
+                 'AvgRelCondStrata', 'AvgRelCondStrataSD', 'AvgExpcatchwtStrata', 'AvgExpcatchnumStrata',
+                'AvgLatStrata', 'AvgLonStrata', 'AvgBottomTempStrata', 'AvgSurfaceTempStrata',
+               # 'AvgRelCondYear', 'AvgRelCondYearSD', 'AvgExpcatchwtYear', 'AvgExpcatchnumYear',
+                #'AvgLatYear', 'AvgLonYear', 'AvgBottomTempYear', 'AvgSurfaceTempYear',
+                'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+                #'CalEPU',
+                'CopepodSmallLarge',
+                #      'CopepodSmallLargeStrataWinter', 'CopepodSmallLargeStrataSpring', 'CopepodSmallLargeStrataSummer', 'CopepodSmallLargeStrataFall',
+                #        'CopepodSmallLargeSprStrata','CopepodSmallLargeFallStrata','CopepodSmallLargeAnnualStrata',
+                #      'TotalCopepodStrataWinter', 'TotalCopepodStrataSpring', 'TotalCopepodStrataSummer', 'TotalCopepodStrataFall',
+                #     'ZooplAbundStrataWinter', 'ZooplAbundStrataSpring','ZooplAbundStrataSummer', 'ZooplAbundStrataFall',
+                'ZooplBiomassAnomaly', 'TotalCopepodsMillions',
+                'RangeMagnitude', 'RangeDuration', 'AvgStomFullStratalag') %>%
+  distinct()
 
 
 #Lagged stomach index by tow for multi-model dataset:
-# A <- AvgStom %>% select(YEAR, Species, STRATUM, EPU, SEASON, sex, AvgStomFullStrata)
-# B <- unique(A)
-# C <- B %>% dplyr::mutate(YEARstom= YEAR)
-# D <- C %>% dplyr::ungroup()
-# E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEASON, sex, AvgStomFullStratalag=AvgStomFullStrata)
-# Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
-# AvgStom2 <- AvgStom %>% dplyr::select(-c(AvgStomFullStrata))
-# 
-# AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "STRATUM", "EPU", "sex")) %>%
-#   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'sex', 
-#          'EXPCATCHWT', 'EXPCATCHNUM', 
-#          'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
-#         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
-# AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
+ # A <- stom.data.strata %>% select(YEAR, Species, STRATUM, EPU, SEASON, SEX, AvgStomFullStrata)
+ # B <- unique(A)
+ # C <- B %>% dplyr::mutate(YEARstom= YEAR)
+ # D <- C %>% dplyr::ungroup()
+ # E <- D %>% dplyr::select(Species, YEARstom, STRATUM, EPU, SEASON, SEX, AvgStomFullStratalag=AvgStomFullStrata)
+ # Stomlag <- E %>% dplyr::mutate(YEAR = YEARstom+1)
+ # AvgStom2 <- stom.data.strata %>% dplyr::select(-c(AvgStomFullStrata))
+
+ # AvgStomTowLag <- dplyr::left_join(AvgStom2, Stomlag, by=c("YEAR", "SEASON", "Species", "STRATUM", "EPU", "SEX")) %>%
+ #   select('YEAR', 'SEASON','CRUISE6', 'STRATUM', 'STATION', 'TOW', 'BOTTEMP', 'LAT', 'LON', 'EPU', 'Species', 'SEX',
+ #          'EXPCATCHWT', 'EXPCATCHNUM',
+ #          'AvgTowRelCond', 'AvgTowRelCondSD', 'AvgTempWinter', 'AvgTempSpring', 'AvgTempSummer', 'AvgTempFall',
+ #         'CalEPU', 'CopepodSmallLarge', 'ZooplBiomassAnomaly', 'AvgStomFullStratalag')
+ # AvgStomTowLag <- dplyr::distinct(AvgStomTowLag)
 
 #check merge rows by counting distinct rows:
-#DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, STATION, TOW, EPU, SEASON, sex))
-#DistRowsStomlag <- nrow(dplyr::distinct(Stomlag, YEAR, Species, STRATUM, EPU, SEASON, sex))
+DistRowsAvgStom2 <- nrow(dplyr::distinct(AvgStom2, YEAR, Species, STRATUM, EPU, SEASON, SEX))
+#DistRowsStomlag <- nrow(dplyr::distinct(Stomlag, YEAR, Species, STRATUM, EPU, SEASON, SEX))
 
 #Multi-model dataset:
-#readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))   
+#readr::write_csv(AvgStomTowLag, here::here(out.dir,"RelCondition_tow_EnvirIndices.csv"))
 
 #------------------------------------------------------------------------------------ 
 #Add stock assessment data from Stock SMART: https://www.fisheries.noaa.gov/resource/tool-app/stock-smart
@@ -760,9 +760,9 @@ AssDat2 <- tibble::as_tibble(AssDat) %>%
   dplyr::mutate(Species = trimws(Species))
 #Using Average stomach fullness lagged 1 year: 
 #***********
-#CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
+CondStockAss <- dplyr::left_join(AvgStomStrataLag, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
 
-CondStockAss <- dplyr::left_join(FallBloomCond, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
+#CondStockAss <- dplyr::left_join(FallBloomCond, AssDat2, by=c('Species', 'StockUnit', 'YEAR'))
 #Using spring stomach fullness: 
 #CondStockAss <- dplyr::left_join(AvgStomSpr, AssDat, by=c('Species', 'StockUnit', 'YEAR'))
 
@@ -1079,7 +1079,7 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         # 'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
                                         # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
-                                        'LocalBiomass'='BIOMASS', 'LocalAbundance'= 'ABUNDANCE',
+                                        'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchwtStrata',
                                         'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
@@ -1089,7 +1089,7 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         #'CopepodSmLg_SprStrata'= 'CopepodSmallLargeSprStrata', 
                                         #'CopepodSmLg_FallStrata'= 'CopepodSmallLargeFallStrata', 
                                         #'CopepodSmLg_AnnualStrata'= 'CopepodSmallLargeAnnualStrata',
-                                       # 'StomachFullness'= 'AvgStomFullStratalag',  
+                                        'StomachFullness'= 'AvgStomFullStratalag',  
                                         #                          'StockBiomass'= 'TotalBiomass',
                                         'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
                                         'PropColumnColdPool'= 'PropColumnColdPool', 
@@ -1101,9 +1101,9 @@ condSPP <-  CondClean %>% dplyr::rename(
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 #*********
-#saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
+saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 
-saveRDS(condSPP,file = here::here("other",paste0("condSPP_Year.rds")))
+#saveRDS(condSPP,file = here::here("other",paste0("condSPP_Year.rds")))
 
 spp <- unique(CondClean$Species)
 datalist = list()
