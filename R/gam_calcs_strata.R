@@ -923,11 +923,12 @@ CondClean <- CondColdPool %>%
 
 
 CondCleanSpDogWt <- CondClean %>%
-  dplyr::filter(is.na(BIOMASS) | (!(Species == "Spiny dogfish" & BIOMASS >1500)))
+#  dplyr::filter(is.na(BIOMASS) | (!(Species == "Spiny dogfish" & BIOMASS >1500)))
+  dplyr::filter(is.na(AvgExpcatchwtStrata) | (!(Species == "Spiny dogfish" & AvgExpcatchwtStrata >1500)))
 
 CondClean <- CondCleanSpDogWt %>%
-  dplyr::filter(is.na(ABUNDANCE) | (!(Species == "Windowpane" & ABUNDANCE >250)))
-
+#  dplyr::filter(is.na(ABUNDANCE) | (!(Species == "Windowpane" & ABUNDANCE >250)))
+  dplyr::filter(is.na(AvgExpcatchnumStrata) | (!(Species == "Windowpane" & AvgExpcatchnumStrata >250)))
 
 #####For GOM Haddock analyses comparing condition to commercial catch whole fish conversions:
 # GOMhadd <- CondClean %>% 
@@ -1076,10 +1077,9 @@ CondClean <- CondCleanSpDogWt %>%
 # 
 #Send Andy condSPP:
 condSPP <-  CondClean %>% dplyr::rename(
-                                        # 'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
+                                         'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
                                         # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
-                                        'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchwtStrata',
                                         'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         'WinterTemp'= 'AvgTempWinter',
                                         'SpringTemp'= 'AvgTempSpring', 'SummerTemp'= 'AvgTempSummer',
@@ -1093,11 +1093,11 @@ condSPP <-  CondClean %>% dplyr::rename(
                                         #                          'StockBiomass'= 'TotalBiomass',
                                         'FallBloomMagnitude'= 'RangeMagnitude', 'FallBloomDuration'= 'RangeDuration',
                                         'PropColumnColdPool'= 'PropColumnColdPool', 
-                                       # 'AverageLatStrata' = 'AvgLatStrata',
-                                       #  'AverageLonStrata' = 'AvgLonStrata'
+                                        'AverageLatStrata' = 'AvgLatStrata',
+                                         'AverageLonStrata' = 'AvgLonStrata')
                                        # by year:
-                                       'AverageLatYear' = 'AvgLatStrata',
-                                       'AverageLonYear' = 'AvgLonStrata')
+                                       # 'AverageLatYear' = 'AvgLatStrata',
+                                       # 'AverageLonYear' = 'AvgLonStrata')
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 #*********
