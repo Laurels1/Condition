@@ -94,7 +94,7 @@ AvgStrataCond <- CondStockUnit %>% group_by(CRUISE6, STRATUM, Species, sex) %>%
          AvgLonStrata = (mean(LON)), AvgBottomTempStrata = (mean(BOTTEMP)), AvgSurfaceTempStrata = (mean(SURFTEMP))) %>%
   distinct(AvgRelCondStrata, .keep_all = T)
 
-#Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis)
+#Creating Average Relative Condition by Year, species for shelf-wide regime shift work (Scott Large Dynamic Factor Analysis and Rob Gamble EDM)
 AvgYearCond <- CondStockUnit %>% group_by(YEAR, Species) %>%
   mutate(AvgRelCondYear=(mean(!is.na(RelCond))), AvgRelCondYearSD = (sd(!is.na(RelCond))), AvgExpcatchwtYear = (mean(!is.na(BIOMASS))),
          AvgExpcatchnumYear= (mean(!is.na(ABUNDANCE))), AvgLatYear = (mean(!is.na(LAT))),
@@ -266,7 +266,7 @@ ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
 ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
 
-#Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
+#Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis and Rob Gamble EDM:
 ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
   dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
                  CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
@@ -1025,6 +1025,26 @@ CondClean <- CondCleanSpDogWt %>%
 # 
 # readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
 # saveRDS(DFAdata,file = here::here("other",paste0("FishCondition_EnvirCov_DFA2022.rds")))
+
+#Environmental covariates by Year for Rob Gamble EDM:
+#EDM for mature mackerel >23cm:
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+EDMzoop <- ZoopDataEPU %>% dplyr::filter(EPU == 'MAB') %>%
+  ungroup() %>% dplyr::select('YEAR', 'ZoopAbundFallEPU') %>% dplyr::rename(ZoopAbundFallMAB = ZoopAbundFallEPU)
+
+EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
+
+SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
+
+EDMdataTemp <- dplyr::full_join(EDMdataZoop, SurfTemp, by='YEAR')
+
+EDMdata <- EDMdataTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
+
+#readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
+saveRDS(EDMdata,file = here::here("other",paste0("FishCondition_EDM2022.rds")))
 
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:

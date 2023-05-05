@@ -896,6 +896,9 @@ Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::group_by(YEAR) %>%
   dplyr::summarize(AvgSurfTemp = mean(SURFTEMP)) 
 
+#Surface data for mackerel ESP:
+readr::write_csv(Surfdata, here::here(out.dir,"NEFSC_SpringSurfaceTemp2022.csv"))
+
 #Regime analysis:
 SurfRegime <- Surfdata %>% dplyr::select(AvgSurfTemp, YEAR)
 Regime <- rpart::rpart(AvgSurfTemp~YEAR, data=SurfRegime)
