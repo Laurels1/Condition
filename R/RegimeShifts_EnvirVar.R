@@ -57,6 +57,58 @@ p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
 
 ggsave(path= here::here("output"),"GOMspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
+
+GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Summer') %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, mlucens_100m3, pseudo_100m3)) %>%
+  dplyr::select(year, SumZoop)
+
+#Regime analysis:
+GOMZoopRegime <- GOMsummerZoop %>% dplyr::select(SumZoop, year)
+Regime <- rpart::rpart(SumZoop~year, data=GOMZoopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "GOMsummerZoopAnom_Regimes_2021.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+GOMZoopRegime$year <- as.numeric(as.character(GOMZoopRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "GOM Summer Zooplankton Abundance Anomalies", y = "Zooplankton Anomaly") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"GOMsummerZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
 #Mean GB zooplankton abundance anomalies from Ryan Morse (GBK_mean_seasonal_anomalies.csv)
 GBseasonZooAbund <- readr::read_csv(here::here(data.dir, "GBK_mean_seasonal_anomalies.csv"))
 
@@ -160,6 +212,58 @@ p2 <- ggplot(MABZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit5, color='red')
 
 ggsave(path= here::here("output"),"MABspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#MAB fall Zooplankton anomaly from Ryan Morse:
+MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
+
+MABfallZoop <- MABseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Fall') %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, tlong_100m3, pseudo_100m3)) %>%
+  dplyr::select(year, SumZoop)
+
+#Regime analysis:
+MABZoopRegime <- MABfallZoop %>% dplyr::select(SumZoop, year)
+Regime <- rpart::rpart(SumZoop~year, data=MABZoopRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "MABfallZoopAnom_Regimes_2021.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+MABZoopRegime$year <- as.numeric(as.character(MABZoopRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(MABZoopRegime, aes(x = year, y = SumZoop)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "MAB Fall Zooplankton Abundance Anomalies", y = "Total Zooplankton Anomaly") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"MABfallZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
@@ -897,7 +1001,7 @@ Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::summarize(AvgSurfTemp = mean(SURFTEMP)) 
 
 #Surface data for mackerel ESP:
-readr::write_csv(Surfdata, here::here(out.dir,"NEFSC_SpringSurfaceTemp2022.csv"))
+#readr::write_csv(Surfdata, here::here(out.dir,"NEFSC_SpringSurfaceTemp2022.csv"))
 
 #Regime analysis:
 SurfRegime <- Surfdata %>% dplyr::select(AvgSurfTemp, YEAR)

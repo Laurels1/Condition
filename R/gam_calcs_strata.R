@@ -285,16 +285,16 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
 #readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2021.csv")) 
 
 #Zooplankton data separately for regime shift:
-# ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER', 
-#                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
-# 
-# ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
-# 
-# ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>% 
-#   dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
-#                  TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
-#                  ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)), 
-#   )
+ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER',
+                                                       ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
+
+ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
+
+ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>%
+  dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
+                 TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
+                 ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)),
+  )
 # 
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
 load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
@@ -313,7 +313,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Small-large copepod index for Rob Gamble EDM:
-saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
+#saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
@@ -1035,27 +1035,31 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH
   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-EDMzoop <- ZoopDataEPU %>% dplyr::filter(EPU == 'MAB') %>%
-  ungroup() %>% dplyr::select('YEAR', 'ZoopAbundFallEPU') %>% dplyr::rename(ZoopAbundFallMAB = ZoopAbundFallEPU)
+#from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
+EDMzoop <- MABfallZoop %>% dplyr::select(SumZoop, year) %>%
+ dplyr::rename(MABfallZoopAnom = SumZoop, YEAR = year)
 
 EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
 
-SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
+#Surfdata from RegimeShifs_EnvirVar.R:
+#SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
 
-EDMdataTemp <- dplyr::full_join(EDMdataZoop, SurfTemp, by='YEAR')
+EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by='YEAR')
 
 EDMdata <- EDMdataTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
-saveRDS(EDMdata,file = here::here("other",paste0("FishCondition_EDM2022.rds")))
+saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(ImmatureMackerelCond = mean(RelCond), ImmMackStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-EDMzoopGOM <- ZoopDataEPU %>% dplyr::filter(EPU == 'GOM') %>%
-  ungroup() %>% dplyr::select('YEAR', 'ZoopAbundSummerEPU') %>% dplyr::rename(ZoopAbundSummerGOM = ZoopAbundSummerEPU)
+
+#from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
+EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
+  dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
 
 EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
 
