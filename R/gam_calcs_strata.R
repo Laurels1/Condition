@@ -1036,13 +1036,27 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
+#MAB fall Zooplankton anomaly from Ryan Morse:
+MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
+
+MABfallZoop <- MABseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Fall') %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, tlong_100m3, pseudo_100m3)) %>%
+  dplyr::select(year, SumZoop)
+
 EDMzoop <- MABfallZoop %>% dplyr::select(SumZoop, year) %>%
  dplyr::rename(MABfallZoopAnom = SumZoop, YEAR = year)
 
 EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
 
-#Surfdata from RegimeShifs_EnvirVar.R:
+#Surfdata from RegimeShifts_EnvirVar.R:
 #SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
+#Regime shifts in surface temp:
+Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, SURFTEMP) %>%
+  dplyr::filter(!is.na(SURFTEMP)) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::summarize(AvgSurfTemp = mean(SURFTEMP))
 
 EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by='YEAR')
 
@@ -1057,13 +1071,25 @@ annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LEN
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 
-#from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
+#from GOM summer Zooplankton anomaly section of RegimeShifts_EnvirVar.R
+#Mean GOM zooplankton abundance anomalies from Ryan Morse (GOM_mean_seasonal_anomalies.csv)
+GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
+
+GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Spring') %>%
+  dplyr::group_by(year) %>%
+  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, mlucens_100m3, pseudo_100m3)) %>%
+  dplyr::select(year, SumZoop)
+
 EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
   dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
 
 EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
 
-EDMtempSpr <- AvgTemp %>% dplyr::select('YEAR', 'AvgTempSpring')
+#AvgTempSpringData from line 120 of this code:
+EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpring'='GOM',
+                                                  'GB_AvgTempSpring'='GB',
+                                                  'MAB_AvgTempSpring'='MAB',
+                                                  'SS_AvgTempSpring'='SS')
 
 EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by='YEAR')
 
@@ -1122,7 +1148,6 @@ saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_E
 #Send Andy condSPP:
 condSPP <-  CondClean %>% dplyr::rename(
                                          'LocalBiomass'='AvgExpcatchwtStrata', 'LocalAbundance'= 'AvgExpcatchnumStrata',
-                                        # 'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         # by Year:
                                         'LocalBottomTemp'= 'AvgBottomTempStrata','LocalSurfaceTemp'='AvgSurfaceTempStrata',
                                         'WinterTemp'= 'AvgTempWinter',

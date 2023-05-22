@@ -70,13 +70,13 @@ gis.dir  <- "gis"
 
 
 #laptop (for 2023 SOE condition data):
- #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
- #channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
-# #getBio for individual weights:
- #survey <- survdat::get_survdat_data(channel, getBio = T)
- #Gets hung up on either of these two lines when trying to run Jan 6, 2023:
- #survdat <- survey$survdat
- #survbio=as.data.frame(survey[['survdat']])
+#  source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+#  channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
+# # #getBio for individual weights:
+#  survey <- survdat::get_survdat_data(channel, getBio = T)
+#  #Gets hung up on either of these two lines when trying to run Jan 6, 2023:
+#  survdat <- survey$survdat
+#  survbio=as.data.frame(survey[['survdat']])
 
  #Strata sets
  # EPU <- c('MAB', 'GB', 'GOM', 'SS')

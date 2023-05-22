@@ -55,7 +55,7 @@ p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GOMspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"GOMspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
 
@@ -73,7 +73,7 @@ Regime <- rpart::rpart(SumZoop~year, data=GOMZoopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "GOMsummerZoopAnom_Regimes_2021.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "GOMsummerZoopAnom_Regimes_2021.RDS"))
 printcp(Regime)
 
 
@@ -106,7 +106,7 @@ p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GOMsummerZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"GOMsummerZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Mean GB zooplankton abundance anomalies from Ryan Morse (GBK_mean_seasonal_anomalies.csv)
@@ -126,7 +126,7 @@ Regime <- rpart::rpart(SumZoop~year, data=GBZoopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "GBsummerZoop_Regimes_2021.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "GBsummerZoop_Regimes_2021.RDS"))
 printcp(Regime)
 
 
@@ -159,7 +159,7 @@ p2 <- ggplot(GBZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GBsummerZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"GBsummerZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Mean MAB zooplankton abundance anomalies from Ryan Morse (MAB_mean_seasonal_anomalies.csv)
 MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
@@ -178,7 +178,7 @@ Regime <- rpart::rpart(SumZoop~year, data=MABZoopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "MABspringZoop_Regimes_2021.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "MABspringZoop_Regimes_2021.RDS"))
 printcp(Regime)
 
 
@@ -211,7 +211,7 @@ p2 <- ggplot(MABZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"MABspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"MABspringZoop_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #MAB fall Zooplankton anomaly from Ryan Morse:
 MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
@@ -230,7 +230,7 @@ Regime <- rpart::rpart(SumZoop~year, data=MABZoopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "MABfallZoopAnom_Regimes_2021.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "MABfallZoopAnom_Regimes_2021.RDS"))
 printcp(Regime)
 
 
@@ -263,7 +263,7 @@ p2 <- ggplot(MABZoopRegime, aes(x = year, y = SumZoop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"MABfallZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"MABfallZoopAnom_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
@@ -292,88 +292,88 @@ ZoopList <- unique(Zoop) %>%
   dplyr::pull()
 
 #Only select Species with names that have sufficient data:
-numZoop <- length(ZoopList)
-for (i in numZoop:1) {
-  if (!is.na(as.numeric(ZoopList[i]))) {
-    ZoopList <-ZoopList[-i]
-  }
-}
-
-#loop over zooplankton index:
-for (aZoop in ZoopList) {  
-  print(aZoop)
-  
-
-  #Test for regime shifts in each zooplankton index (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-  ZoopRegDat <- Zoop %>% dplyr::filter(ZoopIndex == aZoop) %>% dplyr::select(ZoopData, ZoopIndex, YEAR, SEASONS) 
-  Regime <- rpart::rpart(ZoopData~YEAR, data=ZoopRegDat)
-  #Selecting best fit (gives optimal CP value associated with the minimum error)::
-  # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
-  
-  ZoopRegimePlot <- rpart.plot::rpart.plot(Regime)
-  
-  # Prettier plot of pruned tree (not currently working):
-  # library(rpart.plot)
-  # library(RColorBrewer)
-  
-  
-  
-  # ptree<- prune(Regime,
-  #               + cp= Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"])
-  # fancyRpartPlot(ptree, uniform=TRUE,
-  #                  + main="Pruned Classification Tree")
-  #plotcp
-  
-  
-  #Outputs pruning tree table:
-  saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aZoop,"_Zooplankton_Regimes.RDS")))
-  # printcp(Regime)
-  
-  #Select best pruned tree (outputs the row of the cptable that has the number of splits with the lowest error (xerror)
-  # Used rpart::prune
-  optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
-  optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
-  Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
-  Regime <- Regime_pruned
-  
-  
-  #Pull regime shift years into new data frame to add to plot (use the simplest tree 
-  #within one standard error (xstd) of the best tree (lowest xerror)):
-  Results <- as.data.frame(Regime[["splits"]])
-  SppSplit1 <- Results$index[1]
-  SppSplit2 <- Results$index[2]
-  SppSplit3 <- Results$index[3]
-  SppSplit4 <- Results$index[4]
-  SppSplit5 <- Results$index[5]
-  
-  
-  ZoopDat <- Zoop 
-  
-  #change YEAR to continuous numeric for plotting function below:
- ZoopDat$YEAR <- as.numeric(as.character(ZoopDat$YEAR))
-
- ZoopIndexRegime <- ZoopDat %>% dplyr::filter(YEAR >= 1992) %>%
-   dplyr::select(YEAR, SEASONS, ZoopData) %>% group_by(SEASONS)
- 
-
-  #Line plot of condition
-  p2 <- ggplot(ZoopDat, aes(x = YEAR, y = ZoopData)) +
-   geom_line(aes(color = SEASONS)) + 
-   scale_color_manual(values = c("red", "blue", "green", "orange")) +
-    # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond), colour="black") +
-    # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond)) +
-    geom_point(aes(color = SEASONS)) +
-    labs(title= paste0(aZoop, " Regime Shifts by Season"), y = "aZoop") +
-    geom_vline(xintercept=SppSplit1, color='red')+
-    geom_vline(xintercept=SppSplit2, color='red')+
-    geom_vline(xintercept=SppSplit3, color='red')+
-    geom_vline(xintercept=SppSplit4, color='red')+
-    geom_vline(xintercept=SppSplit5, color='red')+
-    # ylim(0.85, 1.21)+
-    xlim(1992, 2022)
-  
-  ggsave(path= here::here("output","RegimeShifts"),paste0(aZoop, "_RegimeShifts.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
-}
+# numZoop <- length(ZoopList)
+# for (i in numZoop:1) {
+#   if (!is.na(as.numeric(ZoopList[i]))) {
+#     ZoopList <-ZoopList[-i]
+#   }
+# }
+# 
+# #loop over zooplankton index:
+# for (aZoop in ZoopList) {  
+#   print(aZoop)
+#   
+# 
+#   #Test for regime shifts in each zooplankton index (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+#   ZoopRegDat <- Zoop %>% dplyr::filter(ZoopIndex == aZoop) %>% dplyr::select(ZoopData, ZoopIndex, YEAR, SEASONS) 
+#   Regime <- rpart::rpart(ZoopData~YEAR, data=ZoopRegDat)
+#   #Selecting best fit (gives optimal CP value associated with the minimum error)::
+#   # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+#   
+#   ZoopRegimePlot <- rpart.plot::rpart.plot(Regime)
+#   
+#   # Prettier plot of pruned tree (not currently working):
+#   # library(rpart.plot)
+#   # library(RColorBrewer)
+#   
+#   
+#   
+#   # ptree<- prune(Regime,
+#   #               + cp= Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"])
+#   # fancyRpartPlot(ptree, uniform=TRUE,
+#   #                  + main="Pruned Classification Tree")
+#   #plotcp
+#   
+#   
+#   #Outputs pruning tree table:
+#   saveRDS(Regime[["cptable"]],file = here::here("output","RegimeShifts", paste0(aZoop,"_Zooplankton_Regimes.RDS")))
+#   # printcp(Regime)
+#   
+#   #Select best pruned tree (outputs the row of the cptable that has the number of splits with the lowest error (xerror)
+#   # Used rpart::prune
+#   optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+#   optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+#   Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+#   Regime <- Regime_pruned
+#   
+#   
+#   #Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#   #within one standard error (xstd) of the best tree (lowest xerror)):
+#   Results <- as.data.frame(Regime[["splits"]])
+#   SppSplit1 <- Results$index[1]
+#   SppSplit2 <- Results$index[2]
+#   SppSplit3 <- Results$index[3]
+#   SppSplit4 <- Results$index[4]
+#   SppSplit5 <- Results$index[5]
+#   
+#   
+#   ZoopDat <- Zoop 
+#   
+#   #change YEAR to continuous numeric for plotting function below:
+#  ZoopDat$YEAR <- as.numeric(as.character(ZoopDat$YEAR))
+# 
+#  ZoopIndexRegime <- ZoopDat %>% dplyr::filter(YEAR >= 1992) %>%
+#    dplyr::select(YEAR, SEASONS, ZoopData) %>% group_by(SEASONS)
+#  
+# 
+#   #Line plot of condition
+#   p2 <- ggplot(ZoopDat, aes(x = YEAR, y = ZoopData)) +
+#    geom_line(aes(color = SEASONS)) + 
+#    scale_color_manual(values = c("red", "blue", "green", "orange")) +
+#     # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond), colour="black") +
+#     # geom_errorbar(width=.1, aes(ymin=lower.ci.cond, ymax=upper.ci.cond)) +
+#     geom_point(aes(color = SEASONS)) +
+#     labs(title= paste0(aZoop, " Regime Shifts by Season"), y = "aZoop") +
+#     geom_vline(xintercept=SppSplit1, color='red')+
+#     geom_vline(xintercept=SppSplit2, color='red')+
+#     geom_vline(xintercept=SppSplit3, color='red')+
+#     geom_vline(xintercept=SppSplit4, color='red')+
+#     geom_vline(xintercept=SppSplit5, color='red')+
+#     # ylim(0.85, 1.21)+
+#     xlim(1992, 2022)
+#   
+# #  ggsave(path= here::here("output","RegimeShifts"),paste0(aZoop, "_RegimeShifts.jpg"), width = 8, height = 3.75, units = "in", dpi = 300)
+# }
 
 
 #readRDS(file = here::here("output","RegimeShifts", paste0("American plaice_RelCondition_Regimes_Fall.RDS")))
@@ -435,7 +435,7 @@ p2 <- ggplot(AvgSummerTemp, aes(x = YEAR, y = AvgTempSummer)) +
   # geom_vline(xintercept=SummerSplit4, color='red') +
   # geom_vline(xintercept=SummerSplit5, color='red') 
 
-ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"AverageSummerBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgSpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -453,7 +453,7 @@ p2 <- ggplot(AvgSpringTemp, aes(x = YEAR, y = AvgTempSpring)) +
   # geom_vline(xintercept=SpringSplit3, color='red') +
   # geom_vline(xintercept=SpringSplit4, color='red')
 
-ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgFallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -467,7 +467,7 @@ p2 <- ggplot(AvgFallTemp, aes(x = YEAR, y = AvgTempFall)) +
   labs(title="Average Fall Bottom Temperature by EPU", y = "Average Fall Bottom Temp") +
   geom_vline(xintercept=FallSplit1, color='red') 
 
-ggsave(path= here::here(out.dir),"AverageFallBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"AverageFallBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgWinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -481,7 +481,7 @@ p2 <- ggplot(AvgWinterTemp, aes(x = YEAR, y = AvgTempWinter)) +
   labs(title="Average Winter Bottom Temperature by EPU", y = "Average Winter Bottom Temp") +
   geom_vline(xintercept=WinterSplit1, color='red') 
 
-ggsave(path= here::here(out.dir),"AverageWinterBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"AverageWinterBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Copepod small to large ratio data by EPU (from gam_calcs_strata.R):
@@ -497,7 +497,7 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_vline(xintercept=CopepodEPUSplit1, color='red') +
   geom_vline(xintercept=CopepodEPUSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2019.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2019.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Fall phyoplanktion bloom magnitude data (from gam_calcs_strata.R):
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
@@ -509,7 +509,7 @@ p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeMagnitude)) +
   geom_point(color = "blue") +
   labs(title="Fall Phytoplankton Bloom Magnitude", y = "Fall Bloom Magnitude")
 
-ggsave(path= here::here(out.dir),"FallBloom_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"FallBloom_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Fall phytoplankton bloom duration data (from gam_calcs_strata.R):
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
@@ -521,7 +521,7 @@ p2 <- ggplot(FallBloomdata, aes(x = YEAR, y = RangeDuration)) +
   geom_point(color = "blue") +
   labs(title="Fall Phytoplankton Bloom Duration", y = "Fall Bloom Duration")
 
-ggsave(path= here::here(out.dir),"FallBloom_duration_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"FallBloom_duration_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #"TotalCopepods","ZooplanktonBiomass","StomachFullness"
 
@@ -538,7 +538,7 @@ p2 <- ggplot(TotCopData, aes(x = YEAR, y = TotalCopepodsMillions)) +
   geom_vline(xintercept=TotCopepodsSplit1, color='red') +
   geom_vline(xintercept=TotCopepodsSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"TotalCopepods_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"TotalCopepods_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Spring Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
@@ -559,7 +559,7 @@ Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_spr2022.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_spr2022.RDS"))
  printcp(Regime)
 
 
@@ -596,7 +596,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCopepods_Regimes_spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalCopepods_Regimes_spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Summer Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopSummer <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Summer') %>%
@@ -615,7 +615,7 @@ Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Summer2022.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Summer2022.RDS"))
 printcp(Regime)
 
 
@@ -652,7 +652,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCopepods_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalCopepods_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Fall Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopFall <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Fall') %>%
@@ -671,8 +671,8 @@ Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Fall2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Fall2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -708,7 +708,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCopepods_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalCopepods_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Winter Total copepods from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZoopData from gam_calcs_strata.R:
 TotalCopWinter <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Winter') %>%
@@ -727,8 +727,8 @@ Regime <- rpart::rpart(SumTotCop~YEAR, data=CopRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Winter2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalCopepds_Regimes_Winter2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -764,7 +764,7 @@ p2 <- ggplot(TotCopRegime, aes(x = YEAR, y = SumTotCop)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalCopepods_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalCopepods_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Spring Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
 TotalZoopSpr <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Spring') %>%
@@ -783,8 +783,8 @@ Regime <- rpart::rpart(SumTotalZooSpr~YEAR, data=ZooRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Spring2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Spring2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -820,7 +820,7 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooSpr)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalZoopl_Regimes_Spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalZoopl_Regimes_Spring.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Summer Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
@@ -840,8 +840,8 @@ Regime <- rpart::rpart(SumTotalZooSummer~YEAR, data=ZooRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Summer2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Summer2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -877,7 +877,7 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooSummer)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalZoopl_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalZoopl_Regimes_Summer.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Fall Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
@@ -897,8 +897,8 @@ Regime <- rpart::rpart(SumTotalZooFall~YEAR, data=ZooRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Fall2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Fall2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -934,7 +934,7 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooFall)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalZoopl_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalZoopl_Regimes_Fall.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Winter Total zooplankton abundance from Harvey: EcoMon_ZooplanktonData_BTSMeanAbundance.csv, as ZooSeason from gam_calcs_strata.R:
 TotalZoopWinter <- ZooSeason %>% dplyr::filter(YEAR >= 1992, season1 == 'Winter') %>%
@@ -953,8 +953,8 @@ Regime <- rpart::rpart(SumTotalZooWinter~YEAR, data=ZooRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Winter2022.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "TotalZoopl_Regimes_Winter2022.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -990,7 +990,7 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooWinter)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"TotalZoopl_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"TotalZoopl_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 #Regime shifts in surface temp:
@@ -1012,8 +1012,8 @@ Regime <- rpart::rpart(AvgSurfTemp~YEAR, data=SurfRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
-printcp(Regime)
+#saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
+#printcp(Regime)
 
 
 optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
@@ -1049,4 +1049,4 @@ p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
