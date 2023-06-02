@@ -55,10 +55,10 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #For mature mackerel >23 cm:
-cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 
 #For immature mackerel <=23:
-#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
+cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
 
 #Drop StockName column for merge with StockSMART:
 CondStockjoin <- dplyr::left_join(cond.strata, dplyr::select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
