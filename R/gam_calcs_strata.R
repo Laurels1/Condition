@@ -54,6 +54,12 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 #Limit survey strata to north of Hatteras:
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
+#For mature mackerel >23 cm:
+cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+
+#For immature mackerel <=23:
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
+
 #Drop StockName column for merge with StockSMART:
 CondStockjoin <- dplyr::left_join(cond.strata, dplyr::select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
 
@@ -1060,7 +1066,13 @@ Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
 
 EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by='YEAR')
 
-EDMdata <- EDMdataTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
+#Bring in small minus large copepod size structure data:
+CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
+
+EDMdataTempCop <- EDMdataTemp <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by='YEAR', 'EPU')
+
+EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
 saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
@@ -1093,7 +1105,9 @@ EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpr
 
 EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by='YEAR')
 
-EDMdataImm <- EDMdataImm2 %>% unique() %>% dplyr::filter(YEAR >= 1992)
+EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by='YEAR', 'EPU')
+
+EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2022.rds")))
 

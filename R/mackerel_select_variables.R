@@ -61,8 +61,12 @@ if (!dir.exists(here::here("output","automate", "test"))) {
 data <- readRDS(file=here::here("other","condSPP.rds")) %>% 
   dplyr::ungroup()
 
+#Mature mackerel >23cm:
+data <- data %>%  dplyr::mutate(logLocalBiomass = (log(LocalBiomass)), logLocalAbundance = (log(LocalAbundance)))
+
 # select subset of variables needed in analysis
-cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, LocalAbundance,
+cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, logLocalBiomass, logLocalAbundance,
+  #                             LocalBiomass, LocalAbundance,
   #                             StockBiomass,
   #                             Fproxy,
                                LocalBottomTemp, LocalSurfaceTemp, 
@@ -80,11 +84,11 @@ cond <- data %>% dplyr::select(AvgRelCondStrata, Species, SVSPP, LocalBiomass, L
 ) 
 
 # define variable and levels
-localDensity <- c("LocalBiomass","LocalAbundance")
+localDensity <- c("logLocalBiomass","logLocalAbundance")
 #populationDensity <- "StockBiomass"
 #fishing <- "Fproxy"
 #localEnv <- c("LocalBottomTemp", "PropColumnColdPool")
-localEnv <- c("LocalBottomTemp")
+localEnv <- c("LocalBottomTemp", "LocalSurfaceTemp")
 broadEnv <- c("WinterTemp","SpringTemp","SummerTemp","FallTemp")
 #copepod <- c("CopepodSmallLargeStrataWinter", "CopepodSmallLargeStrataSpring", "CopepodSmallLargeStrataSummer", "CopepodSmallLargeStrataFall")
 copepod <- c("CopepodSmall_Large")
@@ -99,7 +103,7 @@ spatialLat <- "AverageLatStrata"
 df <- data.frame(variables = c("localDensity","localDensity",
   #                             "populationDensity",
    #                            "fishing",
-                               "localEnv",
+                               "localEnv","localEnv",
   #localEnv",
                                "broadEnv","broadEnv","broadEnv","broadEnv",
                                "copepod",
@@ -115,9 +119,9 @@ df <- data.frame(variables = c("localDensity","localDensity",
                            resource,
                            temporal),
                  num = c(2,2,
-                         1,
+       #                  1,
              #            1,
-      #                  2,2,
+                          2,2,
         #                 3,3,3,
                          4,4,4,4,
                          1,
@@ -144,7 +148,8 @@ allVars <- c(unique(as.vector(as.matrix(modelScenarios))),"AverageLonStrata", "A
 speciesList <- cond %>%
 #  dplyr::distinct(Species) %>% 
   #For single species:
-  dplyr::filter(Species=="Atlantic mackerel") %>%
+ # dplyr::filter(Species=="Atlantic mackerel") %>%
+  dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 dplyr::distinct(Species) %>% 
   dplyr::pull()
 
@@ -377,7 +382,7 @@ for (aspecies in speciesList) {
 
 
 saveRDS(mainList,file = here::here("output","automate","test", "mackerel_zoop_temp_copSize_Year.RDS"))
-saveRDS(finalModels,file = here::here("output","automate","test", "finalModels_mackerel_zoop_temp_copSize_Year.RDS"))
+saveRDS(finalModels,file = here::here("output","automate","test", "finalModels_MatureMackerel_zoop_temp_copSize_Year.RDS"))
 
 #allModels <- readRDS(file=here::here("output","automate","allModels.RDS"))
-#finalModels <- readRDS(file=here::here("output","automate","finalModels.RDS"))
+finalModels <- readRDS(file=here::here("output","automate","test", "finalModels_MatureMackerel_zoop_temp_copSize_Year.RDS"))
