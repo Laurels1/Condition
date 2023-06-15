@@ -167,7 +167,8 @@ SpringTemp <- AvgTempSpringFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::sel
 SpringRegime <- rpart::rpart(AvgTempSpring~YEAR, data=SpringTemp)
 #Choose simplest tree within one standard error of best tree: xerror +xstd < xerror of next row
 printcp(SpringRegime)
-SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
+#error margins too large:
+#SpringTempRegimePlot <- rpart.plot::rpart.plot(SpringRegime)
 #b <- SpringRegime$cptable[which.min(SpringRegime$cptable[, "xerror"]), "CP"]
 #SpringRegimePrune <- prune(SpringRegime, cp = b)
 #SpringTempPlot2 <- rpart.plot::rpart.plot(SpringRegimePrune)
@@ -303,18 +304,19 @@ ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>%
   )
 # 
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
-load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
+load(here::here("data","1977_2021_SLI.rdata"))
+Calfin <- test
+#load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
 #load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
-#View(Zooplankton_Primary_Prod)
-Calfin <- Zooplankton_Primary_Prod
+#Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
 CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
-  dplyr::select(YEAR, SLI.gbk, SLI.gom, SLI.mab, SLI.scs) %>%
-  tidyr::gather(CalEPU, CopepodSmallLarge, c(SLI.gbk, SLI.gom, SLI.mab, SLI.scs)) %>%
-  dplyr::mutate(EPU = if_else(CalEPU=='SLI.gbk', 'GB',
-                              if_else(CalEPU=='SLI.gom', 'GOM',
-                                      if_else(CalEPU=='SLI.mab', 'MAB',
-                                              if_else(CalEPU=='SLI.scs', 'SS', 'NA')))))
+  dplyr::select(YEAR, SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs) %>%
+  tidyr::gather(CalEPU, CopepodSmallLarge, c(SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs)) %>%
+  dplyr::mutate(EPU = if_else(CalEPU=='SLIAnom.gbk', 'GB',
+                              if_else(CalEPU=='SLIAnom.gom', 'GOM',
+                                      if_else(CalEPU=='SLIAnom.mab', 'MAB',
+                                              if_else(CalEPU=='SLIAnom.scs', 'SS', 'NA')))))
 
 CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
@@ -325,11 +327,16 @@ CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
 CopepodEPURegime <- rpart::rpart(CopepodSmallLarge~YEAR, data=CopepodEPU)
 #CopepodEPURegimePlot <- rpart.plot::rpart.plot(CopepodEPURegime)
+CopepodEPURegime$cptable
 
 #Pull regime shift years into new data frame to add to plot:
 CopepodEPURegimeResults <- as.data.frame(CopepodEPURegime[["splits"]])
 CopepodEPUSplit1 <- CopepodEPURegimeResults$index[1]
 CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
+# CopepodEPUSplit3 <- CopepodEPURegimeResults$index[3]
+# CopepodEPUSplit4 <- CopepodEPURegimeResults$index[4]
+# CopepodEPUSplit5 <- CopepodEPURegimeResults$index[5]
+# CopepodEPUSplit6 <- CopepodEPURegimeResults$index[6]
 
 # #Bring in ratio of small to large copepods (by strata from Ryan Morse):
 # load(here::here("data","TS_spring_zoop.rda"))
