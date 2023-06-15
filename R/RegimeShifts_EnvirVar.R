@@ -504,6 +504,27 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
 
 ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+#shelf-wide Copepod small to large ratio data by Shelf (from gam_calcs_strata.R):
+CopepodShelfdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, CopepodSmallLarge) 
+
+#Line plot of coppepod small to large index:
+p2 <- ggplot(CopepodShelfdata, aes(x = YEAR, y = CopepodSmallLarge)) +
+  geom_line() + 
+  scale_color_manual(values = "red") +
+  geom_point() +
+  labs(title="Shelf-wide Copepod Size Index", y = "Copepod Size Index") +
+  geom_vline(xintercept=CopepodShelfSplit1, color='red') +
+  geom_vline(xintercept=CopepodShelfSplit2, color='red') 
+# +
+#   geom_vline(xintercept=CopepodShelfSplit3, color='red') +
+#   geom_vline(xintercept=CopepodShelfSplit4, color='red') +
+#   geom_vline(xintercept=CopepodShelfSplit5, color='red') +
+#   geom_vline(xintercept=CopepodShelfSplit6, color='red')
+
+ggsave(path= here::here(out.dir),"CopepodSmLgShelf_regime2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
 #Fall phyoplanktion bloom magnitude data (from gam_calcs_strata.R):
 FallBloomdata <- Fallbloom %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, RangeMagnitude)

@@ -321,7 +321,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Small-large copepod index for Rob Gamble EDM:
-#saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
+saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2021.rds")))
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
@@ -333,6 +333,32 @@ CopepodEPURegime$cptable
 CopepodEPURegimeResults <- as.data.frame(CopepodEPURegime[["splits"]])
 CopepodEPUSplit1 <- CopepodEPURegimeResults$index[1]
 CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
+# CopepodEPUSplit3 <- CopepodEPURegimeResults$index[3]
+# CopepodEPUSplit4 <- CopepodEPURegimeResults$index[4]
+# CopepodEPUSplit5 <- CopepodEPURegimeResults$index[5]
+# CopepodEPUSplit6 <- CopepodEPURegimeResults$index[6]
+
+#Bringing in difference of small to large copepod anomalies (shelf-wide from Ryan Morse):
+load(here::here("data","1977_2021_NES_SLI.rdata"))
+Calfin <- SLI.nes
+#head(Calfin)
+CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
+   dplyr::select(YEAR, SLIAnom.nes) %>%
+  dplyr::rename(CopepodSmallLarge = SLIAnom.nes)
+
+#Shelf-wide Small-large copepod index for Rob Gamble EDM:
+#saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_Shelf_EDM2021.rds")))
+
+
+#Test for regime shifts in Shelf-wide Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+CopepodShelf <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
+CopepodShelfRegime <- rpart::rpart(CopepodSmallLarge~YEAR, data=CopepodShelf)
+CopepodShelfRegime$cptable
+
+#Pull regime shift years into new data frame to add to plot:
+CopepodShelfRegimeResults <- as.data.frame(CopepodShelfRegime[["splits"]])
+CopepodShelfSplit1 <- CopepodShelfRegimeResults$index[1]
+CopepodShelfSplit2 <- CopepodShelfRegimeResults$index[2]
 # CopepodEPUSplit3 <- CopepodEPURegimeResults$index[3]
 # CopepodEPUSplit4 <- CopepodEPURegimeResults$index[4]
 # CopepodEPUSplit5 <- CopepodEPURegimeResults$index[5]
