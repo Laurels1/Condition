@@ -359,10 +359,10 @@ CopepodShelfRegime$cptable
 CopepodShelfRegimeResults <- as.data.frame(CopepodShelfRegime[["splits"]])
 CopepodShelfSplit1 <- CopepodShelfRegimeResults$index[1]
 CopepodShelfSplit2 <- CopepodShelfRegimeResults$index[2]
-# CopepodEPUSplit3 <- CopepodEPURegimeResults$index[3]
-# CopepodEPUSplit4 <- CopepodEPURegimeResults$index[4]
-# CopepodEPUSplit5 <- CopepodEPURegimeResults$index[5]
-# CopepodEPUSplit6 <- CopepodEPURegimeResults$index[6]
+# CopepodShelfSplit3 <- CopepodShelfRegimeResults$index[3]
+# CopepodShelfSplit4 <- CopepodShelfRegimeResults$index[4]
+# CopepodShelfSplit5 <- CopepodShelfRegimeResults$index[5]
+# CopepodShelfSplit6 <- CopepodShelfRegimeResults$index[6]
 
 # #Bring in ratio of small to large copepods (by strata from Ryan Morse):
 # load(here::here("data","TS_spring_zoop.rda"))
