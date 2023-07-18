@@ -13,24 +13,26 @@ out.dir="output"
 #   dplyr::filter(n >= 20)
 
 # #Summarize annually over all EPUs for butterfish WG:
-# annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-# condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
-# condNSpp <- condN %>% dplyr::add_count(Species) %>% 
-#     dplyr::filter(n >= 20)
+annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count(Species) %>%
+    dplyr::filter(n >= 20)
 # 
 # #Mean butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
-# ButtCondPlot <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
+ ButtCondPlot <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
 # 
 # #Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-# ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(RelCond, YEAR)
-# ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
-# ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
-# 
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(RelCond, YEAR)
+ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+#Outputs pruning tree table:
+printcp(ButtRegime)
+
 # #Pull regime shift years into new data frame to add to plot (use the simplest tree 
 # #within one standard error (xstd) of the best tree (lowest xerror)):
-# ButtResults <- as.data.frame(ButtRegime[["splits"]])
-# ButtSplit1 <- ButtResults$index[1]
-# ButtSplit2 <- ButtResults$index[2]
+ButtResults <- as.data.frame(ButtRegime[["splits"]])
+ButtSplit1 <- ButtResults$index[1]
+ButtSplit2 <- ButtResults$index[2]
 # 
 # #Summarize annually BY SEX over all EPUs for butterfish WG:
 # annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR, SEX) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
@@ -78,45 +80,45 @@ out.dir="output"
 #Summarize annually over all EPUs for mackerel:
 #USE SPRING SURVEY
 #Do sensitivity tests for maturity cut-offs between 23-29cm and then run for mature and immature fish separately:
-annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
-
-readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_Mature23_Fall2022.csv"))
+# annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+# condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+# 
+# readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_Mature23_Fall2022.csv"))
 
 # condNSpp <- condN %>%
 #   dplyr::add_count(Species) %>%
 #   dplyr::filter(n >= 20)
 
 #Mean mackerel condition for line plot (SingleSpecies_ConditionPlot.R):
-MackCondPlot <- condN %>% 
+#MackCondPlot <- condN %>% 
   # dplyr::filter(Species == 'Atlantic mackerel') %>%
-  dplyr::select(MeanCond, YEAR)
+#  dplyr::select(MeanCond, YEAR)
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
-MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH >23) %>% 
-  dplyr::select(RelCond, YEAR)
-MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
-MackPlot <- rpart.plot::rpart.plot(MackRegime)
+# MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH >23) %>% 
+#   dplyr::select(RelCond, YEAR)
+# MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
+# MackPlot <- rpart.plot::rpart.plot(MackRegime)
 #Outputs pruning tree table:
-printcp(MackRegime)
+#printcp(MackRegime)
 
 #Pull regime shift years into new data frame to add to plot (use the simplest tree
 #within one standard error (xstd) of the best tree (lowest xerror)):
-MackResults <- as.data.frame(MackRegime[["splits"]])
-MackSplit1 <- MackResults$index[1]
-MackSplit2 <- MackResults$index[2]
-MackSplit3 <- MackResults$index[3]
+# MackResults <- as.data.frame(MackRegime[["splits"]])
+# MackSplit1 <- MackResults$index[1]
+# MackSplit2 <- MackResults$index[2]
+# MackSplit3 <- MackResults$index[3]
 
 
 #Removed MAB values in 2017 due to low sampling coverage:
-#annualCondition <- ButtCondPlot
+annualCondition <- ButtCondPlot
 #%>%
 #   dplyr::filter(!(EPU == "MAB" & YEAR == 2017))
 #   dplyr::filter(!(YEAR == 2017))
 
-annualCondition <- MackCondPlot
+#annualCondition <- MackCondPlot
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
@@ -133,13 +135,16 @@ speciesNames <- annualCondition
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
-  labs(title="Mature Atlantic Mackerel Fall Relative Condition (>23cm)", y = "Relative Condition") +
-  geom_vline(xintercept=MackSplit1, color='red')+
-  geom_vline(xintercept=MackSplit2, color='red')
+  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
+#  labs(title="Mature Atlantic Mackerel Fall Relative Condition (>23cm)", y = "Relative Condition") +
+  # geom_vline(xintercept=MackSplit1, color='red')+
+  # geom_vline(xintercept=MackSplit2, color='red')
 # +
 #     geom_vline(xintercept=MackSplit3, color='red')
+   geom_vline(xintercept=ButtSplit1, color='red')+
+   geom_vline(xintercept=ButtSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"AtlMackerel_Fall_Mature23_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Butterfish_Fall_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 

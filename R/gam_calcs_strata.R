@@ -1070,8 +1070,13 @@ CondClean <- CondCleanSpDogWt %>%
 
 #Environmental covariates by Year for Rob Gamble EDM:
 #EDM for mature mackerel >23cm:
-annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+# annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+# condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+#EDM for butterfish (all sizes, sexes):
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
@@ -1108,7 +1113,8 @@ EDMdataTempCop <- EDMdataTemp <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, b
 EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
-saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
+#saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
+saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2022.rds")))
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%

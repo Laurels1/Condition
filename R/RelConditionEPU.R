@@ -24,8 +24,8 @@ library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
 #updated install of Survdat (2022):
 library(remotes)
-remotes::install_github('NOAA-EDAB/Survdat', force=T)
-library(Survdat)
+#remotes::install_github('NOAA-EDAB/Survdat', force=T)
+#library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
 #remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
 library(survdat)
@@ -70,16 +70,16 @@ gis.dir  <- "gis"
 
 
 #laptop (for 2023 SOE condition data):
-  source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
-  channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
-# # #getBio for individual weights:
-  survey <- survdat::get_survdat_data(channel, getBio = T)
-#  #first line works as of July 13th, 2023:
-  survdat <- survey$survdat
-#  survbio=as.data.frame(survey[['survdat']])
-  
-  #Save survdat as RDS for Tori Kentner data request and NRHA update:
-  saveRDS(survdat,file = here::here("other",paste0("survdat_7-13-2023.rds")))
+#   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+#   channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
+# # # #getBio for individual weights:
+#   survey <- survdat::get_survdat_data(channel, getBio = T)
+# #  #first line works as of July 13th, 2023:
+#   survdat <- survey$survdat
+# #  survbio=as.data.frame(survey[['survdat']])
+#   
+#   #Save survdat as RDS for Tori Kentner data request and NRHA update:
+#   saveRDS(survdat,file = here::here("other",paste0("survdat_7-13-2023.rds")))
 
  #Strata sets
  # EPU <- c('MAB', 'GB', 'GOM', 'SS')
