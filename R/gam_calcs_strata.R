@@ -58,7 +58,7 @@ cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 #cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 
 #For immature mackerel <=23:
-cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
 
 #Drop StockName column for merge with StockSMART:
 CondStockjoin <- dplyr::left_join(cond.strata, dplyr::select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
@@ -339,12 +339,12 @@ CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
 # CopepodEPUSplit6 <- CopepodEPURegimeResults$index[6]
 
 #Bringing in difference of small to large copepod anomalies (shelf-wide from Ryan Morse):
-load(here::here("data","1977_2021_NES_SLI.rdata"))
-Calfin <- SLI.nes
-#head(Calfin)
-CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
-   dplyr::select(YEAR, SLIAnom.nes) %>%
-  dplyr::rename(CopepodSmallLarge = SLIAnom.nes)
+# load(here::here("data","1977_2021_NES_SLI.rdata"))
+# Calfin <- SLI.nes
+# #head(Calfin)
+# CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
+#    dplyr::select(YEAR, SLIAnom.nes) %>%
+#   dplyr::rename(CopepodSmallLarge = SLIAnom.nes)
 
 #Shelf-wide Small-large copepod index for Rob Gamble EDM:
 #saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_Shelf_EDM2021.rds")))
@@ -1079,6 +1079,22 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)
   dplyr::group_by(YEAR) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
+#Bring in small minus large copepod size structure data:
+CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, CopepodSmallLarge) 
+
+EDMdataCop <- dplyr::full_join(annualcond, CopepodEPUdata, by='YEAR', 'EPU')
+
+#Bring in average temperature data:
+CopAvgTemp <- AvgTemp %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, AvgTempSummer) 
+
+EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by='YEAR', 'EPU')
+
+EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
+
+saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2022.rds")))
+
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
 #MAB fall Zooplankton anomaly from Ryan Morse:
 MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
@@ -1108,13 +1124,12 @@ EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by='YEAR')
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
 
-EDMdataTempCop <- EDMdataTemp <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataTempCop <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by='YEAR', 'EPU')
 
 EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
 #saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
-saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2022.rds")))
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
