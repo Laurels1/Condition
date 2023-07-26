@@ -5,7 +5,7 @@
 #'
 
 #install.packages("corrplot")
-#install.packages("car")
+#install.packages("car")==
 #install.packages("mgcv.helper")
 #devtools::install_github("samclifford/mgcv.helper")
 
@@ -1074,16 +1074,23 @@ CondClean <- CondCleanSpDogWt %>%
 #   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
 # condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-#EDM for butterfish (all sizes, sexes):
+#EDM for butterfish (all sizes, sexes, annual without EPU):
 annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2022.rds")))
+
+#EDM for butterfish (all sizes, sexes, by EPU):
+EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #Bring in small minus large copepod size structure data:
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) 
 
-EDMdataCop <- dplyr::full_join(annualcond, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataCop <- dplyr::full_join(EPUcond, CopepodEPUdata, by='YEAR', 'EPU')
 
 #Bring in average temperature data:
 CopAvgTemp <- AvgTemp %>% dplyr::filter(YEAR >= 1992) %>%
