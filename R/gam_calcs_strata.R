@@ -1090,13 +1090,13 @@ condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) 
 
-EDMdataCop <- dplyr::full_join(EPUcond, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataCop <- dplyr::left_join(EPUcond, CopepodEPUdata, by=c('YEAR', 'EPU'))
 
 #Bring in average temperature data:
 CopAvgTemp <- AvgTemp %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, AvgTempSummer) 
 
-EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by='YEAR', 'EPU')
+EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by=c('YEAR', 'EPU'))
 
 EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
