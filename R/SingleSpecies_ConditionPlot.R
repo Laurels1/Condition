@@ -12,6 +12,32 @@ out.dir="output"
 # condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
 #   dplyr::filter(n >= 20)
 
+# #Summarize annually over all EPUs for mature butterfish (>11cm) for regime manuscript:
+annualcond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992) %>% 
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count() %>%
+  dplyr::filter(n >= 20)
+# 
+# #Mean mature butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+ButtCondPlot <- condNSpp  %>% dplyr::select(MeanCond, YEAR)
+# 
+# #Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11) %>% dplyr::select(RelCond, YEAR)
+ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+#Outputs pruning tree table:
+printcp(ButtRegime)
+
+# #Pull regime shift years into new data frame to add to plot (use the simplest tree 
+# #within one standard error (xstd) of the best tree (lowest xerror)):
+ButtResults <- as.data.frame(ButtRegime[["splits"]])
+ButtSplit1 <- ButtResults$index[1]
+ButtSplit2 <- ButtResults$index[2]
+
+
+
+
 # #Summarize annually over all EPUs for butterfish WG:
 annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
