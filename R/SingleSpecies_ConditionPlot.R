@@ -35,8 +35,68 @@ ButtResults <- as.data.frame(ButtRegime[["splits"]])
 ButtSplit1 <- ButtResults$index[1]
 ButtSplit2 <- ButtResults$index[2]
 
+#MATURE butterfish condition (>11cm) and regime shift for plotting:
+ annualCondition <- ButtCondPlot 
+ 
+#change YEAR to continuous numeric for plotting function below:
+ annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+ speciesNames <- annualCondition
+ 
+#Line plot of condition
+ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+     geom_line()+
+     geom_point() +
+     labs(title="Mature Butterfish (>11cm) Relative Condition", y = "Relative Condition") +
+     geom_vline(xintercept=ButtSplit1, color='red')+
+     geom_vline(xintercept=ButtSplit2, color='red')
+ 
+ ggsave(path= here::here(out.dir),"Mature_Butterfish_ShelfCondition_202w2.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
+ 
+ 
+ # #Summarize annually over all EPUs for immature butterfish (<=11cm) for regime manuscript:
+ annualcond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH <= 11, YEAR >= 1992) %>% 
+   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+ condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+ condNSpp <- condN %>% dplyr::add_count() %>%
+   dplyr::filter(n >= 20)
+ # 
+ # #Mean immature butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+ ButtCondPlot <- condNSpp  %>% dplyr::select(MeanCond, YEAR)
+ # 
+ # #Test for regime shifts in IMMATURE butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
+ ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH <= 11) %>% dplyr::select(RelCond, YEAR)
+ ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
+ ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
+ #Outputs pruning tree table:
+ printcp(ButtRegime)
+ 
+ # #Pull regime shift years into new data frame to add to plot (use the simplest tree 
+ # #within one standard error (xstd) of the best tree (lowest xerror)):
+ ButtResults <- as.data.frame(ButtRegime[["splits"]])
+ ButtSplit1 <- ButtResults$index[1]
+ ButtSplit2 <- ButtResults$index[2]
+ 
+ #IMMATURE butterfish condition (<=11cm) and regime shift for plotting:
+ annualCondition <- ButtCondPlot 
+ 
+ #change YEAR to continuous numeric for plotting function below:
+ annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+ 
+ speciesNames <- annualCondition
+ 
+ #Line plot of condition
+ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+   geom_line()+
+   geom_point() +
+   labs(title="Immature Butterfish (<=11cm) Relative Condition", y = "Relative Condition") +
+   geom_vline(xintercept=ButtSplit1, color='red')+
+   geom_vline(xintercept=ButtSplit2, color='red')
+ 
+ ggsave(path= here::here(out.dir),"Immature_Butterfish_ShelfCondition_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ 
 
 # #Summarize annually over all EPUs for butterfish WG:
 annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
