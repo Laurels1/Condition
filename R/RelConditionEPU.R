@@ -11,6 +11,7 @@
 #'
 #' @export
 
+
 #Once package is complete, source files below:
 # source("R/install_cond_packages.R")
 # source("R/connect_to_database.R")
@@ -72,7 +73,15 @@ gis.dir  <- "gis"
 #laptop (for 2023 SOE condition data):
 #   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #   channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
-# # # #getBio for individual weights:
+#Sean gave connection code on Nov. 14, 2023:   
+   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=user.name)
+
+#NERHA Surfclam and ocean quahog data:
+   clam <- survdat::get_survdat_clam_data(channel)
+   save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
+   
+   # # # #getBio for individual weights:
 #   survey <- survdat::get_survdat_data(channel, getBio = T)
 # #  #first line works as of July 13th, 2023:
 #   survdat <- survey$survdat
@@ -537,6 +546,9 @@ annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summ
 condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
+
+#SOE Condition data renamed for submission into google form (2023):
+rel_condition <- condNSppEPU %>% dplyr::select(Species, EPU, YEAR, MeanCond)
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
