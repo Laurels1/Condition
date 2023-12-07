@@ -15,10 +15,10 @@ out.dir="output"
 annualCondition <- condNshelfSpp
 #For SOE plots:
 #annualCondition <- condGOM
-# annualCondition <- condGB
-  # annualCondition <- condMAB %>% 
-  #    dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
-  #    dplyr::filter(!(YEAR == 2017)) 
+annualCondition <- condGB
+annualCondition <- condMAB %>%
+   dplyr::filter(!(EPU == "MAB" & YEAR == 2017)) %>%
+   dplyr::filter(!(YEAR == 2017))
 
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))

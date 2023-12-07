@@ -28,7 +28,7 @@ library(remotes)
 #remotes::install_github('NOAA-EDAB/Survdat', force=T)
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
-#remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
+remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
 library(survdat)
 library(data.table)
 # library(graphics)
@@ -38,10 +38,11 @@ library(dplyr)
 library(tidyr)
 library(tidyverse)
 #library(gapminder)
-library(rgdal)
+#rgdal won't install without Rtools, Rtools can't be installed on this version of R
+#library(rgdal)
 #library(RODBC)
 #dowload dbutils to pull survdat data:
-#remotes::install_github("andybeet/dbutils")
+remotes::install_github("andybeet/dbutils")
 #library(gam)
 library(magrittr)
 #Changepoint analysis:
@@ -73,18 +74,21 @@ gis.dir  <- "gis"
 #laptop (for 2023 SOE condition data):
 #   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #   channel <- dbutils::connect_to_database(server="sole.nefsc.noaa.gov",uid=user.name)
-#Sean gave connection code on Nov. 14, 2023:   
-   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
-   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=user.name)
+#Sean gave connection code on Nov. 14, 2023 (no longer works after new laptop on Nov. 28, 2023):   
+#   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
+#   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=lsmith)
+# 
+#ITD gave script to connect to Oracle on Dec. 7, 2023:
+    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
 
-#NERHA Surfclam and ocean quahog data:
-   clam <- survdat::get_survdat_clam_data(channel)
-   save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
+# #NERHA Surfclam and ocean quahog data:
+#    clam <- survdat::get_survdat_clam_data(channel)
+#    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
-   # # # #getBio for individual weights:
-#   survey <- survdat::get_survdat_data(channel, getBio = T)
+   # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):
+   survey <- survdat::get_survdat_data(channel, getBio = T)
 # #  #first line works as of July 13th, 2023:
-#   survdat <- survey$survdat
+   survdat <- survey$survdat
 # #  survbio=as.data.frame(survey[['survdat']])
 #   
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
@@ -549,6 +553,13 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 
 #SOE Condition data renamed for submission into google form (2023):
 rel_condition <- condNSppEPU %>% dplyr::select(Species, EPU, YEAR, MeanCond)
+
+#Proportion of species below average for 2024 SOE:
+propLowCond <- rel_condition %>% dplyr::group_by(Species) %>% 
+  dplyr::summarize(TotalMeanCond = mean(MeanCond)) %>%
+  ungroup() %>%
+  dplyr::select(MeanCond<TotalMeanCond) %>%
+  count(Species )
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
