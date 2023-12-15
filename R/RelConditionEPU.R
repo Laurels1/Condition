@@ -42,7 +42,7 @@ library(tidyverse)
 #library(rgdal)
 #library(RODBC)
 #dowload dbutils to pull survdat data:
-remotes::install_github("andybeet/dbutils")
+#remotes::install_github("andybeet/dbutils")
 #library(gam)
 library(magrittr)
 #Changepoint analysis:
@@ -91,6 +91,10 @@ gis.dir  <- "gis"
    survdat <- survey$survdat
 # #  survbio=as.data.frame(survey[['survdat']])
 #   
+#   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
+  load(file.path(data.dir, 'NRHA_survdat.RData', sep = ''))
+   spread <- nrha.survdat$survdat
+   
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
 #   saveRDS(survdat,file = here::here("other",paste0("survdat_7-13-2023.rds")))
 
