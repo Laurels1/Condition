@@ -92,7 +92,7 @@ gis.dir  <- "gis"
 # #  survbio=as.data.frame(survey[['survdat']])
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
-  load(file.path(data.dir, 'NRHA_survdat.RData', sep = ''))
+   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
    spread <- nrha.survdat$survdat
    
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
@@ -555,7 +555,7 @@ condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
 
-#SOE Condition data renamed for submission into google form (2023):
+#SOE Condition data renamed for submission into google form (Dec. 21, 2023):
 rel_condition <- condNSppEPU %>% dplyr::select(Species, EPU, YEAR, MeanCond)
 
 #Proportion of species below average for 2024 SOE:
@@ -599,7 +599,7 @@ condYear <- condNSppYear
 
 ####For 2021 SOE: 
 condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
-readr::write_csv(condYear, here::here(out.dir,"RelCond2022_Year.csv"))
+readr::write_csv(condYear, here::here(out.dir,"RelCond2023_Year.csv"))
 
 ####For Jamie Behan and Lisa Kerr data request: 
 # annualcondEPUYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
