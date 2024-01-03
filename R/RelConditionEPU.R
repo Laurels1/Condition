@@ -82,7 +82,7 @@ gis.dir  <- "gis"
     source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
 
 # #NERHA Surfclam and ocean quahog data:
-#    clam <- survdat::get_survdat_clam_data(channel)
+    clam <- survdat::get_survdat_clam_data(channel)
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
    # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):
@@ -177,7 +177,7 @@ load(file.path(data.dir, "survdat.RData"))
 #pulling directly from SVDBS:
 #fall survey to be used for most species:
 #fall <- survey %>% filter(SEASON == 'FALL') %>% mutate(SEX=as.character(SEX), 
- #                                                      LAT = BEGLAT, LON = BEGLON)
+  #                                                     LAT = BEGLAT, LON = BEGLON)
 
 #Using survdat data (change SEX== NA to sex == 0)
 #fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
