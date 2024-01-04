@@ -557,6 +557,8 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 
 #SOE Condition data renamed for submission into google form (Dec. 21, 2023):
 rel_condition <- condNSppEPU %>% dplyr::select(Species, EPU, YEAR, MeanCond)
+readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
+
 
 #Proportion of species below average for 2024 SOE:
 propLowCond <- rel_condition %>% dplyr::group_by(Species) %>% 
@@ -599,7 +601,8 @@ condYear <- condNSppYear
 
 ####For 2021 SOE: 
 condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
-readr::write_csv(condYear, here::here(out.dir,"RelCond2023_Year.csv"))
+#originally submitted this for 2023 SOE, but changed to include EPU on Jan. 3rd, 2024:
+#readr::write_csv(condYear, here::here(out.dir,"RelCond2023_Year.csv"))
 
 ####For Jamie Behan and Lisa Kerr data request: 
 # annualcondEPUYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
