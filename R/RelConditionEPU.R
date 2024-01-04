@@ -82,7 +82,7 @@ gis.dir  <- "gis"
     source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
 
 # #NERHA Surfclam and ocean quahog data:
-    clam <- survdat::get_survdat_clam_data(channel)
+#    clam <- survdat::get_survdat_clam_data(channel)
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
    # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):
@@ -90,10 +90,11 @@ gis.dir  <- "gis"
 # #  #first line works as of July 13th, 2023:
    survdat <- survey$survdat
 # #  survbio=as.data.frame(survey[['survdat']])
+#   saveRDS(survdat,file = here::here("other",paste0("survdat_1-4-2024.rds")))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
-   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
-   spread <- nrha.survdat$survdat
+#   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
+#   spread <- nrha.survdat$survdat
    
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
 #   saveRDS(survdat,file = here::here("other",paste0("survdat_7-13-2023.rds")))
@@ -161,7 +162,7 @@ gis.dir  <- "gis"
  
 #load("survbio.Rdata")
 #Got survdat.RData from Sean Lucey on Jan 6th, 2023 for 2023 SOE because it stalled out and wouldn't load from my data pull.
-load(file.path(data.dir, "survdat.RData"))
+#load(file.path(data.dir, "survdat.RData"))
 
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
@@ -555,8 +556,9 @@ condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
 
-#SOE Condition data renamed for submission into google form (Dec. 21, 2023):
-rel_condition <- condNSppEPU %>% dplyr::select(Species, EPU, YEAR, MeanCond)
+#SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023):
+cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
+rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
 readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
 
 
