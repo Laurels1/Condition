@@ -89,8 +89,8 @@ gis.dir  <- "gis"
    survey <- survdat::get_survdat_data(channel, getBio = T)
 # #  #first line works as of July 13th, 2023:
    survdat <- survey$survdat
-# #  survbio=as.data.frame(survey[['survdat']])
-#   saveRDS(survdat,file = here::here("other",paste0("survdat_1-4-2024.rds")))
+  survbio=as.data.frame(survey[['survdat']])
+   saveRDS(survdat,file = here::here("other",paste0("survdat_2-5-2024.rds")))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
 #   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))

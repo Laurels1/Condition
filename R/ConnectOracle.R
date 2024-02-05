@@ -5,9 +5,9 @@ library(rstudioapi)
 
 drv <- dbDriver("Oracle")
 
-host <- "sole.nefsc.noaa.gov"
+host <- "nefscdb1.nmfs.local"
 port <- 1526
-svc <- "sole"
+svc <- "nefsc_users"
 
 connect.string <- paste("(DESCRIPTION=",
                         "(ADDRESS=(PROTOCOL=tcp)(HOST=",host,")(PORT=",port,"))",
