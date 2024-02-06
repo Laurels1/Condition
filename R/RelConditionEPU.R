@@ -28,7 +28,7 @@ library(remotes)
 #remotes::install_github('NOAA-EDAB/Survdat', force=T)
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
-remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
+#remotes::install_github("NOAA-EDAB/survdat",build_vignettes = FALSE)
 library(survdat)
 library(data.table)
 # library(graphics)
@@ -90,10 +90,12 @@ gis.dir  <- "gis"
 # #  #first line works as of July 13th, 2023:
    survdat <- survey$survdat
   survbio=as.data.frame(survey[['survdat']])
-   saveRDS(survdat,file = here::here("other",paste0("survdat_2-5-2024.rds")))
+   saveRDS(survdat,file = here::here("other",paste0("survdat_2-6-2024.rds")))
+
+   data <- readRDS(here::here("other", "survdat_2-6-2024.rds"))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
-#   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
+   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
 #   spread <- nrha.survdat$survdat
    
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
