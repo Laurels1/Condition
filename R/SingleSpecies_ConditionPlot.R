@@ -230,7 +230,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
    geom_vline(xintercept=ButtSplit1, color='red')+
    geom_vline(xintercept=ButtSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"Butterfish_Fall_ShelfCondition_allsex_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Butterfish_Fall_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 

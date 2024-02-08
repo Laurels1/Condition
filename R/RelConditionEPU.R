@@ -185,7 +185,7 @@ gis.dir  <- "gis"
 #Using survdat data (change SEX== NA to sex == 0)
 #fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 
  #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
@@ -565,7 +565,7 @@ readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
 
 
 #Proportion of species below average for 2024 SOE:
-propLowCond <- rel_condition %>% dplyr::group_by(Species) %>% 
+propLowCond <- condNSppEPU %>% dplyr::group_by(Species) %>% 
   dplyr::summarize(TotalMeanCond = mean(MeanCond)) %>%
   ungroup() %>%
   dplyr::select(MeanCond<TotalMeanCond) %>%
@@ -586,13 +586,13 @@ condEPUlen <- condNSppEPUlen
 annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 
-saveRDS(annualcondYear,file = here::here("other",paste0("condSPP_Year.rds")))
+#saveRDS(annualcondYear,file = here::here("other",paste0("condSPP_Year.rds")))
 
 #Output for Dynamic Factor Analysis (Scott Large):
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 
-saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
+#saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
 #CondEPU <-  readRDS(file.path("other", 'condSPP_EPU.rds', sep = ''))
 
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
