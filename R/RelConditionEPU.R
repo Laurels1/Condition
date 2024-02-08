@@ -86,13 +86,13 @@ gis.dir  <- "gis"
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
    # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):
-   survey <- survdat::get_survdat_data(channel, getBio = T)
+   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
 # #  #first line works as of July 13th, 2023:
    survdat <- survey$survdat
   survbio=as.data.frame(survey[['survdat']])
-   saveRDS(survdat,file = here::here("other",paste0("survdat_2-6-2024.rds")))
+   saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_2-6-2024.rds")))
 
-   data <- readRDS(here::here("other", "survdat_2-6-2024.rds"))
+   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
    load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
