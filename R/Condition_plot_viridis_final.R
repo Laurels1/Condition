@@ -58,7 +58,7 @@ Regime <- rpart::rpart(MeanCond~YEAR, data=CondRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "Cond_Shelf_Regimes_2022.RDS"))
+saveRDS(Regime[["cptable"]],file = here::here("output", "Cond_Shelf_Regimes_2023.RDS"))
 printcp(Regime)
 
 
@@ -97,8 +97,8 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     theme_bw() +
     scale_fill_manual(values=vir) +
      guides(fill = guide_legend(reverse = TRUE)) +
-#      geom_vline(xintercept=SppSplit1, color='red')+
-#      geom_vline(xintercept=SppSplit2, color='red')+
+      geom_vline(xintercept=SppSplit1, color='red')+
+      geom_vline(xintercept=SppSplit2, color='red')+
     # geom_vline(xintercept=SppSplit3, color='red')+
     #scale_x_discrete works if don't need to pad final year for missing data. Changed Year to numeric above and this works:
     scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
@@ -107,8 +107,8 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
           axis.title = element_blank(), axis.text.x = element_text(size = 6),
           axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) #+
-#      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
-#      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
+      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
+      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
 #         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
 
-ggsave(path= here::here(out.dir),"GOM_Condition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Shelf_Condition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

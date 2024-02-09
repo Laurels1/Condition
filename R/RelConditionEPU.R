@@ -559,17 +559,17 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
   dplyr::filter(n >= 20)
 
 #SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023):
-cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
-rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
-readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
+#cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
+#rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
+#readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
 
 
 #Proportion of species below average for 2024 SOE:
-propLowCond <- condNSppEPU %>% dplyr::group_by(Species) %>% 
-  dplyr::summarize(TotalMeanCond = mean(MeanCond)) %>%
-  ungroup() %>%
-  dplyr::select(MeanCond<TotalMeanCond) %>%
-  count(Species )
+# propLowCond <- condNSppEPU %>% dplyr::group_by(Species) %>% 
+#   dplyr::summarize(TotalMeanCond = mean(MeanCond)) %>%
+#   ungroup() %>%
+#   dplyr::select(MeanCond<TotalMeanCond) %>%
+#   count(Species )
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
