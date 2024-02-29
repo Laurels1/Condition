@@ -456,7 +456,7 @@ ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2022.jpg", width = 8
 AvgFallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, AvgTempFall) %>% group_by(EPU)
 
-#Line plot of fall temp:
+#Line plot of fall temp (splits from gam_calcs_strata.R):
 p2 <- ggplot(AvgFallTemp, aes(x = YEAR, y = AvgTempFall)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +

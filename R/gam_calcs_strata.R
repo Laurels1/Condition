@@ -12,6 +12,7 @@
 library(mgcv)
 library(gam)
 library(dplyr)
+library(tidyr)
 library(readr)
 library(corrplot)
 library(data.table)
@@ -123,22 +124,22 @@ AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>%
 
 #Bringing in average temperature data from Chris Melrose (e.g. Data For Laurel- Sep 1 2022.xlsx saved as files below)
 #***Before reading EcoMon data, have to change all NaN values to NAs
-AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2021.csv"))
-AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2021.csv"))
-AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2021.csv"))
-AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2021.csv"))
+AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2023.csv"))
+AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2022.csv"))
+AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2022.csv"))
+AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2022.csv"))
 
 AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=Year) %>%
-  gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
+  tidyr::gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTempSummerFormat <- AvgTempSummerData %>% dplyr::mutate(YEAR=Year) %>%
-  gather(EPU, AvgTempSummer, c(GB, GOM,SS, MAB), na.rm=F)
+  tidyr::gather(EPU, AvgTempSummer, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTempFallFormat <- AvgTempFallData %>% dplyr::mutate(YEAR=Year) %>%
-  gather(EPU, AvgTempFall, c(GB, GOM,SS, MAB), na.rm=F)
+  tidyr::gather(EPU, AvgTempFall, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTempWinterFormat <- AvgTempWinterData %>% dplyr::mutate(YEAR=Year) %>%
-  gather(EPU, AvgTempWinter, c(GB, GOM,SS, MAB), na.rm=F)
+  tidyr::gather(EPU, AvgTempWinter, c(GB, GOM,SS, MAB), na.rm=F)
 
 AvgTemp <- Reduce(dplyr::full_join, list(AvgTempWinterFormat, AvgTempSpringFormat, AvgTempSummerFormat, AvgTempFallFormat))
 
@@ -181,16 +182,16 @@ SpringSplit3 <- SpringRegimeResults$index[3]
 SpringSplit4 <- SpringRegimeResults$index[4]
 # 
 # #Test for regime shifts in Fall temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-# FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
-# FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
-# #FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
-# 
-# #Pull regime shift years into new data frame to add to plot:
-# FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
-# FallSplit1 <- FallRegimeResults$index[1]
-# FallSplit2 <- FallRegimeResults$index[2]
-# FallSplit3 <- FallRegimeResults$index[3]
-# 
+FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
+FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
+#FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
+
+#Pull regime shift years into new data frame to add to plot:
+FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
+FallSplit1 <- FallRegimeResults$index[1]
+FallSplit2 <- FallRegimeResults$index[2]
+FallSplit3 <- FallRegimeResults$index[3]
+
 # #Test for regime shifts in Winter temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 # WinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempWinter)
 # WinterRegime <- rpart::rpart(AvgTempWinter~YEAR, data=WinterTemp)
