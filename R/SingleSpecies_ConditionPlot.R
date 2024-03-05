@@ -1043,4 +1043,4 @@ p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"SurfaceTemp2023_Spring_Regimes.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
