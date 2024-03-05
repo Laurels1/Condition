@@ -51,7 +51,7 @@ ButtSplit2 <- ButtResults$index[2]
      geom_vline(xintercept=ButtSplit1, color='red')+
      geom_vline(xintercept=ButtSplit2, color='red')
  
- ggsave(path= here::here(out.dir),"Mature_Butterfish_ShelfCondition_202w2.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ ggsave(path= here::here(out.dir),"Mature_Butterfish_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
  
@@ -95,7 +95,7 @@ ButtSplit2 <- ButtResults$index[2]
    geom_vline(xintercept=ButtSplit1, color='red')+
    geom_vline(xintercept=ButtSplit2, color='red')
  
- ggsave(path= here::here(out.dir),"Immature_Butterfish_ShelfCondition_2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ ggsave(path= here::here(out.dir),"Immature_Butterfish_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
  
 
 # #Summarize annually over all EPUs for butterfish WG:

@@ -85,17 +85,17 @@ gis.dir  <- "gis"
 #    clam <- survdat::get_survdat_clam_data(channel)
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
-   # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):
-   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
+   # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):#
+#   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
 # #  #first line works as of July 13th, 2023:
-   survdat <- survey$survdat
-  survbio=as.data.frame(survey[['survdat']])
-   saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_2-6-2024.rds")))
+  #  survdat <- survey$survdat
+  # survbio=as.data.frame(survey[['survdat']])
+  #  saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_2-6-2024.rds")))
 
    data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
-   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
+#   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
 #   spread <- nrha.survdat$survdat
    
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
@@ -172,8 +172,7 @@ gis.dir  <- "gis"
 #CSV from Andy_DataPull.R:
 #  survey <- readr::read_csv(here::here(data.dir, "SurveyData.csv"))
 
-#   survey 
-#   #<- readRDS(here::here(out.dir, "NEFSC_survey_data_01-09-20.rds"))
+#   survey <- readRDS(here::here(out.dir, "NEFSC_survey_data_1-5-2023.rds"))
 # }
 
 
