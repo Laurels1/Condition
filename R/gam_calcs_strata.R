@@ -1071,16 +1071,16 @@ CondClean <- CondCleanSpDogWt %>%
 
 #Environmental covariates by Year for Rob Gamble EDM:
 #EDM for mature mackerel >23cm:
-# annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
-#   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
-# condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #EDM for butterfish (all sizes, sexes, annual without EPU):
 annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2022.rds")))
+saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2023.rds")))
 
 #EDM for butterfish (all sizes, sexes, by EPU):
 EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
@@ -1101,7 +1101,7 @@ EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by=c('YEAR', 'EPU'))
 
 EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2022.rds")))
+saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2023.rds")))
 
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
 #MAB fall Zooplankton anomaly from Ryan Morse:
@@ -1171,7 +1171,7 @@ EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by='
 
 EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2022.rds")))
+saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2023.rds")))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |

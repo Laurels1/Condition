@@ -531,6 +531,7 @@ cond.epu$Species[cond.epu$SVSPP=='35'] <- 'Atlantic menhaden'
 cond.epu$Species[cond.epu$SVSPP=='192'] <- 'Atlantic wolffish'
 cond.epu$Species[cond.epu$SVSPP=='360'] <- 'Atlantic sharpnose shark'
 cond.epu$Species[cond.epu$SVSPP=='101'] <- 'Atlantic halibut'
+cond.epu$Species[cond.epu$SVSPP=='139'] <- 'Striped bass'
 
 count(cond.epu, is.na(EPU))
 
