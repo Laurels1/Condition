@@ -184,13 +184,13 @@ gis.dir  <- "gis"
 #Using survdat data (change SEX== NA to sex == 0)
 #fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-#fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 
  #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
 #Spring survey data to be used for herring, mackerel and OP:
-spring <- data %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#spring <- data %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
 
@@ -272,8 +272,8 @@ LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.cha
                                       if_else(Season == 'Spring', as.character('SPRING'), 
                                       if_else(Season == 'Winter', as.character('WINTER'),'NA'))))))))
 
-#LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
-LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
+LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
+#LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
 
 #By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
 # Rob's code
@@ -322,8 +322,8 @@ for (spp in 1:numSpecies) {
 #   mutate(SEX = as.character(rep(0:2, length.out = n())))
 
 #Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
-LWpar_sexed <- LWspring %>%
-#LWpar_sexed <- LWfall %>% 
+#LWpar_sexed <- LWspring %>%
+LWpar_sexed <- LWfall %>% 
   dplyr::mutate(sex = if_else(Gender == 'Combined', as.character(0),
                       if_else(Gender == 'Unsexed', as.character(0),
                       if_else(Gender == 'Male', as.character(1),

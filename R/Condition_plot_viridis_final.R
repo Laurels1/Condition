@@ -106,7 +106,7 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
           legend.text = element_text(size = 6),
           axis.title = element_blank(), axis.text.x = element_text(size = 6),
           axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank()) #+
+          panel.grid.minor = element_blank()) +
       geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
       geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
 #         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
