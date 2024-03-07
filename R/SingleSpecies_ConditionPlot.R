@@ -166,11 +166,13 @@ ButtSplit2 <- ButtResults$index[2]
 #Summarize annually over all EPUs for mackerel:
 #USE SPRING SURVEY
 #Do sensitivity tests for maturity cut-offs between 23-29cm and then run for mature and immature fish separately:
- annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
+ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', 
+  #                                         LENGTH > 23, 
+                                           YEAR >= 1992)  %>%
    dplyr::group_by(YEAR, Species) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
  condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
- readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerel_Immature23_Fall2023.csv"))
+ readr::write_csv(condN, here::here(out.dir,"RelCondition_mackerelAllSizes_Spring2023.csv"))
 
  condNSpp <- condN %>%
    dplyr::add_count(Species) %>%
@@ -183,7 +185,8 @@ dplyr::filter(Species == 'Atlantic mackerel') %>%
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
-MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH <=23) %>%
+MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel') %>%
+                                        #, LENGTH >23) %>%
   dplyr::select(RelCond, YEAR)
 MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
 MackPlot <- rpart.plot::rpart.plot(MackRegime)
@@ -195,7 +198,7 @@ printcp(MackRegime)
 MackResults <- as.data.frame(MackRegime[["splits"]])
 MackSplit1 <- MackResults$index[1]
 MackSplit2 <- MackResults$index[2]
-MackSplit3 <- MackResults$index[3]
+#MackSplit3 <- MackResults$index[3]
 
 
 #Removed MAB values in 2017 due to low sampling coverage:
@@ -221,15 +224,15 @@ speciesNames <- annualCondition
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
-#  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
-  labs(title="Immature Atlantic Mackerel Fall Relative Condition (<=23cm)", y = "Relative Condition") +
+#  labs(title="Immature Mackerel Relative Condition", y = "Relative Condition") +
+  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
     geom_vline(xintercept=MackSplit1, color='red')+
-    geom_vline(xintercept=MackSplit2, color='red') +
-   geom_vline(xintercept=MackSplit3, color='red')
+    geom_vline(xintercept=MackSplit2, color='red') #+
+#   geom_vline(xintercept=MackSplit3, color='red')
 #    geom_vline(xintercept=ButtSplit1, color='red')+
 #   geom_vline(xintercept=ButtSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"MackerelImmature_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
