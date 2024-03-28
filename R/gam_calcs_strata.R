@@ -46,9 +46,9 @@ library(data.table)
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata))
 
@@ -56,7 +56,7 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #For mature mackerel >23 cm:
-#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 
 #For immature mackerel <=23:
 #cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
@@ -147,6 +147,7 @@ AvgTemp <- AvgTemp %>% dplyr::mutate_all(~(replace(., . == NaN, NA))) %>%
   dplyr::mutate_at(c("AvgTempWinter", "AvgTempSpring", "AvgTempSummer", "AvgTempFall"), as.numeric)
 
 CondAvgTemp <- dplyr::left_join(AvgStrataCond, AvgTemp, by=c("YEAR", "EPU"))
+CondAvgTempEPU <- dplyr::left_join(AvgEPUCond, AvgTemp, by=c("YEAR", "EPU"))
 
 #Test for regime shifts in summer temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 # SummerTemp <- AvgTempSummerFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempSummer)
@@ -1137,7 +1138,8 @@ EDMdataTempCop <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by='YEAR', 'EPU'
 EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
-#saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2022.rds")))
+saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2023.rds")))
+#MackerelCondition_EDM2022 <- readRDS("other\\MackerelCondition_EDM2022.rds")
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
@@ -1157,7 +1159,8 @@ GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Sp
 EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
   dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
 
-EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
+#EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
+EDMdataZoop <- dplyr::full_join(annualcond, EDMzoopGOM, by='YEAR')
 
 #AvgTempSpringData from line 120 of this code:
 EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpring'='GOM',
@@ -1165,13 +1168,17 @@ EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpr
                                                   'MAB_AvgTempSpring'='MAB',
                                                   'SS_AvgTempSpring'='SS')
 
-EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by='YEAR')
+#EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by='YEAR')
+EDMdataMack2 <- dplyr::full_join(EDMtempSpr, EDMdataZoop, by='YEAR')
 
-EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by='YEAR', 'EPU')
+#EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataMack3 <- EDMdataTemp <- dplyr::full_join(EDMdataMack2, CopepodEPUdata, by='YEAR', 'EPU')
 
-EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
+#EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
+EDMdataMack <- EDMdataMack3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2023.rds")))
+#saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2023.rds")))
+saveRDS(EDMdataMack,file = here::here("other",paste0("MatureMackerel_FishCondition_EDM2023.rds")))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |

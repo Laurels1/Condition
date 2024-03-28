@@ -340,7 +340,7 @@ LWpar_spp <- LWpar_sex %>% mutate(SVSPP = as.numeric(LW_SVSPP))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
+#mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
 mergedata <- left_join(spring, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
