@@ -122,7 +122,7 @@ AvgEPUCond <- CondStockUnit %>% group_by(YEAR, EPU, Species) %>%
 #  distinct(AvgRelCondEPU, .keep_all = T)
 #---------------------------------------------------------------
 
-#Bringing in average temperature data from Chris Melrose (e.g. Data For Laurel- Sep 1 2022.xlsx saved as files below)
+#Bringing in average bottom temperature data from Chris Melrose (e.g. Data For Laurel- Sep 1 2022.xlsx saved as files below)
 #***Before reading EcoMon data, have to change all NaN values to NAs
 AvgTempSpringData <- readr::read_csv(here::here(data.dir, "AverageTempSpring2023.csv"))
 AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2022.csv"))
@@ -238,42 +238,83 @@ FallSplit3 <- FallRegimeResults$index[3]
 #--------------------------------------------------------------------------------
 #Bringing in small-large copepods, total copepods and zooplankton abundance anomaly by strata from Harvey Walsh:
 #Change NaN's to NA's before importing
-ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv"), col_names = T)
+#ZooplStrata <- readr::read_csv(here::here(data.dir,"EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv"), col_names = T)
+ZooplEPU <- readr::read_csv(here::here(data.dir,"EcoMonPlanktonAbundance_v3_9.csv"), col_names = T)
 
 #****have to separate out into 4 seasons to merge with condition data
-ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%
-  dplyr::mutate(TotalCopepodStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
-  dplyr::mutate(ZooplAbundStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
+#EcoMon_ZooplanktonData2021_BTSMeanAbundance.csv through 2021 was by strata:
+# ZoopStr <- ZooplStrata %>% dplyr::mutate(YEAR=Year, STRATUM = BTS, Seasons = as.character(Season)) %>%
+#   dplyr::mutate(TotalCopepodStrata = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
+#   dplyr::mutate(ZooplAbundStrata= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
+#                                      Cirripedia+Cnidaria+Cyclopoida+Decapoda+
+#                                      Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
+#                                      Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
+#                                      Protozoa+Thecosomata+Tunicata)/1000) %>%
+#   dplyr::filter(LgCalanoida != 0) %>%
+#   dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
+#   dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) %>%
+#   dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
+# 
+#  ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
+#                                                          ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
+# 
+# #ZooSeason <- ZoopStr %>% dplyr::mutate(SEASON = ifelse(Seasons == '1', 'WINTER', 
+# #                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
+# 
+# SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
+#   dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
+#   tidyr::spread(season1, CopepodSmallLargeStrata)
+# 
+# TotCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, TotalCopepodStrata) %>%
+#   dplyr::mutate(season1=paste('TotalCopepodStrata', season1, sep="")) %>%
+#   tidyr::spread(season1, TotalCopepodStrata)
+# 
+# ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, ZooplAbundStrata) %>%
+#   dplyr::mutate(season1=paste('ZooplAbundStrata', season1, sep="")) %>%
+#   tidyr::spread(season1, ZooplAbundStrata)
+# 
+# ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
+# 
+# ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
+
+#EcoMonPlanktonAbundance_v3_9.csv through 2022 was by EPU:
+ZoopEPU <- ZooplEPU %>% dplyr::mutate(YEAR=Year, Seasons = as.character(Season)) %>%
+  dplyr::mutate(TotalCopepodEPU = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
+  dplyr::mutate(ZooplAbundEPU= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
                                      Cirripedia+Cnidaria+Cyclopoida+Decapoda+
                                      Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
                                      Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
                                      Protozoa+Thecosomata+Tunicata)/1000) %>%
   dplyr::filter(LgCalanoida != 0) %>%
-  dplyr::mutate(CopepodSmallLargeStrata = SmCalanoida/LgCalanoida) %>%
-  dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) %>%
-  dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
+  dplyr::mutate(CopepodSmallLargeEPU = SmCalanoida/LgCalanoida) %>%
+  dplyr::select(YEAR, Seasons, EPU, CopepodSmallLargeEPU, TotalCopepodEPU, ZooplAbundEPU) %>%
+  dplyr::mutate_at(c('CopepodSmallLargeEPU', 'TotalCopepodEPU', 'ZooplAbundEPU'), as.numeric)
 
- ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
-                                                         ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
+ZooEPUdata <- ZoopEPU %>% dplyr::mutate(EPU = ifelse(EPU == '1', 'MAB',
+                                                     ifelse(EPU == '2', 'GB', ifelse(EPU == '3', 'GOM', ifelse(EPU == '4', 'SS', NA)))))
+
+ZooSeason <- ZooEPUdata %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
+                                                        ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
 
 #ZooSeason <- ZoopStr %>% dplyr::mutate(SEASON = ifelse(Seasons == '1', 'WINTER', 
 #                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
 
-SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
-  dplyr::mutate(season1=paste('CopepodSmallLargeStrata', season1, sep="")) %>%
-  tidyr::spread(season1, CopepodSmallLargeStrata)
+SmLgCop <- ZooSeason %>% dplyr::select(YEAR, season1, EPU, CopepodSmallLargeEPU) %>%
+  dplyr::mutate(season1=paste('CopepodSmallLargeEPU', season1, sep="")) %>%
+  tidyr::spread(season1, CopepodSmallLargeEPU)
 
-TotCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, TotalCopepodStrata) %>%
-  dplyr::mutate(season1=paste('TotalCopepodStrata', season1, sep="")) %>%
-  tidyr::spread(season1, TotalCopepodStrata)
+TotCop <- ZooSeason %>% dplyr::select(YEAR, season1, EPU, TotalCopepodEPU) %>%
+  dplyr::mutate(season1=paste('TotalCopepodEPU', season1, sep="")) %>%
+  tidyr::spread(season1, TotalCopepodEPU)
 
-ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, ZooplAbundStrata) %>%
-  dplyr::mutate(season1=paste('ZooplAbundStrata', season1, sep="")) %>%
-  tidyr::spread(season1, ZooplAbundStrata)
+ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, season1, EPU, ZooplAbundEPU) %>%
+  dplyr::mutate(season1=paste('ZooplAbundEPU', season1, sep="")) %>%
+  tidyr::spread(season1, ZooplAbundEPU)
 
-ZoopIndexStrata <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
+ZoopIndexEPU <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
 
-ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexStrata, by=c('YEAR', 'STRATUM'))
+ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexEPU, by=c('YEAR', 'EPU'))
+
 
 #Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
 ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
