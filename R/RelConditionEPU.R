@@ -79,7 +79,7 @@ gis.dir  <- "gis"
 #   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=lsmith)
 # 
 #ITD gave script to connect to Oracle on Dec. 7, 2023:
- #   source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
+#    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
 
 # #NERHA Surfclam and ocean quahog data:
 #    clam <- survdat::get_survdat_clam_data(channel)

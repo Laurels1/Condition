@@ -26,10 +26,10 @@ library(data.table)
 #gam_calcs <- function(annualcond,out.dir="output") {
 #gam_calcs_strata <- function(cond.epu=cond.epu,stom=stom,out.dir,data.dir,gis.dir) {
 #turn on output dir when not using funtion
-# out.dir = "output"
-# data.dir <- "data"
+ out.dir = "output"
+ data.dir <- "data"
 # 
-# gis.dir  <- "gis"
+ gis.dir  <- "gis"
 
 #--------------------------------------------------------------
 #Set up data structure of condition data for GAMs:
@@ -312,25 +312,26 @@ ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, season1, EPU, ZooplAbundEPU) %>%
   tidyr::spread(season1, ZooplAbundEPU)
 
 ZoopIndexEPU <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
+readr::write_csv(ZoopIndexEPU, here::here(out.dir,"Zooplankton1977-2022_Harvey.csv"))
 
 ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexEPU, by=c('YEAR', 'EPU'))
 
 
 #Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
-ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
-  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
-                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
-                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
-                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
-                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
-                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
-                 TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
-                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
-                 ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)), 
-                 ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)), 
-                 ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)), 
-                 ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)), 
-              )
+# ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
+#   dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
+#                  CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
+#                  CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
+#                  CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
+#                  TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
+#                  TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
+#                  TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
+#                  TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
+#                  ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)), 
+#                  ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)), 
+#                  ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)), 
+#                  ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)), 
+#               )
 
 #readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2021.csv")) 
 
