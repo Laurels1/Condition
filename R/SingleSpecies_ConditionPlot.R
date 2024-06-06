@@ -4,6 +4,15 @@ library(tidyr)
 
 out.dir="output"
 
+#Summarize annually over all EPUs for herring spring condition:
+annualcond <- cond.epu %>% dplyr::filter(Species == 'Atlantic herring', YEAR >= 1992) %>% 
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count() %>%
+  dplyr::filter(n >= 20)
+
+save(condNSpp, file=(here::here(out.dir,'AtlHerring_SpringCondition.RData')))
+
 #Data from RelConditionEPU.R
 #No data available for 2020 due to Covid-19
 #Summarize annually by EPU (use for SOE plots)

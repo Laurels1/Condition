@@ -34,7 +34,7 @@ library(dplyr)
 library(tidyr)
 library(tidyverse)
 #library(gapminder)
-library(rgdal)
+#library(rgdal)
 #library(RODBC)
 #dowload dbutils to pull survdat data:
 #remotes::install_github("andybeet/dbutils")
@@ -68,7 +68,11 @@ gis.dir  <- "gis"
 
 #laptop:
 #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
-#sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE)
+#Works as of June 6th, 2024:
+source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
+channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
+
+#sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE) #SVDBS no longer on sole
 
 #   #comment out if not running as function
 # if (pullNewData == T) {
@@ -102,12 +106,15 @@ gis.dir  <- "gis"
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
 
-# survey <- get_survdat_data(channel, getBio = T)
+ survey <- survdat::get_survdat_data(channel, getBio = T)
+ survdat=as.data.frame(survey[['survdat']])
+ 
 # 
 # survbio=as.data.frame(survey[['survdat']])
-# 
-# #save survbio object so RData data doesn't need to be pulled each time:
-#  save(survbio, file='survbio.RData')
+# # #save survbio object so RData data doesn't need to be pulled each time:
+ # save(survbio, file='survbio.RData')
+
+#  save(survdat, file=(here::here(data.dir,'survdat.RData')))
 ###end data pull
 
 #Pull data for NRHA:
@@ -406,7 +413,7 @@ condnoEPU <- filter(cond.epu, is.na(EPU))
 #calculate single standard deviation and mean of relative condition for each species and sex:
  condstdev <- group_by(cond.epu, SVSPP, SEX) %>% summarize(mean = mean(RelCond), sd = sd(RelCond))
 # 
-# #Remove relative conditons that are outside of 1 standard deviation
+# #Remove relative conditions that are outside of 1 standard deviation
  condsd <- left_join(cond.epu, condstdev, by=c('SVSPP', 'SEX'))
  ungroup(condsd)
 # 
@@ -490,6 +497,7 @@ cond.epu$Species[cond.epu$SVSPP=='35'] <- 'Atlantic menhaden'
 cond.epu$Species[cond.epu$SVSPP=='192'] <- 'Atlantic wolffish'
 cond.epu$Species[cond.epu$SVSPP=='360'] <- 'Atlantic sharpnose shark'
 cond.epu$Species[cond.epu$SVSPP=='101'] <- 'Atlantic halibut'
+cond.epu$Species[cond.epu$SVSPP=='139'] <- 'Striped bass'
 
 count(cond.epu, is.na(EPU))
 
