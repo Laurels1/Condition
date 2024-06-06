@@ -348,7 +348,7 @@ ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>%
   )
 # 
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
-load(here::here("data","1977_2021_SLI.rdata"))
+load(here::here("data","1977_2022_SLIanom.rdata"))
 Calfin <- test
 #load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
 #load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
@@ -365,7 +365,7 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Small-large copepod index for Rob Gamble EDM:
-saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2021.rds")))
+saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
@@ -383,15 +383,12 @@ CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
 # CopepodEPUSplit6 <- CopepodEPURegimeResults$index[6]
 
 #Bringing in difference of small to large copepod anomalies (shelf-wide from Ryan Morse):
-# load(here::here("data","1977_2021_NES_SLI.rdata"))
-# Calfin <- SLI.nes
-# #head(Calfin)
 # CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 #    dplyr::select(YEAR, SLIAnom.nes) %>%
 #   dplyr::rename(CopepodSmallLarge = SLIAnom.nes)
-
-#Shelf-wide Small-large copepod index for Rob Gamble EDM:
-#saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_Shelf_EDM2021.rds")))
+# 
+# #Shelf-wide Small-large copepod index for Rob Gamble EDM:
+# saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_Shelf_EDM2022.rds")))
 
 
 #Test for regime shifts in Shelf-wide Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
