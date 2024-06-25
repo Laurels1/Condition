@@ -78,18 +78,18 @@ gis.dir  <- "gis"
 #   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=lsmith)
 # 
-#ITD gave script to connect to Oracle on Dec. 7, 2023:
-    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
-    channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
+#ITD gave script to connect to Oracle on Dec. 7, 2023, still works June 2024:
+#    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
+#    channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
 
 # #NERHA Surfclam and ocean quahog data:
 #    clam <- survdat::get_survdat_clam_data(channel)
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
    # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):#
-   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
+#   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
 # #  #first line works as of July 13th, 2023:
-    survdat <- survey$survdat
+#    survdat <- survey$survdat
   # survbio=as.data.frame(survey[['survdat']])
   #  saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_2-6-2024.rds")))
 
@@ -185,13 +185,13 @@ gis.dir  <- "gis"
 #Using survdat data (change SEX== NA to sex == 0)
 #fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-#fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 
  #about 1/4 of fish with indwt have sex = 0:
 #fall_indwt <- fall %>% filter(!is.na(INDWT))
 
 #Spring survey data to be used for herring, mackerel and OP:
-spring <- data %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#spring <- data %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
 
@@ -273,8 +273,8 @@ LWpar <- LWparams1 %>% dplyr::mutate(SEASON = if_else(Season == 'Autumn', as.cha
                                       if_else(Season == 'Spring', as.character('SPRING'), 
                                       if_else(Season == 'Winter', as.character('WINTER'),'NA'))))))))
 
-#LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
-LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
+LWfall <- LWpar %>% dplyr::filter(SEASON == 'FALL')
+#LWspring <- LWpar %>% dplyr::filter(SEASON == 'SPRING')
 
 #By Species: Parse Combined gender L-Ws by sex if no sex-specific parameters available. Otherwise assign SEX codes:
 # Rob's code
@@ -323,8 +323,8 @@ for (spp in 1:numSpecies) {
 #   mutate(SEX = as.character(rep(0:2, length.out = n())))
 
 #Add SEX for Combined gender back into Wigley at all data (loses 4 Gender==Unsexed):
-LWpar_sexed <- LWspring %>%
-#LWpar_sexed <- LWfall %>% 
+#LWpar_sexed <- LWspring %>%
+LWpar_sexed <- LWfall %>% 
   dplyr::mutate(sex = if_else(Gender == 'Combined', as.character(0),
                       if_else(Gender == 'Unsexed', as.character(0),
                       if_else(Gender == 'Male', as.character(1),
@@ -341,10 +341,10 @@ LWpar_spp <- LWpar_sex %>% mutate(SVSPP = as.numeric(LW_SVSPP))
 
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-#mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
+mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #mergedata <- left_join(fall, LWparInt, by= c('SVSPP', 'SEX'))
-mergedata <- left_join(spring, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
+#mergedata <- left_join(spring, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 
 #checking for missing complete L-W params (over 96,000 species don't have LW parameters or aren't assigned a M/F sex code)
 # nocompl <- dplyr::filter(mergedata, is.na(COEFFICIENT_FALL_COMPL))
