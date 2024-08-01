@@ -131,6 +131,20 @@ channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
 #Got survdat.RData from Sean Lucey on Jan 6th, 2023 for 2023 SOE because it stalled out and wouldn't load from my data pull.
 load(file.path(data.dir, "survdat.RData"))
 
+data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
+
+
+#Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
+survey.data <- data %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
+                                                      STRATUM %in% c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550) ~ 'GB',
+                                                      STRATUM %in% c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)~ 'GOM',
+                                                      STRATUM %in% c(1300:1352, 1401:1599, 3840:3990)~ 'SS'))
+
+#Included strata 1410-1590 as SS:                                                   
+#                                                     STRATUM %in% c(1401:1599)~ 'Other'))
+
+EPUna <- survey.data %>% dplyr::filter(is.na(EPU))
+
 #for total swept-area biomass estimates (not currently used in condition GAMS):
 #swept_area <- calc_swept_area(survey)
 
@@ -159,6 +173,9 @@ load(file.path(data.dir, "survdat.RData"))
 spring <- survdat %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
+
+#When parsing EPUs based on survey strata instead of through suvdat:
+spring <- survey.data %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 
 #SVDBS has errors in SEX data. If not fixed in pull, reassign SEX for red hake in 1980-1981:
 # fall <- fallOrig %>% mutate(SEX= (ifelse(SEX=='M', '1',
@@ -398,6 +415,9 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 #Paring by EPU using corrected conversions in survdat package and Wigley et all L-W params:
 cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
+#If parsing by strata, change to cond.epu:
+cond.epu <- cond
+
 #View(cond.epu)
 condnoEPU <- filter(cond.epu, is.na(EPU))
 #condno <- filter(cond.epu, is.na(SEX))
@@ -523,6 +543,9 @@ annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summ
 condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
 condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
   dplyr::filter(n >= 20)
+
+#Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
+readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Spring.csv"))
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
