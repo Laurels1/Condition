@@ -46,9 +46,9 @@ library(data.table)
 #by shelf:
 
 #by stock (fall BTS stock designations from StockStrataFall.csv):
-#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
+StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataFall.csv"))
 
-StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
+#StockStrata <- readr::read_csv(here::here(data.dir, "StockStrataSpring.csv"))
 
 StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRATUM = as.numeric(Strata))
 
@@ -56,15 +56,18 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #For mature mackerel >23 cm:
-cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+
+#For mature butterfish >11 cm:
+cond.strata <- cond.strata %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)
 
 #For immature mackerel <=23:
-#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH >= 23, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)
 
 #Drop StockName column for merge with StockSMART:
 CondStockjoin <- dplyr::left_join(cond.strata, dplyr::select(StockData, c(SVSPP,STRATUM,Stock) ), by = c("SVSPP", "STRATUM"))
 
-#Assign stock to Unit if sample is outside of stock strata or no stock strata are definited for species:
+#Assign stock to Unit if sample is outside of stock strata or no stock strata are identified for species:
 CondStockUnit <- CondStockjoin %>% dplyr::mutate(StockUnit =ifelse(is.na(Stock), "Unit", Stock))
 
 #Samples without stock area designations (strata where species were sampled but aren't included in stock area definition):
@@ -255,10 +258,10 @@ ZooplEPU <- readr::read_csv(here::here(data.dir,"EcoMonPlanktonAbundance_v3_9.cs
 #   dplyr::select(YEAR, STRATUM, Seasons, CopepodSmallLargeStrata, TotalCopepodStrata, ZooplAbundStrata) %>%
 #   dplyr::mutate_at(c('CopepodSmallLargeStrata', 'TotalCopepodStrata', 'ZooplAbundStrata'), as.numeric)
 # 
-#  ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter', 
+#  ZooSeason <- ZoopStr %>% dplyr::mutate(season1 = ifelse(Seasons == '1', 'Winter',
 #                                                          ifelse(Seasons =='2', 'Spring', ifelse(Seasons == '3', 'Summer', ifelse(Seasons=='4', 'Fall', NA)))))
 # 
-# #ZooSeason <- ZoopStr %>% dplyr::mutate(SEASON = ifelse(Seasons == '1', 'WINTER', 
+# #ZooSeason <- ZoopStr %>% dplyr::mutate(SEASON = ifelse(Seasons == '1', 'WINTER',
 # #                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
 # 
 # SmLgCop <- ZooSeason %>% dplyr::select(YEAR, STRATUM, season1, CopepodSmallLargeStrata) %>%
@@ -312,40 +315,40 @@ ZoopAbund <- ZooSeason %>% dplyr::select(YEAR, season1, EPU, ZooplAbundEPU) %>%
   tidyr::spread(season1, ZooplAbundEPU)
 
 ZoopIndexEPU <- Reduce(dplyr::full_join, list(SmLgCop, TotCop, ZoopAbund))
-readr::write_csv(ZoopIndexEPU, here::here(out.dir,"Zooplankton1977-2022_Harvey.csv"))
+#readr::write_csv(ZoopIndexEPU, here::here(out.dir,"Zooplankton1977-2022_Harvey.csv"))
 
 ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexEPU, by=c('YEAR', 'EPU'))
 
 
 #Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
-# ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>% 
-#   dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
-#                  CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
-#                  CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
-#                  CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
-#                  TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
-#                  TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
-#                  TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
-#                  TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
-#                  ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)), 
-#                  ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)), 
-#                  ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)), 
-#                  ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)), 
-#               )
+ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
+  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
+                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
+                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
+                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
+                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
+                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
+                 TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
+                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
+                 ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)),
+                 ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)),
+                 ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)),
+                 ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)),
+              )
 
 #readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2021.csv")) 
 
 #Zooplankton data separately for regime shift:
-ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER',
-                                                       ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
+# ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER',
+#                                                        ifelse(Seasons =='2', 'SPRING', ifelse(Seasons == '3', 'SUMMER', ifelse(Seasons=='4', 'FALL', NA)))))
 
-ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
-
-ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>%
-  dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
-                 TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
-                 ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)),
-  )
+# ZoopEPU <- dplyr::left_join(CondAvgTemp, ZooSeason, by=c('YEAR', 'STRATUM'))
+# 
+# ZoopDataSeasonEPU <- ZoopEPU %>% group_by(YEAR, EPU, SEASON) %>%
+#   dplyr:: mutate(CopepodSmLgEPU=(mean(CopepodSmallLargeStrata, na.rm=TRUE)),
+#                  TotCopEPU=(sum(TotalCopepodStrata, na.rm=TRUE)),
+#                  ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)),
+#   )
 # 
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
 load(here::here("data","1977_2022_SLIanom.rdata"))
@@ -1115,16 +1118,52 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH
   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
+#EDM for mature mackerel >23cm by EPU:
+EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(MatureMackerelCond = mean(RelCond), MatMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
 #EDM for butterfish (all sizes, sexes, annual without EPU):
 annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2023.rds")))
+#saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2023.rds")))
+#Without missing EPU data:
+readr::write_csv(annualcond, here::here(out.dir,"ButterfishCondition_Shelf2023.csv"))
+
+#With missing EPU data:
+data <- readRDS(here::here("other", "ButterfishCondition_Shelf2023.rds"))
+
+#EDM for mature butterfish (>11cm, all sexes, annual without EPU):
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+saveRDS(annualcond,file = here::here("other",paste0("Mature12cmButterfishCondition_Shelf2023.rds")))
+readr::write_csv(annualcond, here::here(out.dir,"Mature12cmButterfishCondition_Shelf2023.csv"))
+
+#EDM for immature butterfish (<=11cm, all sexes, annual without EPU):
+annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH <= 11, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(ImmatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+saveRDS(annualcond,file = here::here("other",paste0("Immature11cmButterfishCondition_Shelf2023.rds")))
+readr::write_csv(annualcond, here::here(out.dir,"Immature11cmButterfishCondition_Shelf2023.csv"))
 
 #EDM for butterfish (all sizes, sexes, by EPU):
 EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
   dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(ButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+#EDM for mature butterfish (>11cm, all sexes, by EPU):
+EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(MatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+
+#EDM for immature butterfish (<=11cm, all sexes, by EPU):
+EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)  %>%
+  dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(ImmatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #Bring in small minus large copepod size structure data:
@@ -1141,7 +1180,15 @@ EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by=c('YEAR', 'EPU'))
 
 EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2023.rds")))
+#saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2023.rds")))
+
+#saveRDS(EDMdata,file = here::here("other",paste0("MatureButterfishCondition_EDM2023.rds")))
+
+
+#saveRDS(EDMdata,file = here::here("other",paste0("ImmatureButterfishCondition_EDM2023.rds")))
+
+saveRDS(EDMdata,file = here::here("other",paste0("MatureMackerelCondition_EPU2023.rds")))
+
 
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
 #MAB fall Zooplankton anomaly from Ryan Morse:
@@ -1156,34 +1203,36 @@ EDMzoop <- MABfallZoop %>% dplyr::select(SumZoop, year) %>%
  dplyr::rename(MABfallZoopAnom = SumZoop, YEAR = year)
 
 EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
+EDMdataZoop <- dplyr::full_join(EPUcond, EDMzoop, by='YEAR', 'EPU')
 
 #Surfdata from RegimeShifts_EnvirVar.R:
 #SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
 #Regime shifts in surface temp:
 Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
-  dplyr::select(YEAR, SURFTEMP) %>%
+  dplyr::select(YEAR, EPU, SURFTEMP) %>%
   dplyr::filter(!is.na(SURFTEMP)) %>%
-  dplyr::group_by(YEAR) %>%
+  dplyr::group_by(YEAR, EPU) %>%
   dplyr::summarize(AvgSurfTemp = mean(SURFTEMP))
 
-EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by='YEAR')
+EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by= c('YEAR', 'EPU'))
 
 #Bring in small minus large copepod size structure data:
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
 
-EDMdataTempCop <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataTempCop <- dplyr::full_join(EDMdataTemp, CopepodEPUdata, by= c('YEAR', 'EPU'))
 
 EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
-saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2023.rds")))
-#MackerelCondition_EDM2022 <- readRDS("other\\MackerelCondition_EDM2022.rds")
+#saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2023.rds")))
+#saveRDS(EDMdata,file = here::here("other",paste0("MatMackerelCondition_EPU2023.rds")))
+MatMackerelCondition_EDM2023 <- readRDS("other\\MatMackerelCondition_EPU2023.rds")
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(ImmatureMackerelCond = mean(RelCond), ImmMackStdDevCond = sd(RelCond), nCond = dplyr::n())
-condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+  dplyr::group_by(YEAR, EPU) %>% dplyr::summarize(ImmatureMackerelCond = mean(RelCond), ImmMackStdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcondImm, nCond>=3) %>% ungroup()
 
 
 #from GOM summer Zooplankton anomaly section of RegimeShifts_EnvirVar.R
@@ -1198,7 +1247,7 @@ GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Sp
 EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
   dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
 
-#EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
+EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
 EDMdataZoop <- dplyr::full_join(annualcond, EDMzoopGOM, by='YEAR')
 
 #AvgTempSpringData from line 120 of this code:
@@ -1207,17 +1256,19 @@ EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpr
                                                   'MAB_AvgTempSpring'='MAB',
                                                   'SS_AvgTempSpring'='SS')
 
-#EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by='YEAR')
+EDMtempSpr <- AvgTempSpringFormat
+
+EDMdataImm2 <- dplyr::full_join(EDMtempSpr, EDMdataZoopImm, by= c('YEAR', 'EPU'))
 EDMdataMack2 <- dplyr::full_join(EDMtempSpr, EDMdataZoop, by='YEAR')
 
-#EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by='YEAR', 'EPU')
+EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by= c('YEAR', 'EPU'))
 EDMdataMack3 <- EDMdataTemp <- dplyr::full_join(EDMdataMack2, CopepodEPUdata, by='YEAR', 'EPU')
 
-#EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
+EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
 EDMdataMack <- EDMdataMack3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-#saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EDM2023.rds")))
-saveRDS(EDMdataMack,file = here::here("other",paste0("MatureMackerel_FishCondition_EDM2023.rds")))
+saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EPU2023.rds")))
+#saveRDS(EDMdataMack,file = here::here("other",paste0("MatureMackerel_FishCondition_EDM2023.rds")))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |

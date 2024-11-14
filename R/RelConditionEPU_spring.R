@@ -398,8 +398,8 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 #strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
 #For survdat package:
-strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
-                    quiet = T)
+# strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
+#                     quiet = T)
 
 #Needed in direct data pull but not in Survdat:
 #data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
@@ -413,7 +413,7 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 #sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
 
 #Paring by EPU using corrected conversions in survdat package and Wigley et all L-W params:
-cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
+#cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
 #If parsing by strata, change to cond.epu:
 cond.epu <- cond

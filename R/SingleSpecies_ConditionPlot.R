@@ -22,7 +22,9 @@ save(condNSpp, file=(here::here(out.dir,'AtlHerring_SpringCondition.RData')))
 #   dplyr::filter(n >= 20)
 
 # #Summarize annually over all EPUs for mature butterfish (>11cm) for regime manuscript:
-annualcond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992) %>% 
+annualcond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', 
+                                         #LENGTH > 11, 
+                                         YEAR >= 1992) %>% 
   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count() %>%
@@ -32,7 +34,9 @@ condNSpp <- condN %>% dplyr::add_count() %>%
 ButtCondPlot <- condNSpp  %>% dplyr::select(MeanCond, YEAR)
 # 
 # #Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11) %>% dplyr::select(RelCond, YEAR)
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish'
+                                       #, LENGTH > 11
+                                       ) %>% dplyr::select(RelCond, YEAR)
 ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
 ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
 #Outputs pruning tree table:
@@ -56,12 +60,14 @@ ButtSplit2 <- ButtResults$index[2]
  p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
      geom_line()+
      geom_point() +
-     labs(title="Mature Butterfish (>11cm) Relative Condition", y = "Relative Condition") +
+#     labs(title="Mature Butterfish (>11cm) Relative Condition", y = "Relative Condition") +
+   labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
      geom_vline(xintercept=ButtSplit1, color='red')+
      geom_vline(xintercept=ButtSplit2, color='red')
  
- ggsave(path= here::here(out.dir),"Mature_Butterfish_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
-
+# ggsave(path= here::here(out.dir),"Mature_Butterfish_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ ggsave(path= here::here(out.dir),"Butterfish_ShelfCondition_NoMissingEPU_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ 
 
  
  
@@ -192,6 +198,11 @@ MackCondPlot <- condN %>%
 dplyr::filter(Species == 'Atlantic mackerel') %>%
  dplyr::select(MeanCond, YEAR)
 
+#Mean butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
+ButtCondPlot <- condN %>%
+  dplyr::filter(Species == 'Butterfish') %>%
+  dplyr::select(MeanCond, YEAR)
+
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
 MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel') %>%
@@ -212,6 +223,7 @@ MackSplit2 <- MackResults$index[2]
 
 #Removed MAB values in 2017 due to low sampling coverage:
 annualCondition <- ButtCondPlot
+annualCondition <- ButtPlot
 #%>%
 #   dplyr::filter(!(EPU == "MAB" & YEAR == 2017))
 #   dplyr::filter(!(YEAR == 2017))
@@ -234,14 +246,16 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
 #  labs(title="Immature Mackerel Relative Condition", y = "Relative Condition") +
-  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
-    geom_vline(xintercept=MackSplit1, color='red')+
-    geom_vline(xintercept=MackSplit2, color='red') #+
+#  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
+  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
+ #   geom_vline(xintercept=MackSplit1, color='red')+
+#    geom_vline(xintercept=MackSplit2, color='red') #+
 #   geom_vline(xintercept=MackSplit3, color='red')
-#    geom_vline(xintercept=ButtSplit1, color='red')+
-#   geom_vline(xintercept=ButtSplit2, color='red')
+    geom_vline(xintercept=ButtSplit1, color='red')+
+   geom_vline(xintercept=ButtSplit2, color='red')
 
-ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"ButterfishTestNoMissingEPU_AllSizes_Fall_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 

@@ -102,14 +102,14 @@ gis.dir  <- "gis"
 #   #Save survdat as RDS for Tori Kentner data request and NRHA update:
 #   saveRDS(survdat,file = here::here("other",paste0("survdat_7-13-2023.rds")))
 
- #Strata sets
- EPU <- c('MAB', 'GB', 'GOM', 'SS')
- MAB <- c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510)
- GB  <- c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550)
- GOM <- c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)
- SS  <- c(1300:1352, 3840:3990)
- #Unknown strata 41-59:
- Other <- c(1401:1599)
+ #Strata setsif using Sean's code:
+ # EPU <- c('MAB', 'GB', 'GOM', 'SS')
+ # MAB <- c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510)
+ # GB  <- c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550)
+ # GOM <- c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)
+ # SS  <- c(1300:1352, 3840:3990)
+ # #Unknown strata 41-59:
+ # Other <- c(1401:1599)
 
 # survey.data <- c()
 
@@ -198,7 +198,8 @@ gis.dir  <- "gis"
 #Using survdat data (change SEX== NA to sex == 0)
 #fall <- survbio %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #fall <- survdat %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
-fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#When parsing by EPUs based on Sean Lucey's code:
+# fall <- data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #When parsing EPUs based on survey strata instead of through suvdat:
 fall <- survey.data %>% filter(SEASON == 'FALL') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 
@@ -313,24 +314,24 @@ for (spp in 1:numSpecies) {
  }
 
 #spring:
-LWspring_orig <- LWspring
-LWspring <- LWspring[-c(1:nrow(LWspring)),]
-speciesList <- unique(LWspring_orig$SpeciesName)
-numSpecies <- length(speciesList)
-for (spp in 1:numSpecies) {
-  sppTibble <- filter(LWspring_orig,SpeciesName == speciesList[spp])
-  if (nrow(sppTibble) == 1) {
-    LWspring <- rbind(LWspring,sppTibble)
-    newRow <- sppTibble[1,]
-    newRow$Gender <- "Male"
-    LWspring <- rbind(LWspring,newRow)
-    newRow <- sppTibble[1,]
-    newRow$Gender <- "Female"
-    LWspring <- rbind(LWspring,newRow)
-  } else if (nrow(sppTibble) == 3) {
-    LWspring <- rbind(LWspring,sppTibble)
-  }
-}
+# LWspring_orig <- LWspring
+# LWspring <- LWspring[-c(1:nrow(LWspring)),]
+# speciesList <- unique(LWspring_orig$SpeciesName)
+# numSpecies <- length(speciesList)
+# for (spp in 1:numSpecies) {
+#   sppTibble <- filter(LWspring_orig,SpeciesName == speciesList[spp])
+#   if (nrow(sppTibble) == 1) {
+#     LWspring <- rbind(LWspring,sppTibble)
+#     newRow <- sppTibble[1,]
+#     newRow$Gender <- "Male"
+#     LWspring <- rbind(LWspring,newRow)
+#     newRow <- sppTibble[1,]
+#     newRow$Gender <- "Female"
+#     LWspring <- rbind(LWspring,newRow)
+#   } else if (nrow(sppTibble) == 3) {
+#     LWspring <- rbind(LWspring,sppTibble)
+#   }
+# }
 
 #Add rows to assign SEX when Gender == Combined in Wigley et al ref (didn't work):
 # LWpar_sex <- LWparams1 %>% dplyr::filter(Gender == 'Combined') %>%
@@ -431,8 +432,8 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 #strata <- rgdal::readOGR(dsn=here::here(gis.dir),layer="EPU",verbose=F)
 
 #For survdat package:
-strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
-                    quiet = T)
+# strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
+#                     quiet = T)
 
 #Needed in direct data pull but not in Survdat:
 #data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
@@ -446,11 +447,12 @@ strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat
 #sort(unique(cond.epu$SEX[cond.epu$SVPP==143]))
 
 #Paring by EPU using corrected conversions in survdat package and Wigley et all L-W params:
-cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
+# cond.epu <- survdat::post_strat(as.data.table(cond), strata, areaDescription = 'EPU', na.keep = TRUE)
 
 
 #If parsing by strata, change to cond.epu:
 cond.epu <- cond
+
 
 #View(cond.epu)
 condnoEPU <- filter(cond.epu, is.na(EPU))
@@ -579,7 +581,7 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
   dplyr::filter(n >= 20)
 
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
-readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Fall.csv"))
+#readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Fall.csv"))
 
 #SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023):
 #cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
