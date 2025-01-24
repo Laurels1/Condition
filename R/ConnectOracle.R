@@ -5,9 +5,16 @@ library(rstudioapi)
 
 drv <- dbDriver("Oracle")
 
+#For SVDBS:
 host <- "nefscdb1.nmfs.local"
 port <- 1526
 svc <- "nefsc_users"
+
+#For Observer data:
+  # host <- "155.206.139.31"
+  # port <- 1526
+  # svc <- NOVA
+
 
 connect.string <- paste("(DESCRIPTION=",
                         "(ADDRESS=(PROTOCOL=tcp)(HOST=",host,")(PORT=",port,"))",

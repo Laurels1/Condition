@@ -91,9 +91,9 @@ gis.dir  <- "gis"
 # #  #first line works as of July 13th, 2023:
     survdat <- survey$survdat
   # survbio=as.data.frame(survey[['survdat']])
-  #  saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_2-6-2024.rds")))
+    saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_1-24-2025.rds")))
 
-   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
+#   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
 #   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
@@ -114,7 +114,7 @@ gis.dir  <- "gis"
 # survey.data <- c()
 
  #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
- survey.data <- data %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
+ survey.data <- survdat %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
                                                      STRATUM %in% c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550) ~ 'GB',
                                                      STRATUM %in% c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)~ 'GOM',
                                                      STRATUM %in% c(1300:1352, 1401:1599, 3840:3990)~ 'SS'))
