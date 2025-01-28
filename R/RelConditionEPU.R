@@ -94,6 +94,7 @@ gis.dir  <- "gis"
     saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_1-24-2025.rds")))
 
 #   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
+   survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
 #   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
@@ -469,7 +470,7 @@ condnoEPU <- filter(cond.epu, is.na(EPU))
 #calculate single standard deviation and mean of relative condition for each species and sex:
  condstdev <- group_by(cond.epu, SVSPP, SEX) %>% summarize(mean = mean(RelCond), sd = sd(RelCond))
 # 
-# #Remove relative conditons that are outside of 1 standard deviation
+# #Remove relative conditions that are outside of 1 standard deviation
  condsd <- left_join(cond.epu, condstdev, by=c('SVSPP', 'SEX'))
  ungroup(condsd)
 # 
@@ -554,6 +555,7 @@ cond.epu$Species[cond.epu$SVSPP=='192'] <- 'Atlantic wolffish'
 cond.epu$Species[cond.epu$SVSPP=='360'] <- 'Atlantic sharpnose shark'
 cond.epu$Species[cond.epu$SVSPP=='101'] <- 'Atlantic halibut'
 cond.epu$Species[cond.epu$SVSPP=='139'] <- 'Striped bass'
+cond.epu$Species[cond.epu$SVSPP=='270'] <- 'Cownose ray'
 
 count(cond.epu, is.na(EPU))
 
@@ -583,10 +585,10 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
 #readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Fall.csv"))
 
-#SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023):
-#cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
-#rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
-#readr::write_csv(rel_condition, here::here(out.dir,"RelCond2023_Year.csv"))
+#SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023, Jan. 27, 2025):
+cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
+rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
+readr::write_csv(rel_condition, here::here(out.dir,"RelCond2024_Year.csv"))
 
 
 #Proportion of species below average for 2024 SOE:
