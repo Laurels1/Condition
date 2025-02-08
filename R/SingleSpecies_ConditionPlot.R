@@ -1,8 +1,70 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(patchwork)
+library(forcats)
+library(viridis)
 
 out.dir="output"
+
+#Summarize annually over all EPUs for black sea bass condition for ESP 2025:
+annualcond <- cond.epu %>% dplyr::filter(Species == 'Black sea bass', YEAR >= 1992) %>% 
+  dplyr::group_by(YEAR, Species) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
+condNSpp <- condN %>% dplyr::add_count() %>%
+  dplyr::filter(n >= 20)
+
+save(condNSpp, file=(here::here(out.dir,'BlackSeaBass_FallCondition.RData')))
+
+annualCondition <- condNSpp
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition %>%
+  #    dplyr::filter(sexMF == "F") %>%
+  #group_by(Species) %>% 
+  mutate(scaleCond = scale(MeanCond, scale = TRUE, center = TRUE))
+
+xs = quantile(speciesNames$scaleCond, seq(0,1, length.out = 6), na.rm = TRUE)
+
+speciesNames <- speciesNames %>% 
+  mutate(category = cut(scaleCond, breaks = xs, labels = c( "Poor Condition", 
+                                                            "Below Average",
+                                                            "Neutral",
+                                                            "Above Average",
+                                                            "Good Condition"), 
+                        include.lowest = TRUE))
+
+#plot of condition
+#See 5 scale colors for viridis:
+#scales::show_col(viridis::viridis_pal()(5))
+vir <- viridis::viridis_pal()(5)
+
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = category)) +
+  labs(fill="Quintiles of Condition") +
+  geom_tile() +
+  coord_equal() +
+  theme_bw() +
+  scale_fill_manual(values=vir) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  #    geom_vline(xintercept=SppSplit1, color='red')+
+  #     geom_vline(xintercept=SppSplit2, color='red')+
+  # geom_vline(xintercept=SppSplit3, color='red')+
+  #scale_x_discrete works if don't need to pad final year for missing data. Changed Year to numeric above and this works:
+  scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
+  theme(legend.position = "right", legend.box = "vertical", legend.title = element_text(size = 8),
+        legend.text = element_text(size = 6),
+        axis.title = element_blank(), axis.text.x = element_text(size = 6),
+        axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+#+
+#      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
+#      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
+#         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
+
+ggsave(path= here::here(out.dir),"BlackSeaBass_FallCondition_allsex_2024.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
 
 #Summarize annually over all EPUs for herring spring condition:
 annualcond <- cond.epu %>% dplyr::filter(Species == 'Atlantic herring', YEAR >= 1992) %>% 
