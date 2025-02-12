@@ -78,20 +78,20 @@ gis.dir  <- "gis"
 #   source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #   channel <- dbutils::connect_to_database(server='sole.nefsc.noaa.gov',uid=lsmith)
 # 
-#ITD gave script to connect to Oracle on Dec. 7, 2023, still works June 2024:
-    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
+#ITD gave script to connect to Oracle on Dec. 7, 2023, still works Jan. 2025:
+#    source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
 #    channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
 
 # #NERHA Surfclam and ocean quahog data:
 #    clam <- survdat::get_survdat_clam_data(channel)
 #    save(clam[["data"]],file = here::here("other",paste0("Clam_Survey_1982_2022.Rdata")))
    
-   # # # #getBio for individual weights (this line and next line works as of Dec. 7, 2023):#
-   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
+   # # # #getBio for individual weights (this line and next line works as of Jan. 2025):#
+#   survey <- survdat::get_survdat_data(channel, all.season = T, getBio = T)
 # #  #first line works as of July 13th, 2023:
-    survdat <- survey$survdat
+#    survdat <- survey$survdat
   # survbio=as.data.frame(survey[['survdat']])
-    saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_1-24-2025.rds")))
+#    saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_1-24-2025.rds")))
 
 #   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
    survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
@@ -588,7 +588,7 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 #SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023, Jan. 27, 2025):
 cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
 rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
-readr::write_csv(rel_condition, here::here(out.dir,"RelCond2024_Year.csv"))
+#readr::write_csv(rel_condition, here::here(out.dir,"RelCond2024_Year.csv"))
 
 
 #Proportion of species below average for 2024 SOE:

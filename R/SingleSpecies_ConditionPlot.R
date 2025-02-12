@@ -14,7 +14,7 @@ condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count() %>%
   dplyr::filter(n >= 20)
 
-save(condNSpp, file=(here::here(out.dir,'BlackSeaBass_FallCondition.RData')))
+#save(condNSpp, file=(here::here(out.dir,'BlackSeaBass_FallCondition.RData')))
 
 annualCondition <- condNSpp
 
@@ -53,10 +53,12 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
   # geom_vline(xintercept=SppSplit3, color='red')+
   #scale_x_discrete works if don't need to pad final year for missing data. Changed Year to numeric above and this works:
   scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
-  theme(legend.position = "right", legend.box = "vertical", legend.title = element_text(size = 8),
-        legend.text = element_text(size = 6),
-        axis.title = element_blank(), axis.text.x = element_text(size = 6),
-        axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
+  theme(legend.position = "bottom", legend.box = "horizontal", legend.title = element_text(size = 11),
+        legend.text = element_text(size = 9),
+        axis.title = element_blank(), axis.text.x = element_text(size = 10),
+ #       axis.text.y = element_text(size = 8), panel.grid.major = element_blank(),
+        axis.text.y = element_blank(), panel.grid.major = element_blank(),
+        axis.ticks.y = element_blank(),
         panel.grid.minor = element_blank()) 
 #+
 #      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
