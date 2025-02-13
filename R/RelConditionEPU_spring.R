@@ -69,8 +69,8 @@ gis.dir  <- "gis"
 #laptop:
 #source("C:\\Users\\laurel.smith\\Documents\\R\\Oracle_User_Data.R")
 #Works as of June 6th, 2024:
-source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
-channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
+#source(("C:\\Users\\laurel.smith\\Documents\\EDAB\\ConditionGAM\\R\\ConnectOracle.R"))
+#channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
 
 #sole <- odbcConnect("sole",uid=user.name,pwd=password,believeNRows=FALSE) #SVDBS no longer on sole
 
@@ -106,9 +106,8 @@ channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
 #copy into console and fill in server and uid:
 #channel <- dbutils::connect_to_database(server="",uid="")
 
- survey <- survdat::get_survdat_data(channel, getBio = T)
- survdat=as.data.frame(survey[['survdat']])
- 
+# survey <- survdat::get_survdat_data(channel, getBio = T)
+# survdat=as.data.frame(survey[['survdat']])
 # 
 # survbio=as.data.frame(survey[['survdat']])
 # # #save survbio object so RData data doesn't need to be pulled each time:
@@ -129,13 +128,14 @@ channel <- dbConnect(drv,username=user,password=passwd, dbname=connect.string)
  
 #load("survbio.Rdata")
 #Got survdat.RData from Sean Lucey on Jan 6th, 2023 for 2023 SOE because it stalled out and wouldn't load from my data pull.
-load(file.path(data.dir, "survdat.RData"))
+#load(file.path(data.dir, "survdat.RData"))
 
-data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
-
+#Bring in data:
+#Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
+survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))  
 
 #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
-survey.data <- data %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
+survey.data <- survdat %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
                                                       STRATUM %in% c(1090, 1130:1210, 1230, 1250, 3460, 3480, 3490, 3520:3550) ~ 'GB',
                                                       STRATUM %in% c(1220, 1240, 1260:1290, 1360:1400, 3560:3830)~ 'GOM',
                                                       STRATUM %in% c(1300:1352, 1401:1599, 3840:3990)~ 'SS'))
@@ -545,7 +545,7 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
   dplyr::filter(n >= 20)
 
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
-readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Spring.csv"))
+readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2024_Spring.csv"))
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
