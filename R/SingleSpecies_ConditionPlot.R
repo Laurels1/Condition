@@ -1079,7 +1079,7 @@ p2 <- ggplot(TotZooRegime, aes(x = YEAR, y = SumTotalZooWinter)) +
 ggsave(path= here::here("output"),"TotalZoopl_Regimes_Winter.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
-#Regime shifts in surface temp:
+#Regime shifts in surface temp (for spring temp, run RelConditionEPU_spring.R first):
 Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, SURFTEMP) %>%
   dplyr::filter(!is.na(SURFTEMP)) %>%
@@ -1095,7 +1095,7 @@ Regime <- rpart::rpart(AvgSurfTemp~YEAR, data=SurfRegime)
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
+saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring2023.RDS"))
 printcp(Regime)
 
 
@@ -1125,11 +1125,11 @@ AnnualSurfRegime <- SurfRegime
 p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_line()+
   geom_point() +
-  labs(title= "Average Spring Surface Temperature", y = "Average Surface Temperature") +
-  geom_vline(xintercept=SppSplit1, color='red')+
-  geom_vline(xintercept=SppSplit2, color='red')+
-  geom_vline(xintercept=SppSplit3, color='red')+
-  geom_vline(xintercept=SppSplit4, color='red')+
-  geom_vline(xintercept=SppSplit5, color='red')
+  labs(title= "Average Spring Surface Temperature", y = "Temperature °C") +
+  geom_vline(xintercept=SppSplit1, color='red')
+#  geom_vline(xintercept=SppSplit2, color='red')+
+#  geom_vline(xintercept=SppSplit3, color='red')+
+#  geom_vline(xintercept=SppSplit4, color='red')+
+#  geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp2023_Spring_Regimes.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"SurfaceTemp2023_Spring_Regime.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
