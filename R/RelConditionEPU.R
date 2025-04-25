@@ -371,7 +371,9 @@ mergedata <- left_join(fall, LWpar_spp, by= c('SEASON', 'SVSPP', 'sex'))
 #filters out values without losing rows with NAs:
 mergewt <- dplyr::filter(mergedata, is.na(INDWT) | INDWT<900)
 mergewtno0 <- dplyr::filter(mergewt, is.na(INDWT) | INDWT>0.004)
-mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
+#mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>0)
+#mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>4)
+mergelenno0 <- dplyr::filter(mergewtno0, is.na(LENGTH) | LENGTH>=10)
 mergelen <- dplyr::filter(mergelenno0, !is.na(LENGTH))
 #over 176,000 missing Indwt:
 mergeindwt <- dplyr::filter(mergelen, !is.na(INDWT))
