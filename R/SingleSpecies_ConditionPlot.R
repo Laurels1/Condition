@@ -178,16 +178,16 @@ ButtSplit2 <- ButtResults$index[2]
  
 
 # #Summarize annually over all EPUs for butterfish WG:
-annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu %>% dplyr::group_by(Species,YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 condNSpp <- condN %>% dplyr::add_count(Species) %>%
     dplyr::filter(n >= 20)
 # 
 # #Mean butterfish condition for line plot (SingleSpecies_ConditionPlot.R):
- ButtCondPlot <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, YEAR)
+ ButtCondPlot <- condNSpp %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(MeanCond, StdDevCond, YEAR)
 # 
 # #Test for regime shifts in butterfish (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
-ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish') %>% dplyr::select(RelCond, YEAR)
+ButtCond <- cond.epu %>% dplyr::filter(Species == 'Butterfish', YEAR < 2024) %>% dplyr::select(RelCond, YEAR)
 ButtRegime <- rpart::rpart(RelCond~YEAR, data=ButtCond)
 ButtPlot <- rpart.plot::rpart.plot(ButtRegime)
 #Outputs pruning tree table:
@@ -320,6 +320,33 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
 
 #ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 ggsave(path= here::here(out.dir),"ButterfishTestNoMissingEPU_AllSizes_Fall_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#######Add standard deviation shading to butterfish plot (all sexes and sizes):
+annualCondition <- ButtCondPlot
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#See 5 scale colors for viridis:
+#scales::show_col(viridis::viridis_pal()(5))
+#vir <- viridis::viridis_pal()(5)
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR)) +
+  geom_line(aes(y = MeanCond))+
+  geom_point(aes(y = MeanCond)) +
+    geom_ribbon(aes(y = MeanCond, ymin = MeanCond - StdDevCond, ymax = MeanCond + StdDevCond), alpha = .2) + 
+  #  labs(title="Immature Mackerel Relative Condition", y = "Relative Condition") +
+  #  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
+  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
+  #   geom_vline(xintercept=MackSplit1, color='red')+
+  #    geom_vline(xintercept=MackSplit2, color='red') #+
+  #   geom_vline(xintercept=MackSplit3, color='red')
+  geom_vline(xintercept=ButtSplit1, color='red')+
+  geom_vline(xintercept=ButtSplit2, color='red')
+
+#ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Butterfish_AllSizes_Fall_ShelfCondition_SD_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
 
