@@ -561,6 +561,9 @@ cond.epu$Species[cond.epu$SVSPP=='270'] <- 'Cownose ray'
 
 count(cond.epu, is.na(EPU))
 
+#Raw relative condition data for Andi Delgado, Matt Robertson's PhD student:
+readr::write_csv(cond.epu, here::here(out.dir,"RawData_RelCond2024.csv"))
+
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%
 #   dplyr::select('YEAR', 'EPU', 'Species', 'SVSPP', 
@@ -659,7 +662,7 @@ condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>%
 #condFormat <- tidyr::spread(condNSppEPU, key = c("Species", "EPU", "sex"), value = 'MeanCond', -YEAR)
 
 #Outputing condition data by EPU:
-# #readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2019_shelf.csv"))
+#readr::write_csv(condNshelfSpp, here::here(out.dir,"AnnualRelCond2024_shelf.csv"))
 #
 condSS <- condNSppEPU %>% dplyr::filter(EPU == "SS")
 #readr::write_csv(condSS, here::here(out.dir,"AnnualRelCond2021_SS.csv"))
