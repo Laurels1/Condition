@@ -649,11 +649,20 @@ condYear <- condNSppYear %>% dplyr::select(Species, YEAR, MeanCond, StdDevCond)
 # condYear <- annualcondEPUYear %>% dplyr::select(Species, SVSPP, EPU, YEAR, MeanCond, StdDevCond)
 # readr::write_csv(condYear, here::here(out.dir,"RelCond_AmPl_2021_EPU_Year.csv"))
 
-#Summarize annually by Strata
+#Summarize annually by Strata and sex
 annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, sexMF, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondStrata, nCond>=3) %>% ungroup()
 condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>% 
   dplyr::filter(n >= 20)
+
+#Summarize annually by species and strata for Andy Applegate data request (5-5-2025):
+annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+condN <- dplyr::filter(annualcondStrata, nCond>=3) %>% ungroup()
+condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM) %>% 
+  dplyr::filter(n >= 20)
+
+readr::write_csv(condNSppStrata, here::here(out.dir,"AnnualRelCond_Strata2024.csv"))
+
 #Format output to be read into plotting function:
 
 
