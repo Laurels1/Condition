@@ -656,7 +656,7 @@ condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM, sexMF) %>%
   dplyr::filter(n >= 20)
 
 #Summarize annually by species and strata for Andy Applegate data request (5-5-2025):
-annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondStrata <- cond.epu %>% dplyr::group_by(Species,STRATUM, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), VarCond = var(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondStrata, nCond>=3) %>% ungroup()
 condNSppStrata <- condN %>% dplyr::add_count(Species, STRATUM) %>% 
   dplyr::filter(n >= 20)
