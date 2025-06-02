@@ -1227,7 +1227,9 @@ EDMdata <- EDMdataTempCop %>% unique() %>% dplyr::filter(YEAR >= 1992)
 #readr::write_csv(DFAdata, here::here(out.dir,"FishCondition_EnvirCov_DFA2022.csv"))
 #saveRDS(EDMdata,file = here::here("other",paste0("MackerelCondition_EDM2023.rds")))
 #saveRDS(EDMdata,file = here::here("other",paste0("MatMackerelCondition_EPU2023.rds")))
-MatMackerelCondition_EDM2023 <- readRDS("other\\MatMackerelCondition_EPU2023.rds")
+#MatMackerelCondition_EDM2023 <- readRDS("other\\MatMackerelCondition_EPU2023.rds")
+#ImmMackerelCondition_EDM2023 <- readRDS("other\\ImmMackerel_FishCondition_EDM2023.rds")
+#ImmMackerelCondition_EPU2023 <- readRDS("other\\ImmMackerel_FishCondition_EPU2023.rds")
 
 #EDM for immature mackerel <=23cm:
 annualcondImm <- cond.epu  %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)  %>%

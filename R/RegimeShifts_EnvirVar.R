@@ -199,14 +199,14 @@ GOMZoopRegime$year <- as.numeric(as.character(GOMZoopRegime$year))
 p2 <- ggplot(GOMZoopRegime, aes(x = year, y = SumZoop)) +
   geom_line()+
   geom_point() +
-  labs(title= "GOM Summer Zooplankton Abundance Anomalies", y = "Total Abundance Anomaly") +
+  labs(title= "GOM Summer Zooplankton Abundance Anomalies", y = "Total Abundance Anomaly", x = "Year") +
   geom_vline(xintercept=SppSplit1, color='red')+
   geom_vline(xintercept=SppSplit2, color='red')+
   geom_vline(xintercept=SppSplit3, color='red')+
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GOMsummerZoopAnomaly_Regimes_2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"GOMsummerZoopAnomaly_Regimes_2021_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 ######GOM zooplankton annual anomolies:
 GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
@@ -616,10 +616,10 @@ p2 <- ggplot(AvgFallTemp, aes(x = YEAR, y = AvgTempFall)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
-  labs(title="Fall Bottom Temperature by EPU", y = "Temperature Anomaly") +
+  labs(title="Fall Bottom Temperature by EPU", y = "Temperature Anomaly", x = "Year") +
   geom_vline(xintercept=FallSplit1, color='red') 
 
-ggsave(path= here::here(out.dir),"AvgFallBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"AvgFallBottomTempEPU2022_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgWinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -640,12 +640,12 @@ p2 <- ggplot(AvgWinterTemp, aes(x = YEAR, y = AvgTempWinter)) +
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
 
-#Line plot of coppepod small to large index:
+#Line plot of copepod small to large index:
 p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
-  labs(title="Copepod Size Index by EPU", y = "Copepod Size Index") +
+  labs(title="Copepod Size Index by EPU", y = "Copepod Size Index", x = "Year") +
   geom_vline(xintercept=CopepodEPUSplit1, color='red') +
   geom_vline(xintercept=CopepodEPUSplit2, color='red') 
 # +
@@ -1228,4 +1228,4 @@ p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_vline(xintercept=SppSplit4, color='red')+
   geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2023_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

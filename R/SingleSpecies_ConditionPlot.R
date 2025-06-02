@@ -269,8 +269,7 @@ ButtCondPlot <- condN %>%
 
 #Test for regime shifts in mackerel (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 #Do sensitivity tests for maturity cut-offs between 23-29cm:
-MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel') %>%
-                                        #, LENGTH >23) %>%
+MackCond <- cond.epu %>%  dplyr::filter(Species == 'Atlantic mackerel', LENGTH >23) %>%
   dplyr::select(RelCond, YEAR)
 MackRegime <- rpart::rpart(RelCond~YEAR, data=MackCond)
 MackPlot <- rpart.plot::rpart.plot(MackRegime)
@@ -297,7 +296,8 @@ annualCondition <- MackCondPlot
 #change YEAR to continuous numeric for plotting function below:
 annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
 
-speciesNames <- annualCondition
+speciesNames <- annualCondition %>%
+dplyr::filter(YEAR<2024)
 #    dplyr::filter(sexMF == "F") %>%
 
 
@@ -310,16 +310,16 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
   geom_line()+
   geom_point() +
 #  labs(title="Immature Mackerel Relative Condition", y = "Relative Condition") +
-#  labs(title="Atlantic Mackerel Spring Relative Condition", y = "Relative Condition") +
-  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
- #   geom_vline(xintercept=MackSplit1, color='red')+
-#    geom_vline(xintercept=MackSplit2, color='red') #+
+  labs(title="Mature Atlantic Mackerel Spring Relative Condition (>23cm)", y = "Relative Condition", x = "Year") +
+#  labs(title="Butterfish Fall Relative Condition", y = "Relative Condition") +
+    geom_vline(xintercept=MackSplit1, color='red')+
+    geom_vline(xintercept=MackSplit2, color='red') #+
 #   geom_vline(xintercept=MackSplit3, color='red')
-    geom_vline(xintercept=ButtSplit1, color='red')+
-   geom_vline(xintercept=ButtSplit2, color='red')
+#    geom_vline(xintercept=ButtSplit1, color='red')+
+#   geom_vline(xintercept=ButtSplit2, color='red')
 
-#ggsave(path= here::here(out.dir),"MackerelAllSizes_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
-ggsave(path= here::here(out.dir),"ButterfishTestNoMissingEPU_AllSizes_Fall_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Mackerel23cm_Year_Spring_ShelfCondition_allsex_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here(out.dir),"ButterfishTestNoMissingEPU_AllSizes_Fall_ShelfCondition_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #######Add standard deviation shading to butterfish plot (all sexes and sizes):
 annualCondition <- ButtCondPlot
@@ -1152,11 +1152,12 @@ AnnualSurfRegime <- SurfRegime
 p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_line()+
   geom_point() +
-  labs(title= "Average Spring Surface Temperature", y = "Temperature °C") +
+  labs(title= "Average Spring Surface Temperature", y = "Temperature °C", x = "Year") +
   geom_vline(xintercept=SppSplit1, color='red')
-#  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')
 #  geom_vline(xintercept=SppSplit3, color='red')+
 #  geom_vline(xintercept=SppSplit4, color='red')+
 #  geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"SurfaceTemp2023_Spring_Regime.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"SurfaceTemp2023_Spring_Regime_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
++
