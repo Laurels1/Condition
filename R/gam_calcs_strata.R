@@ -56,10 +56,10 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #For mature mackerel >23 cm:
-#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 
 #For mature butterfish >11 cm:
-cond.strata <- cond.strata %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)
 
 #For immature mackerel <=23:
 #cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH <= 23, YEAR >= 1992)
@@ -321,20 +321,35 @@ ZoopData <- dplyr::left_join(CondAvgTemp, ZoopIndexEPU, by=c('YEAR', 'EPU'))
 
 
 #Zooplankton data by EPU, YEAR for Scott Large Dynamic Factor Analysis:
+# ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
+#   dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
+#                  CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
+#                  CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
+#                  CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
+#                  TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
+#                  TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
+#                  TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
+#                  TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
+#                  ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)),
+#                  ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)),
+#                  ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)),
+#                  ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)),
+#               )
+
 ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
-  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeStrataSpring, na.rm=TRUE)),
-                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeStrataSummer, na.rm=TRUE)),
-                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeStrataFall, na.rm=TRUE)),
-                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeStrataWinter, na.rm=TRUE)),
-                 TotCopSpringEPU=(sum(TotalCopepodStrataSpring, na.rm=TRUE)),
-                 TotCopSummerEPU=(sum(TotalCopepodStrataSummer, na.rm=TRUE)),
-                 TotCopFallEPU=(sum(TotalCopepodStrataFall, na.rm=TRUE)),
-                 TotCopWinterEPU=(sum(TotalCopepodStrataWinter, na.rm=TRUE)),
-                 ZoopAbundSpringEPU=(sum(ZooplAbundStrataSpring, na.rm=TRUE)),
-                 ZoopAbundSummerEPU=(sum(ZooplAbundStrataSummer, na.rm=TRUE)),
-                 ZoopAbundFallEPU=(sum(ZooplAbundStrataFall, na.rm=TRUE)),
-                 ZoopAbundWinterEPU=(sum(ZooplAbundStrataWinter, na.rm=TRUE)),
-              )
+  dplyr:: mutate(CopepodSmLgSpringEPU=(mean(CopepodSmallLargeEPUSpring, na.rm=TRUE)),
+                 CopepodSmLgSummmerEPU=(mean(CopepodSmallLargeEPUSummer, na.rm=TRUE)),
+                 CopepodSmLgFallEPU=(mean(CopepodSmallLargeEPUFall, na.rm=TRUE)),
+                 CopepodSmLgWinterEPU=(mean(CopepodSmallLargeEPUWinter, na.rm=TRUE)),
+                 TotCopSpringEPU=(sum(TotalCopepodEPUSpring, na.rm=TRUE)),
+                 TotCopSummerEPU=(sum(TotalCopepodEPUSummer, na.rm=TRUE)),
+                 TotCopFallEPU=(sum(TotalCopepodEPUFall, na.rm=TRUE)),
+                 TotCopWinterEPU=(sum(TotalCopepodEPUWinter, na.rm=TRUE)),
+                 ZoopAbundSpringEPU=(sum(ZooplAbundEPUSpring, na.rm=TRUE)),
+                 ZoopAbundSummerEPU=(sum(ZooplAbundEPUSummer, na.rm=TRUE)),
+                 ZoopAbundFallEPU=(sum(ZooplAbundEPUFall, na.rm=TRUE)),
+                 ZoopAbundWinterEPU=(sum(ZooplAbundEPUWinter, na.rm=TRUE)),
+  )
 
 readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2022.csv")) 
 
@@ -351,15 +366,15 @@ readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2022.csv"))
 #   )
 # 
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
-load(here::here("data","1977_2022_SLIanom.rdata"))
+CalfinNEUS <-load(here::here("data","1977_2022_SLIanom.rdata"))
 Calfin <- test
 #load(here::here("data","1977_2019_SLI_Calfin_Pseudocal_Ctyp_anomaly.rdata"))
 #load(here::here("data","1977_2017_SLI_Calfin_Pseudo_Ctyp.rdata"))
 #Calfin <- Zooplankton_Primary_Prod
 #head(Calfin)
 CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
-  dplyr::select(YEAR, SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs) %>%
-  tidyr::gather(CalEPU, CopepodSmallLarge, c(SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs)) %>%
+  dplyr::select(YEAR, SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs, SLIAnom.nes) %>%
+  tidyr::gather(CalEPU, CopepodSmallLarge, c(SLIAnom.gbk, SLIAnom.gom, SLIAnom.mab, SLIAnom.scs, SLIAnom.nes)) %>%
   dplyr::mutate(EPU = if_else(CalEPU=='SLIAnom.gbk', 'GB',
                               if_else(CalEPU=='SLIAnom.gom', 'GOM',
                                       if_else(CalEPU=='SLIAnom.mab', 'MAB',
@@ -368,7 +383,25 @@ CalfinFormat <- Calfin %>% dplyr::rename(YEAR = year) %>%
 CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 
 #Small-large copepod index for Rob Gamble EDM:
-saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
+#saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
+
+#Bring in updated small to large copepod anomalies by season from Ryan Morse (NEUS):
+load(here::here("data","NES_mean_seasonal_anomalies.rdata"))
+CalfinNEUS <- nes.yr.ssn.mn
+CalfinNEUSwide <- spread(CalfinNEUS, key=Var, value=Value)
+CalfinSprNEUS <- CalfinNEUSwide %>% dplyr::filter(season == "Spring")
+
+ZoopSprNEUS <- CalfinSprNEUS %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
+  dplyr::mutate(LgCop = calfin_100m3) %>%
+  dplyr::mutate(SmCop= (ctyp_100m3+pseudo_100m3+cham_100m3+tlong_100m3)) %>%
+  dplyr::filter(LgCop != 0, Year >1991) %>%
+  dplyr::mutate(CopepodSmallLargeSprNEUS = SmCop/LgCop) %>%
+  dplyr::select(Year, Season, CopepodSmallLargeSprNEUS) 
+
+
+#Small-large copepod Spring NEUS index for Rob Gamble EDM:
+saveRDS(ZoopSprNEUS,file = here::here("other",paste0("SmallLargeCopepodsSprNEUS_EDM2022.rds")))
+
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
