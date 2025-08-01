@@ -60,7 +60,7 @@ Euph <- readr::read_csv(here::here(data.dir, "GoM_euphausiidAnomaly.csv"))
 
 GOMeuph <- Euph %>% dplyr::filter(year >= 1992)
 
-#Regime analysis:
+#Regime analysis for annual GOM euphausiids:
 GOMeuphRegime <- GOMeuph %>% dplyr::select(anomaly_total_mean, year)
 Regime <- rpart::rpart(anomaly_total_mean~year, data=GOMeuphRegime)
 #Selecting best fit (gives optimal CP value associated with the minimum error)::
@@ -104,6 +104,147 @@ p2 <- ggplot(GOMeuphRegime, aes(x = year, y = anomaly_total_mean)) +
 
 ggsave(path= here::here("output"),"GOMeuphausiid_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
+#Regime analysis for spring GOM euphausiids (data from Isabel Honda):
+GOMeuphRegime <- GOMeuph %>% dplyr::select(anomaly_spring_mean, year)
+Regime <- rpart::rpart(anomaly_spring_mean~year, data=GOMeuphRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "SprGOMeuphausiid_Regimes_2023.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+GOMeuphRegime$year <- as.numeric(as.character(GOMeuphRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(GOMeuphRegime, aes(x = year, y = anomaly_spring_mean)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Spring GOM Euphausiid Abundance Anomalies", y = "Spring Abundance Anomaly") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"SprGOMeuphausiid_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+#Regime analysis for spring GOM larvaceans (data from Isabel Honda):
+Larv <- readr::read_csv(here::here(data.dir, "GoM_larvaceanAnomaly.csv"))
+
+GOMlarv <- Larv %>% dplyr::filter(year >= 1992)
+
+GOMlarvRegime <- GOMlarv %>% dplyr::select(anomaly_spring_mean, year)
+Regime <- rpart::rpart(anomaly_spring_mean~year, data=GOMlarvRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "SprGOMlarvacean_Regimes_2023.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+GOMlarvRegime$year <- as.numeric(as.character(GOMlarvRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(GOMlarvRegime, aes(x = year, y = anomaly_spring_mean)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Spring GOM Larvacean Abundance Anomalies", y = "Spring Abundance Anomaly") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"SprGOMlarvacean_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Small to large copepod anomalies (by season, shelf-wide from Ryan Morse on Aug. 1, 2025):
+CalfinNEUS <-load(here::here("data","20250801_NES_SLI_Spr.rdata"))
+CopSmLgSprNEUS <- SLI.nes.spr
+
+CopSmLgSprNEUSRegime <- CopSmLgSprNEUS %>% dplyr::select(SLI, year) %>%
+  dplyr::filter(year>=1992)
+
+Regime <- rpart::rpart(SLI~year, data=CopSmLgSprNEUSRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+# Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+saveRDS(Regime[["cptable"]],file = here::here("output", "SprNEUS_SmLgCop_Regimes_2023.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#change YEAR to continuous numeric for plotting function below:
+CopSmLgSprNEUSRegime$year <- as.numeric(as.character(CopSmLgSprNEUSRegime$year))
+
+#Line plot of condition
+p2 <- ggplot(CopSmLgSprNEUSRegime, aes(x = year, y = SLI)) +
+  geom_line()+
+  geom_point() +
+  labs(title= "Spring NEUS Copepod Size Index Anomalies", y = "Spring Abundance Anomaly") +
+  geom_vline(xintercept=SppSplit1, color='red')+
+  geom_vline(xintercept=SppSplit2, color='red')+
+  geom_vline(xintercept=SppSplit3, color='red')+
+  geom_vline(xintercept=SppSplit4, color='red')+
+  geom_vline(xintercept=SppSplit5, color='red')
+
+ggsave(path= here::here("output"),"SprNEUS_SmLgCop_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Mean GOM zooplankton abundance anomalies from Ryan Morse (GOM_mean_seasonal_anomalies.csv)
 GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))

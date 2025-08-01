@@ -365,6 +365,13 @@ readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2022.csv"))
 #                  ZoopAbundEPU=(sum(ZooplAbundStrata, na.rm=TRUE)),
 #   )
 # 
+#Bringing in difference of small to large copepod anomalies (by season, shelf-wide from Ryan Morse on Aug. 1, 2025):
+CalfinNEUS <-load(here::here("data","20250801_NES_SLI_Spr.rdata"))
+CopSmLgSprNEUS <- SLI.nes.spr
+
+CalfinNEUS <-load(here::here("data","20250801_NES_mean_seasonal_anomalies.rdata"))
+Calfin <- nes.yr.ssn.mn
+
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
 CalfinNEUS <-load(here::here("data","1977_2022_SLIanom.rdata"))
 Calfin <- test
@@ -385,22 +392,114 @@ CondCal <- dplyr::left_join(ZoopDataEPU, CalfinFormat, by=c("YEAR", "EPU"))
 #Small-large copepod index for Rob Gamble EDM:
 #saveRDS(CalfinFormat,file = here::here("other",paste0("SmallLargeCopepods_EDM2022.rds")))
 
-#Bring in updated small to large copepod anomalies by season from Ryan Morse (NEUS):
+#Spring NEUS zooplankton indices for Rob Gamble EDM:
 load(here::here("data","NES_mean_seasonal_anomalies.rdata"))
 CalfinNEUS <- nes.yr.ssn.mn
+
+nes.yr.ssn.mn %>%
+  filter(season=="Spring", Var=="volume_100m3") %>%
+  ggplot(aes(y=Value, x=year)) +
+  geom_point()+
+  geom_line()+
+  theme_classic()+
+  labs(x='', y = 'anomaly') +
+  coord_cartesian(xlim=c(1992,2022))+
+  theme(strip.background = element_blank(), strip.text.y = element_blank())
+
 CalfinNEUSwide <- spread(CalfinNEUS, key=Var, value=Value)
 CalfinSprNEUS <- CalfinNEUSwide %>% dplyr::filter(season == "Spring")
 
 ZoopSprNEUS <- CalfinSprNEUS %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
+  dplyr::mutate(larvSprNEUS = larvaceans_100m3) %>%
+  dplyr::mutate(euphSprNEUS = euph_100m3) %>%
+  dplyr::mutate(ZooplSprNEUS = volume_100m3) %>%  
+
+  dplyr::select(Year, Season, larvSprNEUS, euphSprNEUS, ZooplSprNEUS) 
+
+#saveRDS(ZoopSprNEUS,file = here::here("other",paste0("LarvEuphZooplSprNEUS_EDM2022.rds")))
+#readr::write_csv(ZoopSprNEUS, here::here(out.dir,"LarvEuphZooplSprNEUS_EDM2022.csv"))
+
+#GOM spring zooplankton indices for Rob Gamble EDM:
+load(here::here("data","GOM_mean_seasonal_anomalies.rdata"))
+CalfinGOM <- gom.yr.ssn.mn
+CalfinGOMwide <- spread(CalfinGOM, key=Var, value=Value)
+CalfinSprGOM <- CalfinGOMwide %>% dplyr::filter(season == "Spring")
+
+ZoopSprGOM <- CalfinSprGOM %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
+  dplyr::mutate(larvSprGOM = larvaceans_100m3) %>%
+  dplyr::mutate(euphSprGOM = euph_100m3) %>%
+  dplyr::mutate(ZooplSprGOM = volume_100m3) %>%  
+  
+  dplyr::select(Year, Season, larvSprGOM, euphSprGOM, ZooplSprGOM) 
+
+
+#saveRDS(ZoopSprGOM,file = here::here("other",paste0("LarvEuphZooplSprGOM_EDM2022.rds")))
+readr::write_csv(ZoopSprGOM, here::here(out.dir,"LarvEuphZooplSprGOM_EDM2022.csv"))
+
+#GOM summer zooplankton indices for Rob Gamble EDM:
+load(here::here("data","GOM_mean_seasonal_anomalies.rdata"))
+CalfinGOM <- gom.yr.ssn.mn
+CalfinGOMwide <- spread(CalfinGOM, key=Var, value=Value)
+CalfinSummGOM <- CalfinGOMwide %>% dplyr::filter(season == "Summer")
+
+ZoopSummGOM <- CalfinSummGOM %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
+  dplyr::mutate(larvSummGOM = larvaceans_100m3) %>%
+  dplyr::mutate(euphSummGOM = euph_100m3) %>%
+  dplyr::mutate(ZooplSummGOM = volume_100m3) %>%  
+  
+  dplyr::select(Year, Season, larvSummGOM, euphSummGOM, ZooplSummGOM) 
+
+
+#saveRDS(ZoopSprGOM,file = here::here("other",paste0("LarvEuphZooplSprGOM_EDM2022.rds")))
+readr::write_csv(ZoopSummGOM, here::here(out.dir,"LarvEuphZooplSummGOM_EDM2022.csv"))
+
+#Bring in updated small to large copepod anomalies by season from Ryan Morse (NEUS):
+load(here::here("data","GOM_mean_seasonal_anomalies.rdata"))
+CalfinGOM <- gom.yr.ssn.mn
+CalfinGOMwide <- spread(CalfinGOM, key=Var, value=Value)
+CalfinSprGOM <- CalfinGOMwide %>% dplyr::filter(season == "Spring")
+
+ZoopSprGOM <- CalfinSprGOM %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
   dplyr::mutate(LgCop = calfin_100m3) %>%
   dplyr::mutate(SmCop= (ctyp_100m3+pseudo_100m3+cham_100m3+tlong_100m3)) %>%
   dplyr::filter(LgCop != 0, Year >1991) %>%
-  dplyr::mutate(CopepodSmallLargeSprNEUS = SmCop/LgCop) %>%
-  dplyr::select(Year, Season, CopepodSmallLargeSprNEUS) 
+  dplyr::mutate(CopepodSmallLargeSprGOM = SmCop-LgCop) %>%
+  dplyr::mutate(larvSprGOM = larvaceans_100m3) %>%
+  dplyr::mutate(euphSprGOM = (euph_100m3+euph1_100m3)) %>%
+  #Need to change to right variable names:
+  #    dplyr::mutate(TotalCopepodSprNEUS = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
+  # dplyr::mutate(ZooplAbundSprNEUS= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
+  #                                Cirripedia+Cnidaria+Cyclopoida+Decapoda+
+  #                               Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
+  #                              Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
+  #                             Protozoa+Thecosomata+Tunicata)/1000) %>%
+  
+  dplyr::select(Year, Season, CopepodSmallLargeSprGOM, larvSprGOM, euphSprGOM) 
 
+load(here::here("data","GBK_mean_seasonal_anomalies.rdata"))
+CalfinGB <- gbk.yr.ssn.mn
+CalfinGBwide <- spread(CalfinGB, key=Var, value=Value)
+CalfinSprGB <- CalfinGBwide %>% dplyr::filter(season == "Spring")
+
+ZoopSprGB <- CalfinSprGB %>% dplyr::mutate(Year=year, Season = as.character(season)) %>%
+  dplyr::mutate(LgCop = calfin_100m3) %>%
+  dplyr::mutate(SmCop= (ctyp_100m3+pseudo_100m3+cham_100m3+tlong_100m3)) %>%
+  dplyr::filter(LgCop != 0, Year >1991) %>%
+  dplyr::mutate(CopepodSmallLargeSprGB = SmCop-LgCop) %>%
+  dplyr::mutate(larvSprGB = larvaceans_100m3) %>%
+  dplyr::mutate(euphSprGB = (euph_100m3+euph1_100m3)) %>%
+  #Need to change to right variable names:
+  #    dplyr::mutate(TotalCopepodSprNEUS = (SmCalanoida+LgCalanoida+Cyclopoida)/1000) %>%
+  # dplyr::mutate(ZooplAbundSprNEUS= (SmCalanoida+LgCalanoida+Bryozoa+Chaetognatha+
+  #                                Cirripedia+Cnidaria+Cyclopoida+Decapoda+
+  #                               Polychaeta+Diplostraca+Echinodermata+Euphausiacea+
+  #                              Gammaridea+Hyperiidea+Mollusca+Mysidacea+Ostracoda+
+  #                             Protozoa+Thecosomata+Tunicata)/1000) %>%
+  
+  dplyr::select(Year, Season, CopepodSmallLargeSprGB, larvSprGB, euphSprGB) 
 
 #Small-large copepod Spring NEUS index for Rob Gamble EDM:
-saveRDS(ZoopSprNEUS,file = here::here("other",paste0("SmallLargeCopepodsSprNEUS_EDM2022.rds")))
+saveRDS(ZoopSprGB,file = here::here("other",paste0("SmallLargeCopLarvEuphSprGB_EDM2022.rds")))
 
 
 #Test for regime shifts in Copepod small/large ratio (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
