@@ -56,7 +56,7 @@ StockData <- StockStrata %>% tidyr::separate_rows(Strata) %>% dplyr::mutate(STRA
 cond.strata <- cond.epu %>% filter(STRATUM <= 7000)
 
 #For mature mackerel >23 cm:
-cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
+#cond.strata <- cond.strata %>% dplyr::filter(Species == 'Atlantic mackerel', LENGTH > 23, YEAR >= 1992)
 
 #For mature butterfish >11 cm:
 #cond.strata <- cond.strata %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, YEAR >= 1992)
@@ -189,12 +189,16 @@ SpringSplit4 <- SpringRegimeResults$index[4]
 FallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempFall)
 FallRegime <- rpart::rpart(AvgTempFall~YEAR, data=FallTemp)
 #FallTempRegimePlot <- rpart.plot::rpart.plot(FallRegime)
+printcp(FallRegime)
 
 #Pull regime shift years into new data frame to add to plot:
 FallRegimeResults <- as.data.frame(FallRegime[["splits"]])
 FallSplit1 <- FallRegimeResults$index[1]
 FallSplit2 <- FallRegimeResults$index[2]
 FallSplit3 <- FallRegimeResults$index[3]
+FallSplit4 <- FallRegimeResults$index[4]
+FallSplit5 <- FallRegimeResults$index[5]
+FallSplit6 <- FallRegimeResults$index[6]
 
 # #Test for regime shifts in Winter temp (same method as in Perretti et al. 2017, although Perretti uses MRT, gives error when method="mrt"):
 # WinterTemp <- AvgTempWinterFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, AvgTempWinter)
@@ -1306,13 +1310,13 @@ EDMdataCop <- dplyr::left_join(EPUcond, CopepodEPUdata, by=c('YEAR', 'EPU'))
 
 #Bring in average temperature data:
 CopAvgTemp <- AvgTemp %>% dplyr::filter(YEAR >= 1992) %>%
-  dplyr::select(YEAR, EPU, AvgTempSummer) 
+  dplyr::select(YEAR, EPU, AvgTempFall) 
 
 EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by=c('YEAR', 'EPU'))
 
 EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-#saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_EDM2023.rds")))
+saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_FallTemp_EDM2023.rds")))
 
 #saveRDS(EDMdata,file = here::here("other",paste0("MatureButterfishCondition_EDM2023.rds")))
 

@@ -23,7 +23,11 @@
 #Required packages
 library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
-devtools::install_github('READ-EDAB-NEesp2/R/create_condition_indicator.R')
+library(curl)
+library(pak)
+#Install condition function:
+#pak::pak("NEFSC/READ-EDAB-NEesp2@dev")
+devtools::install_github("NEFSC/READ-EDAB-NEesp2@dev")
 #updated install of Survdat (2022):
 library(remotes)
 #remotes::install_github('NOAA-EDAB/Survdat', force=T)

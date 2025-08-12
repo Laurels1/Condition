@@ -739,14 +739,14 @@ p2 <- ggplot(AvgSpringTemp, aes(x = YEAR, y = AvgTempSpring)) +
   geom_line(aes(color = EPU)) + 
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
-  labs(title="Average Spring Bottom Temperature by EPU", y = "Average Spring Bottom Temp") +
-  geom_vline(xintercept=SpringSplit1, color='red') 
+  labs(title="Spring Bottom Temperature by EPU", y = "Temperature Anomaly") +
+  geom_vline(xintercept=SpringSplit1, color='red') +
+   geom_vline(xintercept=SpringSplit2, color='red') 
 #+
-  # geom_vline(xintercept=SpringSplit2, color='red') +
-  # geom_vline(xintercept=SpringSplit3, color='red') +
+ #  geom_vline(xintercept=SpringSplit3, color='red') +
   # geom_vline(xintercept=SpringSplit4, color='red')
 
-#ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2021.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"AverageSpringBottomTempEPU2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Average bottom temp data by EPU and season (from gam_calcs_strata.R):
 AvgFallTemp <- AvgTempFallFormat %>% dplyr::filter(YEAR >= 1992) %>%
@@ -758,7 +758,7 @@ p2 <- ggplot(AvgFallTemp, aes(x = YEAR, y = AvgTempFall)) +
   scale_color_manual(values = c("red", "blue", "green", "orange")) +
   geom_point(aes(color = EPU)) +
   labs(title="Fall Bottom Temperature by EPU", y = "Temperature Anomaly", x = "Year") +
-  geom_vline(xintercept=FallSplit1, color='red') 
+  geom_vline(xintercept=FallSplit1, color='red')
 
 ggsave(path= here::here(out.dir),"AvgFallBottomTempEPU2022_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
