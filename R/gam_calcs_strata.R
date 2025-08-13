@@ -376,6 +376,37 @@ CopSmLgSprNEUS <- SLI.nes.spr
 CalfinNEUS <-load(here::here("data","20250801_NES_mean_seasonal_anomalies.rdata"))
 Calfin <- nes.yr.ssn.mn
 
+CalfinNEUS <-load(here::here("data","20250812SLIanom.rdata"))
+CopSmLgAnnual <- SLIanom
+SLIannualNEUS <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='NES') %>%
+  dplyr::mutate(CopSmLgAnnualNEUS=Value) %>%
+  dplyr::select(year, CopSmLgAnnualNEUS)
+SLIannualGOM <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='GOM') %>%
+  dplyr::mutate(CopSmLgAnnualGOM=Value) %>%
+  dplyr::select(year, CopSmLgAnnualGOM)
+SLIannualGB <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='GB') %>%
+  dplyr::mutate(CopSmLgAnnualGB=Value) %>%
+  dplyr::select(year, CopSmLgAnnualGB)
+SLIannualMAB <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='MAB') %>%
+  dplyr::mutate(CopSmLgAnnualMAB=Value) %>%
+  dplyr::select(year, CopSmLgAnnualMAB)
+SLIannual <- Reduce(dplyr::left_join, list(SLIannualNEUS, SLIannualGOM, SLIannualGB, SLIannualMAB))%>%
+  dplyr::select(year, CopSmLgAnnualNEUS, CopSmLgAnnualGOM, CopSmLgAnnualGB, CopSmLgAnnualMAB)
+
+#Annual small-large copepod index by season and shlef for Rob Gamble EDM:
+saveRDS(SLIannual,file = here::here("other",paste0("SmallLargeCopepods_AnnualEPU_shelf_EDM2023.rds")))
+
+#format SLI for regime shift plot (Aug. 13, 2025):
+CalfinFormat1 <- SLIannual %>% dplyr::rename(YEAR = year) %>%
+  dplyr::filter(YEAR>1991) %>%
+  dplyr::select(YEAR, CopSmLgAnnualNEUS, CopSmLgAnnualGOM, CopSmLgAnnualGB, CopSmLgAnnualMAB) %>%
+  tidyr::gather(CalEPU, CopepodSmallLarge, c(CopSmLgAnnualNEUS, CopSmLgAnnualGOM, CopSmLgAnnualGB, CopSmLgAnnualMAB)) %>%
+  dplyr::mutate(EPU = if_else(CalEPU=='CopSmLgAnnualGB', 'GB',
+                              if_else(CalEPU=='CopSmLgAnnualGOM', 'GOM',
+                                      if_else(CalEPU=='CopSmLgAnnualMAB', 'MAB', 'NA')))) 
+CalfinFormat <- subset(CalfinFormat1, CalfinFormat1$EPU!="NA")
+             
+
 #Bringing in difference of small to large copepod anomalies (by EPU from Ryan Morse):
 CalfinNEUS <-load(here::here("data","1977_2022_SLIanom.rdata"))
 Calfin <- test
@@ -1402,8 +1433,8 @@ EDMdataMack2 <- dplyr::full_join(EDMtempSpr, EDMdataZoop, by='YEAR')
 EDMdataImm3 <- EDMdataTemp <- dplyr::full_join(EDMdataImm2, CopepodEPUdata, by= c('YEAR', 'EPU'))
 EDMdataMack3 <- EDMdataTemp <- dplyr::full_join(EDMdataMack2, CopepodEPUdata, by='YEAR', 'EPU')
 
-EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
-EDMdataMack <- EDMdataMack3 %>% unique() %>% dplyr::filter(YEAR >= 1992)
+EDMdataImm <- EDMdataImm3 %>% unique() %>% dplyr::filter(YEAR >= 1991)
+EDMdataMack <- EDMdataMack3 %>% unique() %>% dplyr::filter(YEAR >= 1991)
 
 saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EPU2023.rds")))
 #saveRDS(EDMdataMack,file = here::here("other",paste0("MatureMackerel_FishCondition_EDM2023.rds")))

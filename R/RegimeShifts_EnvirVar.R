@@ -777,14 +777,24 @@ p2 <- ggplot(AvgWinterTemp, aes(x = YEAR, y = AvgTempWinter)) +
 #ggsave(path= here::here(out.dir),"AverageWinterBottomTempEPU2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 
-#Copepod small to large ratio data by EPU (from gam_calcs_strata.R):
+#Copepod small to large ratio data by EPU for condition manuscript (from gam_calcs_strata.R):
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
+
+CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
+CopepodEPURegime <- rpart::rpart(CopepodSmallLarge~YEAR, data=CopepodEPU)
+CopepodEPURegimePlot <- rpart.plot::rpart.plot(CopepodEPURegime)
+CopepodEPURegime$cptable
+
+#Pull regime shift years into new data frame to add to plot:
+CopepodEPURegimeResults <- as.data.frame(CopepodEPURegime[["splits"]])
+CopepodEPUSplit1 <- CopepodEPURegimeResults$index[1]
+CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
 
 #Line plot of copepod small to large index:
 p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
   geom_line(aes(color = EPU)) + 
-  scale_color_manual(values = c("red", "blue", "green", "orange")) +
+  scale_color_manual(values = c("red", "blue", "green")) +
   geom_point(aes(color = EPU)) +
   labs(title="Copepod Size Index by EPU", y = "Copepod Size Index", x = "Year") +
   geom_vline(xintercept=CopepodEPUSplit1, color='red') +
@@ -795,7 +805,7 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
 #   geom_vline(xintercept=CopepodEPUSplit5, color='red') +
 #   geom_vline(xintercept=CopepodEPUSplit6, color='red')
 
-ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2022.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #shelf-wide Copepod small to large ratio data by Shelf (from gam_calcs_strata.R):
 CopepodShelfdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
