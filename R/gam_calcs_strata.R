@@ -355,7 +355,7 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
                  ZoopAbundWinterEPU=(sum(ZooplAbundEPUWinter, na.rm=TRUE)),
   )
 
-readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2022.csv")) 
+#readr::write_csv(ZooSeason, here::here(out.dir,"Zooplankton1977-2022.csv")) 
 
 #Zooplankton data separately for regime shift:
 # ZooSeason <- ZoopStr %>% dplyr::mutate(SEASONS = ifelse(Seasons == '1', 'WINTER',
@@ -469,7 +469,7 @@ ZoopSprGOM <- CalfinSprGOM %>% dplyr::mutate(Year=year, Season = as.character(se
 
 
 #saveRDS(ZoopSprGOM,file = here::here("other",paste0("LarvEuphZooplSprGOM_EDM2022.rds")))
-readr::write_csv(ZoopSprGOM, here::here(out.dir,"LarvEuphZooplSprGOM_EDM2022.csv"))
+#readr::write_csv(ZoopSprGOM, here::here(out.dir,"LarvEuphZooplSprGOM_EDM2022.csv"))
 
 #GOM summer zooplankton indices for Rob Gamble EDM:
 load(here::here("data","GOM_mean_seasonal_anomalies.rdata"))
@@ -486,7 +486,7 @@ ZoopSummGOM <- CalfinSummGOM %>% dplyr::mutate(Year=year, Season = as.character(
 
 
 #saveRDS(ZoopSprGOM,file = here::here("other",paste0("LarvEuphZooplSprGOM_EDM2022.rds")))
-readr::write_csv(ZoopSummGOM, here::here(out.dir,"LarvEuphZooplSummGOM_EDM2022.csv"))
+#readr::write_csv(ZoopSummGOM, here::here(out.dir,"LarvEuphZooplSummGOM_EDM2022.csv"))
 
 #Bring in updated small to large copepod anomalies by season from Ryan Morse (NEUS):
 load(here::here("data","GOM_mean_seasonal_anomalies.rdata"))
@@ -1297,7 +1297,7 @@ condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
 #saveRDS(annualcond,file = here::here("other",paste0("ButterfishCondition_Shelf2023.rds")))
 #Without missing EPU data:
-readr::write_csv(annualcond, here::here(out.dir,"ButterfishCondition_Shelf2023.csv"))
+#readr::write_csv(annualcond, here::here(out.dir,"ButterfishCondition_Shelf2023.csv"))
 
 #With missing EPU data:
 data <- readRDS(here::here("other", "ButterfishCondition_Shelf2023.rds"))
@@ -1307,16 +1307,16 @@ annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH > 11, 
   dplyr::group_by(YEAR) %>% dplyr::summarize(MatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-saveRDS(annualcond,file = here::here("other",paste0("Mature12cmButterfishCondition_Shelf2023.rds")))
-readr::write_csv(annualcond, here::here(out.dir,"Mature12cmButterfishCondition_Shelf2023.csv"))
+#saveRDS(annualcond,file = here::here("other",paste0("Mature12cmButterfishCondition_Shelf2023.rds")))
+#readr::write_csv(annualcond, here::here(out.dir,"Mature12cmButterfishCondition_Shelf2023.csv"))
 
 #EDM for immature butterfish (<=11cm, all sexes, annual without EPU):
 annualcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', LENGTH <= 11, YEAR >= 1992)  %>%
   dplyr::group_by(YEAR) %>% dplyr::summarize(ImmatureButterfishCond = mean(RelCond), ButterfishStdDevCond = sd(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
 
-saveRDS(annualcond,file = here::here("other",paste0("Immature11cmButterfishCondition_Shelf2023.rds")))
-readr::write_csv(annualcond, here::here(out.dir,"Immature11cmButterfishCondition_Shelf2023.csv"))
+#saveRDS(annualcond,file = here::here("other",paste0("Immature11cmButterfishCondition_Shelf2023.rds")))
+#readr::write_csv(annualcond, here::here(out.dir,"Immature11cmButterfishCondition_Shelf2023.csv"))
 
 #EDM for butterfish (all sizes, sexes, by EPU):
 EPUcond <- cond.epu  %>% dplyr::filter(Species == 'Butterfish', YEAR >= 1992)  %>%
@@ -1347,30 +1347,31 @@ EDMCopAvgTemp <- dplyr::full_join(EDMdataCop, CopAvgTemp, by=c('YEAR', 'EPU'))
 
 EDMdata <- EDMCopAvgTemp %>% unique() %>% dplyr::filter(YEAR >= 1992)
 
-saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_FallTemp_EDM2023.rds")))
+#saveRDS(EDMdata,file = here::here("other",paste0("ButterfishCondition_FallTemp_EDM2023.rds")))
 
 #saveRDS(EDMdata,file = here::here("other",paste0("MatureButterfishCondition_EDM2023.rds")))
 
 
 #saveRDS(EDMdata,file = here::here("other",paste0("ImmatureButterfishCondition_EDM2023.rds")))
 
-saveRDS(EDMdata,file = here::here("other",paste0("MatureMackerelCondition_EPU2023.rds")))
+#saveRDS(EDMdata,file = here::here("other",paste0("MatureMackerelCondition_EPU2023.rds")))
 
 
 #from MAB fall Zooplankton anomaly section of RegimeShifts_EnvirVar.R
 #MAB fall Zooplankton anomaly from Ryan Morse:
 MABseasonZooAbund <- readr::read_csv(here::here(data.dir, "MAB_mean_seasonal_anomalies.csv"))
 
-MABfallZoop <- MABseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Fall') %>%
-  dplyr::group_by(year) %>%
-  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, tlong_100m3, pseudo_100m3)) %>%
-  dplyr::select(year, SumZoop)
-
-EDMzoop <- MABfallZoop %>% dplyr::select(SumZoop, year) %>%
- dplyr::rename(MABfallZoopAnom = SumZoop, YEAR = year)
-
-EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
-EDMdataZoop <- dplyr::full_join(EPUcond, EDMzoop, by='YEAR', 'EPU')
+#zooplankton anomaly data shouldn't be summed, so remove
+# MABfallZoop <- MABseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Fall') %>%
+#   dplyr::group_by(year) %>%
+#   dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, tlong_100m3, pseudo_100m3)) %>%
+#   dplyr::select(year, SumZoop)
+# 
+# EDMzoop <- MABfallZoop %>% dplyr::select(SumZoop, year) %>%
+#  dplyr::rename(MABfallZoopAnom = SumZoop, YEAR = year)
+# 
+# EDMdataZoop <- dplyr::full_join(annualcond, EDMzoop, by='YEAR')
+# EDMdataZoop <- dplyr::full_join(EPUcond, EDMzoop, by='YEAR', 'EPU')
 
 #Surfdata from RegimeShifts_EnvirVar.R:
 #SurfTemp <-cond.epu %>% dplyr::group_by(YEAR) %>% dplyr::summarize(SpringSurfTemp = mean(!is.na(SURFTEMP)))
@@ -1379,7 +1380,10 @@ Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, SURFTEMP) %>%
   dplyr::filter(!is.na(SURFTEMP)) %>%
   dplyr::group_by(YEAR, EPU) %>%
-  dplyr::summarize(AvgSurfTemp = mean(SURFTEMP))
+  dplyr::summarize(AvgFallSurfTemp = mean(SURFTEMP))
+
+saveRDS(Surfdata,file = here::here("other",paste0("FallSurfaceTempEPU2023.rds")))
+readr::write_csv(Surfdata, here::here(out.dir,"FallSurfaceTempEPU2023.csv"))
 
 EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by= c('YEAR', 'EPU'))
 
@@ -1408,16 +1412,17 @@ condN <- dplyr::filter(annualcondImm, nCond>=3) %>% ungroup()
 #Mean GOM zooplankton abundance anomalies from Ryan Morse (GOM_mean_seasonal_anomalies.csv)
 GOMseasonZooAbund <- readr::read_csv(here::here(data.dir, "GOM_mean_seasonal_anomalies.csv"))
 
-GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Spring') %>%
-  dplyr::group_by(year) %>%
-  dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, mlucens_100m3, pseudo_100m3)) %>%
-  dplyr::select(year, SumZoop)
-
-EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
-  dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
-
-EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
-EDMdataZoop <- dplyr::full_join(annualcond, EDMzoopGOM, by='YEAR')
+#Zooplankton anomolies shouldn't be summed, so removed
+# GOMsummerZoop <- GOMseasonZooAbund %>% dplyr::filter(year >= 1992, season == 'Spring') %>%
+#   dplyr::group_by(year) %>%
+#   dplyr::mutate(SumZoop = sum(ctyp_100m3, calfin_100m3, mlucens_100m3, pseudo_100m3)) %>%
+#   dplyr::select(year, SumZoop)
+# 
+# EDMzoopGOM <- GOMsummerZoop %>% dplyr::select(SumZoop, year) %>%
+#   dplyr::rename(GOMsummerZoopAnom = SumZoop, YEAR = year)
+# 
+# EDMdataZoopImm <- dplyr::full_join(annualcondImm, EDMzoopGOM, by='YEAR')
+# EDMdataZoop <- dplyr::full_join(annualcond, EDMzoopGOM, by='YEAR')
 
 #AvgTempSpringData from line 120 of this code:
 EDMtempSpr <- AvgTempSpringData %>% dplyr::rename('YEAR'='Year', 'GOM_AvgTempSpring'='GOM',
@@ -1438,6 +1443,7 @@ EDMdataMack <- EDMdataMack3 %>% unique() %>% dplyr::filter(YEAR >= 1991)
 
 saveRDS(EDMdataImm,file = here::here("other",paste0("ImmMackerel_FishCondition_EPU2023.rds")))
 #saveRDS(EDMdataMack,file = here::here("other",paste0("MatureMackerel_FishCondition_EDM2023.rds")))
+MatMackEDM <-load(here::here("other","MatureMackerel_FishCondition_EDM2023.rds"))
 
 #Attempting to select values less than -0.3 or greater than 0.3 but not working:
 # EnVarCorSig <- EnVarCor %>% filter(('AvgExpcatchwtStrata' < -0.3 | 'AvgExpcatchwtStrata' > 0.3) |
@@ -1512,7 +1518,7 @@ condSPP <-  CondClean %>% dplyr::rename(
 
 #saveRDS(condSPP,file = here::here(out.dir,paste0("condSPP.rds")))
 #*********
-saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
+#saveRDS(condSPP,file = here::here("other",paste0("condSPP.rds")))
 
 #saveRDS(condSPP,file = here::here("other",paste0("condSPP_Year.rds")))
 

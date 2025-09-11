@@ -1380,3 +1380,116 @@ p2 <- ggplot(AnnualSurfRegime, aes(x = YEAR, y = AvgSurfTemp)) +
   geom_vline(xintercept=SppSplit5, color='red')
 
 ggsave(path= here::here("output"),"SurfaceTemp_Spring_Regimes2023_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Fall Surface Temp for plot by EPU in SingleSpecies_ConditionPlot.R:
+Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, SURFTEMP) %>%
+  dplyr::filter(!is.na(SURFTEMP)) %>%
+  dplyr::group_by(YEAR, EPU) %>%
+  dplyr::summarize(AvgFallSurfTemp = mean(SURFTEMP))
+
+#Regime analysis:
+SurfRegime <- Surfdata %>% dplyr::select(AvgFallSurfTemp, YEAR)
+Regime <- rpart::rpart(AvgFallSurfTemp~YEAR, data=SurfRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+ Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+#saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#annualZoopl <- SurfRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+SurfRegime$YEAR <- as.numeric(as.character(SurfRegime$YEAR))
+
+AnnualSurfRegime <- SurfRegime
+
+SurfdataPlot <- Surfdata %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, AvgFallSurfTemp) %>% group_by(EPU)
+
+#Line plot of total copepods:
+p2 <- ggplot(SurfdataPlot, aes(x = YEAR, y = AvgFallSurfTemp)) +
+  geom_line(aes(color = EPU)) + 
+  scale_color_manual(values = c("red", "blue", "green", "yellow")) +
+  geom_point(aes(color = EPU)) +
+  labs(title="Fall Surface Temperature", y = "Surface Temperature °C") +
+  geom_vline(xintercept=SppSplit1, color='red') +
+  geom_vline(xintercept=SppSplit2, color='red')
+
+ggsave(path= here::here(out.dir),"FallSurfTempEPU_regime2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring Surface Temp for plot by EPU in SingleSpecies_ConditionPlot.R:
+Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, EPU, SURFTEMP) %>%
+  dplyr::filter(!is.na(SURFTEMP)) %>%
+  dplyr::group_by(YEAR, EPU) %>%
+  dplyr::summarize(AvgSprSurfTemp = mean(SURFTEMP))
+
+saveRDS(Surfdata,file = here::here("other",paste0("SprSurfTempEPU2024.rds")))
+
+#Regime analysis:
+SurfRegime <- Surfdata %>% dplyr::select(AvgSprSurfTemp, YEAR)
+Regime <- rpart::rpart(AvgSprSurfTemp~YEAR, data=SurfRegime)
+#Selecting best fit (gives optimal CP value associated with the minimum error)::
+Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
+
+SppPlot <- rpart.plot::rpart.plot(Regime)
+
+#Outputs pruning tree table:
+#saveRDS(Regime[["cptable"]],file = here::here("output", "SurfaceTemp_Spring.RDS"))
+printcp(Regime)
+
+
+optimal_cp_index <- as.numeric(which.min(Regime$cptable[,"xerror"]))
+optimal_cp <- Regime$cptable[optimal_cp_index,"CP"]
+Regime_pruned <- rpart::prune(Regime, cp = optimal_cp)
+Regime <- Regime_pruned
+
+#Pull regime shift years into new data frame to add to plot (use the simplest tree 
+#within one standard error (xstd) of the best tree (lowest xerror)):
+Results <- as.data.frame(Regime[["splits"]])
+SppSplit1 <- Results$index[1]
+SppSplit2 <- Results$index[2]
+SppSplit3 <- Results$index[3]
+SppSplit4 <- Results$index[4]
+SppSplit5 <- Results$index[5]
+
+
+#annualZoopl <- SurfRegime 
+
+#change YEAR to continuous numeric for plotting function below:
+SurfRegime$YEAR <- as.numeric(as.character(SurfRegime$YEAR))
+
+AnnualSurfRegime <- SurfRegime
+
+SurfdataPlot <- Surfdata %>% dplyr::filter(YEAR >= 1992, !is.na(EPU)) %>%
+  dplyr::select(YEAR, EPU, AvgSprSurfTemp) %>% group_by(EPU)
+
+#Line plot of total copepods:
+p2 <- ggplot(SurfdataPlot, aes(x = YEAR, y = AvgSprSurfTemp)) +
+  geom_line(aes(color = EPU)) + 
+  scale_color_manual(values = c("red", "blue", "green", "yellow")) +
+  geom_point(aes(color = EPU)) +
+  labs(title="Spring Surface Temperature", y = "Surface Temperature °C") +
+  geom_vline(xintercept=SppSplit1, color='red') +
+  geom_vline(xintercept=SppSplit2, color='red')
+ggsave(path= here::here(out.dir),"SpringSurfTempEPU_regime2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

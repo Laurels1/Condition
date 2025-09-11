@@ -21,15 +21,18 @@
 #source("R/StomFullnessData_allfh.R")
 
 #Required packages
-#library(devtools)
+library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
 #library(curl)
 #library(pak)
 #Install condition function:
 #pak::pak("NEFSC/READ-EDAB-NEesp2@dev")
-#devtools::install_github("NEFSC/READ-EDAB-NEesp2@dev")
+#source("https://raw.githubusercontent.com/NEFSC/READ-EDAB-NEesp2/refs/heads/dev/R/create_condition_indicator.R")
+devtools::install_github("NEFSC/READ-EDAB-NEesp2@dev")
+library("NEesp2")
+species_condition(data = NEesp2::survdat_subset)
 #updated install of Survdat (2022):
-library(remotes)
+#library(remotes)
 #remotes::install_github('NOAA-EDAB/Survdat', force=T)
 #library(Survdat)
 #Modified survdat with corrected Bigelow conversions (build_vignettes not working):
@@ -567,7 +570,7 @@ cond.epu$Species[cond.epu$SVSPP=='270'] <- 'Cownose ray'
 count(cond.epu, is.na(EPU))
 
 #Raw relative condition data for Andi Delgado, Matt Robertson's PhD student:
-readr::write_csv(cond.epu, here::here(out.dir,"RawData_RelCond2024.csv"))
+#readr::write_csv(cond.epu, here::here(out.dir,"RawData_RelCond2024.csv"))
 
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%

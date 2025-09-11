@@ -170,7 +170,7 @@ EPUna <- survey.data %>% dplyr::filter(is.na(EPU))
 #Spring survey data to be used for herring, mackerel and OP:
 #spring <- survbio %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #Need to reference survdat for Jan 6th data set from Sean's survdat.RData 
-spring <- survdat %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
+#spring <- survdat %>% filter(SEASON == 'SPRING') %>% dplyr::mutate(sex = if_else(is.na(SEX), '0', SEX))
 #spring <- survey %>% filter(SEASON == 'SPRING') %>% mutate(SEX=as.character(SEX), 
 #                                                       LAT = BEGLAT, LON = BEGLON)
 
@@ -545,7 +545,7 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
   dplyr::filter(n >= 20)
 
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
-readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2024_Spring.csv"))
+#readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2024_Spring.csv"))
 
 #Output for socio-economic models (by EPU and length):
 annualcondEPUlen <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR, LENGTH) %>% 
@@ -562,13 +562,13 @@ condEPUlen <- condNSppEPUlen
 annualcondYear <- cond.epu %>% dplyr::group_by(Species,SVSPP, YEAR) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 
-saveRDS(annualcondYear,file = here::here("other",paste0("condSPP_Year.rds")))
+#saveRDS(annualcondYear,file = here::here("other",paste0("condSPP_Year.rds")))
 
 #Output for Dynamic Factor Analysis (Scott Large):
 annualcondEPU <- cond.epu %>% dplyr::group_by(Species,SVSPP, EPU, YEAR) %>% 
   dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n()) %>% ungroup()
 
-saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
+#saveRDS(annualcondEPU,file = here::here("other",paste0("condSPP_EPU.rds")))
 #condN <- dplyr::filter(annualcondEPU, nCond>=3)
 condNSppYear <- annualcondYear %>% dplyr::add_count(Species) 
 #%>% 
