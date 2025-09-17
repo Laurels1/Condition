@@ -373,9 +373,89 @@ ZoopDataEPU <- ZoopData %>% group_by(YEAR, EPU, SEASON) %>%
 CalfinNEUS <-load(here::here("data","20250801_NES_SLI_Spr.rdata"))
 CopSmLgSprNEUS <- SLI.nes.spr
 
+#Annual species-level zooplankton anomalies over the NES
 CalfinNEUS <-load(here::here("data","20250801_NES_mean_seasonal_anomalies.rdata"))
 Calfin <- nes.yr.ssn.mn
 
+#Bringing in euphausiids and larvacean anomalies (by season where spring = days 1-150 to cover the whole spring survey and months since the beginning of the year, 
+#shelf-wide and by EPU from Ryan Morse on Sept. 17th, 2025):
+CalfinNEUS <-load(here::here("data","150daySpring_20250917_NES_mean_seasonal_anomalies.rdata"))
+Calfin <- nes.yr.ssn.mn
+
+LarvSprHalf <- Calfin %>% dplyr::filter(season == "Spring", Var == "larvaceans_100m3") %>%
+  dplyr::mutate(LarvSprHalfNEUS=Value) %>%
+  dplyr::select(year, LarvSprHalfNEUS)
+
+EuphSprHalf <- Calfin %>% dplyr::filter(season == "Spring", Var == "euph1_100m3") %>%
+  dplyr::mutate(EuphSprHalfNEUS=Value) %>%
+  dplyr::select(year, EuphSprHalfNEUS)
+
+CalfinNEUS <-load(here::here("data","150daySpring_20250917_GOM_mean_seasonal_anomalies.rdata"))
+Calfin <- gom.yr.ssn.mn
+
+LarvSprHalfGM <- Calfin %>% dplyr::filter(season == "Spring", Var == "larvaceans_100m3") %>%
+  dplyr::mutate(LarvSprHalfGOM=Value) %>%
+  dplyr::select(year, LarvSprHalfGOM)
+
+EuphSprHalfGM <- Calfin %>% dplyr::filter(season == "Spring", Var == "euph1_100m3") %>%
+  dplyr::mutate(EuphSprHalfGOM=Value) %>%
+  dplyr::select(year, EuphSprHalfGOM)
+
+CalfinNEUS <-load(here::here("data","150daySpring_20250917_GBK_mean_seasonal_anomalies.rdata"))
+Calfin <- gbk.yr.ssn.mn
+
+LarvSprHalfGB <- Calfin %>% dplyr::filter(season == "Spring", Var == "larvaceans_100m3") %>%
+  dplyr::mutate(LarvSprHalfGB=Value) %>%
+  dplyr::select(year, LarvSprHalfGB)
+
+EuphSprHalfGB <- Calfin %>% dplyr::filter(season == "Spring", Var == "euph1_100m3") %>%
+  dplyr::mutate(EuphSprHalfGB=Value) %>%
+  dplyr::select(year, EuphSprHalfGB)
+
+CalfinNEUS <-load(here::here("data","150daySpring_20250917_MAB_mean_seasonal_anomalies.rdata"))
+Calfin <- mab.yr.ssn.mn
+
+LarvSprHalfMAB <- Calfin %>% dplyr::filter(season == "Spring", Var == "larvaceans_100m3") %>%
+  dplyr::mutate(LarvSprHalfMAB=Value) %>%
+  dplyr::select(year, LarvSprHalfMAB)
+
+EuphSprHalfMAB <- Calfin %>% dplyr::filter(season == "Spring", Var == "euph1_100m3") %>%
+  dplyr::mutate(EuphSprHalfMAB=Value) %>%
+  dplyr::select(year, EuphSprHalfMAB)
+
+EuphLarvSprHalf <- Reduce(dplyr::left_join, list(EuphSprHalf, LarvSprHalf, EuphSprHalfGM, LarvSprHalfGM, EuphSprHalfGB, LarvSprHalfGB, EuphSprHalfMAB, LarvSprHalfMAB))%>%
+  dplyr::select(year, EuphSprHalfNEUS, LarvSprHalfNEUS, EuphSprHalfGOM, LarvSprHalfGOM, EuphSprHalfGB, LarvSprHalfGB, EuphSprHalfMAB, LarvSprHalfMAB)
+
+#Spring (= days 1-150) lavaceans and euphausiids by EPU and shelf for Rob Gamble EDM:
+saveRDS(EuphLarvSprHalf,file = here::here("other",paste0("LarvEuph_SpringHalfYr_EPU_shelf_EDM2023.rds")))
+
+
+#Bringing in difference of small to large copepod anomalies (by season where spring = days 1-150 to cover the whole spring survey and months since the beginning of the year, 
+#shelf-wide and by EPU from Ryan Morse on Sept. 17th, 2025):
+CalfinNEUS <-load(here::here("data","150daySpring_20250917_SLIanom.rdata"))
+Calfin <- SLIanom
+
+CalfinSprHalf <- Calfin %>% dplyr::filter(season == "Spring", Var == "SLIAnom")
+
+SLISprHalfNEUS <- CalfinSprHalf %>% dplyr::filter(Var=='SLIAnom', epu=='NES') %>%
+  dplyr::mutate(CopSmLgSprHalfNEUS=Value) %>%
+  dplyr::select(year, CopSmLgSprHalfNEUS)
+SLISprHalfGOM <- CalfinSprHalf %>% dplyr::filter(Var=='SLIAnom', epu=='GOM') %>%
+  dplyr::mutate(CopSmLgSprHalfGOM=Value) %>%
+  dplyr::select(year, CopSmLgSprHalfGOM)
+SLISprHalfGB <- CalfinSprHalf %>% dplyr::filter(Var=='SLIAnom', epu=='GB') %>%
+  dplyr::mutate(CopSmLgSprHalfGB=Value) %>%
+  dplyr::select(year, CopSmLgSprHalfGB)
+SLISprHalfMAB <- CalfinSprHalf %>% dplyr::filter(Var=='SLIAnom', epu=='MAB') %>%
+  dplyr::mutate(CopSmLgSprHalfMAB=Value) %>%
+  dplyr::select(year, CopSmLgSprHalfMAB)
+SLISprHalf <- Reduce(dplyr::left_join, list(SLISprHalfNEUS, SLISprHalfGOM, SLISprHalfGB, SLISprHalfMAB))%>%
+  dplyr::select(year, CopSmLgSprHalfNEUS, CopSmLgSprHalfGOM, CopSmLgSprHalfGB, CopSmLgSprHalfMAB)
+
+#Spring (= days 1-150) small-large copepod index by EPU and shelf for Rob Gamble EDM:
+saveRDS(CalfinSprHalf,file = here::here("other",paste0("SmallLargeCopepods_SpringHalfYr_EPUshelf_EDM2023.rds")))
+
+#Annual Copepod small to large index (SLI) and species-level zooplankton anomalies by EPU and NES
 CalfinNEUS <-load(here::here("data","20250812SLIanom.rdata"))
 CopSmLgAnnual <- SLIanom
 SLIannualNEUS <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='NES') %>%
@@ -393,7 +473,7 @@ SLIannualMAB <- CopSmLgAnnual %>% dplyr::filter(Var=='SLIAnom', epu=='MAB') %>%
 SLIannual <- Reduce(dplyr::left_join, list(SLIannualNEUS, SLIannualGOM, SLIannualGB, SLIannualMAB))%>%
   dplyr::select(year, CopSmLgAnnualNEUS, CopSmLgAnnualGOM, CopSmLgAnnualGB, CopSmLgAnnualMAB)
 
-#Annual small-large copepod index by season and shlef for Rob Gamble EDM:
+#Annual small-large copepod index by season and shelf for Rob Gamble EDM:
 saveRDS(SLIannual,file = here::here("other",paste0("SmallLargeCopepods_AnnualEPU_shelf_EDM2023.rds")))
 
 #format SLI for regime shift plot (Aug. 13, 2025):

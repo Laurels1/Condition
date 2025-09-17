@@ -21,16 +21,16 @@
 #source("R/StomFullnessData_allfh.R")
 
 #Required packages
-library(devtools)
+#library(devtools)
 #devtools::install_github('slucey/RSurvey/Survdat', )
 #library(curl)
 #library(pak)
 #Install condition function:
+#Could not install pak and couldn't source from website, but devtools worked
 #pak::pak("NEFSC/READ-EDAB-NEesp2@dev")
 #source("https://raw.githubusercontent.com/NEFSC/READ-EDAB-NEesp2/refs/heads/dev/R/create_condition_indicator.R")
-devtools::install_github("NEFSC/READ-EDAB-NEesp2@dev")
-library("NEesp2")
-species_condition(data = NEesp2::survdat_subset)
+#devtools::install_github("NEFSC/READ-EDAB-NEesp2@dev")
+#library("NEesp2")
 #updated install of Survdat (2022):
 #library(remotes)
 #remotes::install_github('NOAA-EDAB/Survdat', force=T)
@@ -71,6 +71,10 @@ gis.dir  <- "gis"
 # create output directory if it doesn't exist
 #  if (!dir.exists(out.dir)) dir.create(out.dir)
 
+
+#To use NEesp2 package:
+#species_condition(data = NEesp2::survdat_subset,
+#                  LWparams = LWparams)
 
 
 
