@@ -7,20 +7,21 @@ library(rpart)
 out.dir="output"
 
 #Mean GOM larvacean abundance anomalies from Isabel Honda 
-Larvaceans <- readr::read_csv(here::here(data.dir, "GoM_larvaceanAnomaly.csv"))
+#Larvaceans <- readr::read_csv(here::here(data.dir, "GoM_larvaceanAnomaly.csv"))
 
-GOMlarvaceans <- Larvaceans %>% dplyr::filter(year >= 1992)
+#GOMlarvaceans <- Larvaceans %>% dplyr::filter(year >= 1992)
+GOMlarvaceans <- EuphLarvSprHalf %>% dplyr::filter(year >= 1992)
 
 #Regime analysis:
-GOMlarvRegime <- GOMlarvaceans %>% dplyr::select(anomaly_total_mean, year)
-Regime <- rpart::rpart(anomaly_total_mean~year, data=GOMlarvRegime)
+GOMlarvRegime <- GOMlarvaceans %>% dplyr::select(LarvSprHalfGOM, year)
+Regime <- rpart::rpart(LarvSprHalfGOM~year, data=GOMlarvRegime)
 #Selecting best fit (gives optimal CP value associated with the minimum error)::
 # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
 
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "GOMlarvaceans_Regimes_2023.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "GOMlarvaceans_Regimes_2023.RDS"))
 printcp(Regime)
 
 
@@ -43,33 +44,40 @@ SppSplit5 <- Results$index[5]
 GOMlarvRegime$year <- as.numeric(as.character(GOMlarvRegime$year))
 
 #Line plot of condition
-p2 <- ggplot(GOMlarvRegime, aes(x = year, y = anomaly_total_mean)) +
+p2 <- ggplot(GOMlarvRegime, aes(x = year, y = LarvSprHalfGOM)) +
   geom_line()+
   geom_point() +
-  labs(title= "GOM Larvacean Abundance Anomalies", y = "Total Abundance Anomaly") +
+  labs(title= "GOM Larvacean Abundance Anomalies during Jan-May", y = "Total Abundance Anomaly") +
   geom_vline(xintercept=SppSplit1, color='red')+
-  geom_vline(xintercept=SppSplit2, color='red')+
-  geom_vline(xintercept=SppSplit3, color='red')+
-  geom_vline(xintercept=SppSplit4, color='red')+
-  geom_vline(xintercept=SppSplit5, color='red')
+  geom_vline(xintercept=SppSplit2, color='red')
+#+
+#  geom_vline(xintercept=SppSplit3, color='red')+
+#  geom_vline(xintercept=SppSplit4, color='red')+
+#  geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GOMlarvaceans_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"GOMlarvaceans_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"GOMlarvaceans_Jan-May_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
 
 #Mean GOM euphausiid abundance anomalies from Isabel Honda
-Euph <- readr::read_csv(here::here(data.dir, "GoM_euphausiidAnomaly.csv"))
+#Euph <- readr::read_csv(here::here(data.dir, "GoM_euphausiidAnomaly.csv"))
+GOMeuphausiids <- EuphLarvSprHalf %>% dplyr::filter(year >= 1992)
 
-GOMeuph <- Euph %>% dplyr::filter(year >= 1992)
+#GOMeuph <- Euph %>% dplyr::filter(year >= 1992)
+GOMeuph <- GOMeuphausiids %>% dplyr::filter(year >= 1992)
 
 #Regime analysis for annual GOM euphausiids:
-GOMeuphRegime <- GOMeuph %>% dplyr::select(anomaly_total_mean, year)
-Regime <- rpart::rpart(anomaly_total_mean~year, data=GOMeuphRegime)
+#GOMeuphRegime <- GOMeuph %>% dplyr::select(anomaly_total_mean, year)
+GOMeuphRegime <- GOMeuph %>% dplyr::select(EuphSprHalfGOM, year)
+#Regime <- rpart::rpart(anomaly_total_mean~year, data=GOMeuphRegime)
+Regime <- rpart::rpart(EuphSprHalfGOM~year, data=GOMeuphRegime)
 #Selecting best fit (gives optimal CP value associated with the minimum error)::
 # Regime$cptable[which.min(Regime$cptable[,"xerror"]),"CP"]
 
 SppPlot <- rpart.plot::rpart.plot(Regime)
 
 #Outputs pruning tree table:
-saveRDS(Regime[["cptable"]],file = here::here("output", "GOMeuphausiid_Regimes_2023.RDS"))
+#saveRDS(Regime[["cptable"]],file = here::here("output", "GOMeuphausiid_Regimes_2023.RDS"))
 printcp(Regime)
 
 
@@ -92,17 +100,20 @@ SppSplit5 <- Results$index[5]
 GOMeuphRegime$year <- as.numeric(as.character(GOMeuphRegime$year))
 
 #Line plot of condition
-p2 <- ggplot(GOMeuphRegime, aes(x = year, y = anomaly_total_mean)) +
+p2 <- ggplot(GOMeuphRegime, aes(x = year, y = EuphSprHalfGOM)) +
   geom_line()+
   geom_point() +
-  labs(title= "GOM Euphausiid Abundance Anomalies", y = "Total Abundance Anomaly") +
+#  labs(title= "GOM Euphausiid Abundance Anomalies", y = "Total Abundance Anomaly") +
+  labs(title= "GOM Euphausiid Abundance Anomalies, Jan.-May", y = "Total Abundance Anomaly") +
   geom_vline(xintercept=SppSplit1, color='red')+
-  geom_vline(xintercept=SppSplit2, color='red')+
-  geom_vline(xintercept=SppSplit3, color='red')+
-  geom_vline(xintercept=SppSplit4, color='red')+
-  geom_vline(xintercept=SppSplit5, color='red')
+  geom_vline(xintercept=SppSplit2, color='red')
+#+
+#  geom_vline(xintercept=SppSplit3, color='red')+
+#  geom_vline(xintercept=SppSplit4, color='red')+
+#  geom_vline(xintercept=SppSplit5, color='red')
 
-ggsave(path= here::here("output"),"GOMeuphausiid_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+#ggsave(path= here::here("output"),"GOMeuphausiid_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here("output"),"GOMeuphausiid_Jan-May_Regimes_2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #Regime analysis for spring GOM euphausiids (data from Isabel Honda):
 GOMeuphRegime <- GOMeuph %>% dplyr::select(anomaly_spring_mean, year)
@@ -781,7 +792,7 @@ p2 <- ggplot(AvgWinterTemp, aes(x = YEAR, y = AvgTempWinter)) +
 CopepodEPUdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::select(YEAR, EPU, CopepodSmallLarge) %>% group_by(EPU)
 
-CopepodEPU <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
+CopepodEPU <- CopepodEPUdata %>% dplyr::filter(YEAR >= 1992) %>% dplyr::select(YEAR, CopepodSmallLarge)
 CopepodEPURegime <- rpart::rpart(CopepodSmallLarge~YEAR, data=CopepodEPU)
 CopepodEPURegimePlot <- rpart.plot::rpart.plot(CopepodEPURegime)
 CopepodEPURegime$cptable
@@ -806,6 +817,36 @@ p2 <- ggplot(CopepodEPUdata, aes(x = YEAR, y = CopepodSmallLarge)) +
 #   geom_vline(xintercept=CopepodEPUSplit6, color='red')
 
 ggsave(path= here::here(out.dir),"CopepodSmLgEPU_regime2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+#Small to large copepod anomalies from gam_calcs_strata.R (for extended spring days 1-150, by EPU and shelf-wide from Ryan Morse on Sept. 18th, 2025):
+CalfinEPU <-CalfinSprHalf %>% dplyr::filter(epu != "NES", year >= 1992)
+
+CopepodEPU <- CalfinEPU %>% dplyr::filter(year >= 1992) %>% dplyr::select(year, Value)
+CopepodEPURegime <- rpart::rpart(Value~year, data=CopepodEPU)
+CopepodEPURegimePlot <- rpart.plot::rpart.plot(CopepodEPURegime)
+CopepodEPURegime$cptable
+
+#Pull regime shift years into new data frame to add to plot:
+CopepodEPURegimeResults <- as.data.frame(CopepodEPURegime[["splits"]])
+CopepodEPUSplit1 <- CopepodEPURegimeResults$index[1]
+CopepodEPUSplit2 <- CopepodEPURegimeResults$index[2]
+
+#Line plot of copepod small to large index:
+p2 <- ggplot(CalfinEPU, aes(x = year, y = Value)) +
+  geom_line(aes(color = epu), na.rm=TRUE) + 
+  scale_color_manual(values = c("red", "blue", "green")) +
+  geom_point(aes(color = epu)) +
+  labs(title="Copepod Size Index by EPU", y = "Copepod Size Index", x = "Year") +
+  geom_vline(xintercept=CopepodEPUSplit1, color='red') +
+  geom_vline(xintercept=CopepodEPUSplit2, color='red') 
+# +
+#   geom_vline(xintercept=CopepodEPUSplit3, color='red') +
+#   geom_vline(xintercept=CopepodEPUSplit4, color='red') +
+#   geom_vline(xintercept=CopepodEPUSplit5, color='red') +
+#   geom_vline(xintercept=CopepodEPUSplit6, color='red')
+
+ggsave(path= here::here(out.dir),"CopepodSmLgEPU_Spring150_regime2023.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
 
 #shelf-wide Copepod small to large ratio data by Shelf (from gam_calcs_strata.R):
 CopepodShelfdata <- CalfinFormat %>% dplyr::filter(YEAR >= 1992) %>%
