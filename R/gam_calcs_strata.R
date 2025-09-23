@@ -132,6 +132,11 @@ AvgTempSummerData <- readr::read_csv(here::here(data.dir, "AverageTempSummer2022
 AvgTempFallData <- readr::read_csv(here::here(data.dir, "AverageTempFall2022.csv"))
 AvgTempWinterData <- readr::read_csv(here::here(data.dir, "AverageTempWinter2022.csv"))
 
+#Create a spring bottom temperature data for the NEUS by averaging GOM, GB and MAB:
+AvgTempSpringNEUS <- AvgTempSpringData %>% dplyr::rowwise() %>%
+  dplyr::mutate(AvgBottomTempSprNEUS = mean(c_across(c(GOM, GB, MAB)), na.rm=TRUE))
+saveRDS(AvgTempSpringNEUS,file = here::here("other",paste0("AverageBottomTempSprEPU_NEUS.rds")))
+
 AvgTempSpringFormat <- AvgTempSpringData %>% dplyr::mutate(YEAR=Year) %>%
   tidyr::gather(EPU, AvgTempSpring, c(GB, GOM,SS, MAB), na.rm=F)
 
@@ -1463,8 +1468,18 @@ Surfdata <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
   dplyr::group_by(YEAR, EPU) %>%
   dplyr::summarize(AvgFallSurfTemp = mean(SURFTEMP))
 
-saveRDS(Surfdata,file = here::here("other",paste0("FallSurfaceTempEPU2023.rds")))
-readr::write_csv(Surfdata, here::here(out.dir,"FallSurfaceTempEPU2023.csv"))
+#add in sea surface temperature for the shelf:
+SurfdataNEUS <- cond.epu %>% dplyr::filter(YEAR >= 1992) %>%
+  dplyr::select(YEAR, SURFTEMP) %>%
+  dplyr::filter(!is.na(SURFTEMP)) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::summarize(AvgFallSurfTempNEUS = mean(SURFTEMP))
+
+SurfTempNEUS <- dplyr::full_join(Surfdata, SurfdataNEUS, by='YEAR')
+
+saveRDS(SurfTempNEUS,file = here::here("other",paste0("FallSurfaceTempEPU_NEUS2023.rds")))
+#saveRDS(Surfdata,file = here::here("other",paste0("FallSurfaceTempEPU2023.rds")))
+#readr::write_csv(Surfdata, here::here(out.dir,"FallSurfaceTempEPU2023.csv"))
 
 EDMdataTemp <- dplyr::full_join(EDMdataZoop, Surfdata, by= c('YEAR', 'EPU'))
 
