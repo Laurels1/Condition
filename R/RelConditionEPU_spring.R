@@ -521,6 +521,9 @@ cond.epu$Species[cond.epu$SVSPP=='139'] <- 'Striped bass'
 
 count(cond.epu, is.na(EPU))
 
+#Raw relative condition data for Andi Delgado, Matt Robertson's PhD student:
+readr::write_csv(cond.epu, here::here(out.dir,"Spring_RawData_RelCond2025.csv"))
+
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%
 #   dplyr::select('YEAR', 'EPU', 'Species', 'SVSPP', 

@@ -449,7 +449,7 @@ cond <- dplyr::filter(condcalc, is.na(RelCond) | RelCond<300)
 
 #For survdat package:
 # strata <- sf::st_read(dsn = system.file("extdata", "epu.shp", package = "survdat"),
-                     quiet = T)
+ #                    quiet = T)
 
 #Needed in direct data pull but not in Survdat:
 #data.table::setnames(cond,"BEGLAT","LAT") # change name of column header
@@ -576,6 +576,7 @@ count(cond.epu, is.na(EPU))
 
 #Raw relative condition data for Andi Delgado, Matt Robertson's PhD student:
 #readr::write_csv(cond.epu, here::here(out.dir,"RawData_RelCond2024.csv"))
+readr::write_csv(cond.epu, here::here(out.dir,"Test_RawData_RelCond2024.csv"))
 
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%
