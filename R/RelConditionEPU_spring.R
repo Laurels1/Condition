@@ -132,7 +132,10 @@ gis.dir  <- "gis"
 
 #Bring in data:
 #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
-survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))  
+#survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))  
+#Andy did a survdat pull:
+survdat <- readRDS(here::here("other", "survdat_12-4-2025.rds"))
+survdat <- survdat[["survdat"]]
 
 #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
 survey.data <- survdat %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
@@ -522,7 +525,33 @@ cond.epu$Species[cond.epu$SVSPP=='139'] <- 'Striped bass'
 count(cond.epu, is.na(EPU))
 
 #Raw relative condition data for Andi Delgado, Matt Robertson's PhD student:
-readr::write_csv(cond.epu, here::here(out.dir,"Spring_RawData_RelCond2025.csv"))
+#readr::write_csv(cond.epu, here::here(out.dir,"Spring_RawData_RelCond2025.csv"))
+
+#Raw relative condition data for fisherman Christopher Brown to fullfill a data request by Jon Hare:
+SilverHake4Regions <- cond.epu %>% dplyr::mutate(SH_Region = case_when(STRATUM %in% c(1010:1120, 3010:3140, 3450:3550) ~ 'N_MAB',
+                                                         STRATUM %in% c(1610:1760, 3150:3440) ~ 'S_MAB',
+                                                         STRATUM %in% c(1130:1250, 3560)~ 'GB',
+                                                         STRATUM %in% c(1260:1599, 3570:3920)~ 'GM')) %>%
+                      filter(Species== "Silver hake")
+
+Spring_N_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'N_MAB') %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+readr::write_csv(Spring_N_MAB_SH_annualcond, here::here(out.dir,"Spring_N_MAB_SH_annualcond.csv"))
+
+Spring_S_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'S_MAB') %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+readr::write_csv(Spring_S_MAB_SH_annualcond, here::here(out.dir,"Spring_S_MAB_SH_annualcond.csv"))
+
+Spring_GB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GB') %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+readr::write_csv(Spring_GB_SH_annualcond, here::here(out.dir,"Spring_GB_SH_annualcond.csv"))
+
+Spring_GOM_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GM') %>%
+  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+readr::write_csv(Spring_GOM_SH_annualcond, here::here(out.dir,"Spring_GOM_SH_annualcond.csv"))
+
+Spr_SH_condNshelf <- dplyr::filter(Spring_SH_annualcond, nCond>=3) %>% ungroup()
+
 
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%

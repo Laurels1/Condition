@@ -7,6 +7,138 @@ library(viridis)
 
 out.dir="output"
 
+#Data request by Jon Hare for fisherman Christopher Brown: white hake condition spring and fall regionally (Southern MAB, Northern MAB, GB, GOM):
+#Fall Southern MAB silver hake:
+annualCondition <- Fall_S_MAB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Fall Southern MAB", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Fall_S_MAB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Fall Northern MAB Silver Hake:
+annualCondition <- Fall_N_MAB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Fall Northern MAB", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Fall_N_MAB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Fall Northern GB Silver Hake:
+annualCondition <- Fall_GB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Fall Georges Bank", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Fall_GB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Fall Northern GOM Silver Hake:
+annualCondition <- Fall_GOM_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Fall Gulf of Maine", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Fall_GOM.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring Northern MAB Silver Hake:
+annualCondition <- Spring_N_MAB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Spring Northern MAB", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Spring_N_MAB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring Southern MAB Silver Hake:
+annualCondition <- Spring_S_MAB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Spring Southern MAB", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Spring_S_MAB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring GB Silver Hake:
+annualCondition <- Spring_GB_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Spring Georges Bank", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Spring_GB.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+#Spring GOM Silver Hake:
+annualCondition <- Spring_GOM_SH_annualcond
+
+#change YEAR to continuous numeric for plotting function below:
+annualCondition$YEAR <- as.numeric(as.character(annualCondition$YEAR))
+
+speciesNames <- annualCondition
+
+#Line plot of condition
+p2 <- ggplot(speciesNames, aes(x = YEAR, y = MeanCond)) +
+  geom_line()+
+  geom_point() +
+  labs(title="Silver Hake Condition Spring GOM", y = "Relative Condition")
+
+ggsave(path= here::here(out.dir),"SilverHake_Condition_Spring_GOM.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+
+
+####################
+
 #Summarize annually over all EPUs for black sea bass condition for ESP 2025:
 annualcond <- cond.epu %>% dplyr::filter(Species == 'Black sea bass', YEAR >= 1992) %>% 
   dplyr::group_by(YEAR, Species) %>% dplyr::summarize(MeanCond = mean(RelCond), StdDevCond = sd(RelCond), nCond = dplyr::n())
