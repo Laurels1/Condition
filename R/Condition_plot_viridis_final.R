@@ -91,7 +91,7 @@ vir <- viridis::viridis_pal()(5)
 
 #Labeling legend title not working:
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = category)) +
-    labs(fill="Quintiles of Condition") +
+    labs(fill="Quintiles of Condition", x = "Year") +
     geom_tile() +
     coord_equal() +
     theme_bw() +
@@ -111,4 +111,4 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
 #         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
 
-ggsave(path= here::here(out.dir),"Shelf_Condition_Regimes_allsex_2024_Length10+.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Shelf_Condition_Regimes_allsex_2024_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)

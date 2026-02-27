@@ -579,27 +579,27 @@ count(cond.epu, is.na(EPU))
 #readr::write_csv(cond.epu, here::here(out.dir,"Test_RawData_RelCond2024.csv"))
 
 #Raw relative condition data for fisherman Christopher Brown to fullfill a data request by Jon Hare:
-SilverHake4Regions <- cond.epu %>% dplyr::mutate(SH_Region = case_when(STRATUM %in% c(1010:1120, 3010:3140, 3450:3550) ~ 'N_MAB',
-                                                                       STRATUM %in% c(1610:1760, 3150:3440) ~ 'S_MAB',
-                                                                       STRATUM %in% c(1130:1250, 3560)~ 'GB',
-                                                                       STRATUM %in% c(1260:1599, 3570:3920)~ 'GM')) %>%
-  filter(Species== "Silver hake")
-
-Fall_N_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'N_MAB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Fall_N_MAB_SH_annualcond, here::here(out.dir,"Fall_N_MAB_SH_annualcond.csv"))
-
-Fall_S_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'S_MAB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Fall_S_MAB_SH_annualcond, here::here(out.dir,"Fall_S_MAB_SH_annualcond.csv"))
-
-Fall_GB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Fall_GB_SH_annualcond, here::here(out.dir,"Fall_GB_SH_annualcond.csv"))
-
-Fall_GOM_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GM') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Fall_GOM_SH_annualcond, here::here(out.dir,"Fall_GOM_SH_annualcond.csv"))
+# SilverHake4Regions <- cond.epu %>% dplyr::mutate(SH_Region = case_when(STRATUM %in% c(1010:1120, 3010:3140, 3450:3550) ~ 'N_MAB',
+#                                                                        STRATUM %in% c(1610:1760, 3150:3440) ~ 'S_MAB',
+#                                                                        STRATUM %in% c(1130:1250, 3560)~ 'GB',
+#                                                                        STRATUM %in% c(1260:1599, 3570:3920)~ 'GM')) %>%
+#   filter(Species== "Silver hake")
+# 
+# Fall_N_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'N_MAB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Fall_N_MAB_SH_annualcond, here::here(out.dir,"Fall_N_MAB_SH_annualcond.csv"))
+# 
+# Fall_S_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'S_MAB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Fall_S_MAB_SH_annualcond, here::here(out.dir,"Fall_S_MAB_SH_annualcond.csv"))
+# 
+# Fall_GB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Fall_GB_SH_annualcond, here::here(out.dir,"Fall_GB_SH_annualcond.csv"))
+# 
+# Fall_GOM_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GM') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Fall_GOM_SH_annualcond, here::here(out.dir,"Fall_GOM_SH_annualcond.csv"))
 
 #Output GOM raw condition data for Kim Bastile:
 # RawCondGOM <- cond.epu %>% dplyr::filter(EPU == "GOM") %>%
