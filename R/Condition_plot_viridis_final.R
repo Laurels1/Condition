@@ -36,7 +36,8 @@ speciesNames <- speciesNames %>%
                                                               "Neutral",
                                                               "Above Average",
                                                               "Good Condition"), 
-                          include.lowest = TRUE))
+                          include.lowest = TRUE)) %>%
+  filter(YEAR < 2024)
 
 sortNames <- speciesNames %>% 
     filter(YEAR <= 2014) %>%
@@ -91,7 +92,9 @@ vir <- viridis::viridis_pal()(5)
 
 #Labeling legend title not working:
 p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = category)) +
-    labs(fill="Quintiles of Condition", x = "Year") +
+    labs(fill="Quintiles of Condition") +
+    xlab("Year") +
+  #labs(x = "Year") +
     geom_tile() +
     coord_equal() +
     theme_bw() +
@@ -104,11 +107,13 @@ p2 <- ggplot(speciesNames, aes(x = YEAR, y = forcats::fct_rev(Species), fill = c
     scale_x_continuous(breaks=round(seq(min(1990), max(speciesNames$YEAR), by = 5))) +
     theme(legend.position = "right", legend.box = "vertical", legend.title = element_text(size = 8),
           legend.text = element_text(size = 6),
-          axis.title = element_blank(), axis.text.x = element_text(size = 6),
+          axis.title.y = element_blank(), 
+          axis.title.x = element_text(size = 8),
+          axis.text.x = element_text(size = 6),
           axis.text.y = element_text(size = 6), panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) +
      geom_vline(xintercept=SppSplit1, color='red', size = 1.2)+
      geom_vline(xintercept=SppSplit2, color='red', size = 1.2)
 #         geom_vline(xintercept=SppSplit3, color='red', size = 1.2)
 
-ggsave(path= here::here(out.dir),"Shelf_Condition_Regimes_allsex_2024_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
+ggsave(path= here::here(out.dir),"Shelf_Condition_Regimes_allsex_2023_test_Year.jpg", width = 8, height = 3.75, units = "in", dpi = 300)
