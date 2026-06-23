@@ -106,7 +106,9 @@ gis.dir  <- "gis"
 #    saveRDS(survdat,file = here::here("other",paste0("survdat_allseasons_1-24-2025.rds")))
 
 #   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
-   survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
+#   survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
+   data2025 <- readRDS(here::here("other", "survdat_12-4-2025.rds"))
+   survdat <- data2025[["survdat"]]
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
 #   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
@@ -630,7 +632,7 @@ condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>%
 #SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023, Jan. 27, 2025):
 cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
 rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
-#readr::write_csv(rel_condition, here::here(out.dir,"RelCond2024_Year.csv"))
+readr::write_csv(rel_condition, here::here(out.dir,"RelCond2025_Year.csv"))
 
 
 #Proportion of species below average for 2024 SOE:
