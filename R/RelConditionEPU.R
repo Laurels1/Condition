@@ -107,8 +107,8 @@ gis.dir  <- "gis"
 
 #   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
 #   survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
-   data2025 <- readRDS(here::here("other", "survdat_12-4-2025.rds"))
-   survdat <- data2025[["survdat"]]
+   dat2025 <- readRDS(here::here("other", "survdat_2026.rds"))
+   survdat <- dat2025[["survdat"]]
 #   
 #   wing and door spread data included for NERHA from Sean Lucey Oct. 17, 2023:
 #   load(file.path("C:/Users/laurel.smith/Documents/EDAB/data", "NRHA_survdat.RData", sep=''))
