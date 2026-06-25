@@ -107,6 +107,8 @@ gis.dir  <- "gis"
 
 #   data <- readRDS(here::here("other", "survdat_allseasons_2-6-2024.rds"))
 #   survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))   
+
+#Andy did survdat pull on June 25th, 2026:
    dat2025 <- readRDS(here::here("other", "survdat_2026.rds"))
    survdat <- dat2025[["survdat"]]
 #   

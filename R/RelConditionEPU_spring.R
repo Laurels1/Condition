@@ -134,8 +134,12 @@ gis.dir  <- "gis"
 #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
 #survdat <- readRDS(here::here("other", "survdat_allseasons_1-24-2025.rds"))  
 #Andy did a survdat pull:
-survdat <- readRDS(here::here("other", "survdat_12-4-2025.rds"))
-survdat <- survdat[["survdat"]]
+#survdat <- readRDS(here::here("other", "survdat_12-4-2025.rds"))
+#survdat <- survdat[["survdat"]]
+
+#Andy did survdat pull on June 25th, 2026:
+dat2025 <- readRDS(here::here("other", "survdat_2026.rds"))
+survdat <- dat2025[["survdat"]]
 
 #Parsing survey data to EPU based on STRATUM instead of EPU.shp files in survdat:
 survey.data <- survdat %>% dplyr::mutate(EPU = case_when(STRATUM %in% c(1010:1080, 1100:1120, 1600:1750, 3010:3450, 3470, 3500, 3510) ~ 'MAB',
@@ -528,29 +532,29 @@ count(cond.epu, is.na(EPU))
 #readr::write_csv(cond.epu, here::here(out.dir,"Spring_RawData_RelCond2025.csv"))
 
 #Raw relative condition data for fisherman Christopher Brown to fullfill a data request by Jon Hare:
-SilverHake4Regions <- cond.epu %>% dplyr::mutate(SH_Region = case_when(STRATUM %in% c(1010:1120, 3010:3140, 3450:3550) ~ 'N_MAB',
-                                                         STRATUM %in% c(1610:1760, 3150:3440) ~ 'S_MAB',
-                                                         STRATUM %in% c(1130:1250, 3560)~ 'GB',
-                                                         STRATUM %in% c(1260:1599, 3570:3920)~ 'GM')) %>%
-                      filter(Species== "Silver hake")
-
-Spring_N_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'N_MAB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Spring_N_MAB_SH_annualcond, here::here(out.dir,"Spring_N_MAB_SH_annualcond.csv"))
-
-Spring_S_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'S_MAB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Spring_S_MAB_SH_annualcond, here::here(out.dir,"Spring_S_MAB_SH_annualcond.csv"))
-
-Spring_GB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GB') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Spring_GB_SH_annualcond, here::here(out.dir,"Spring_GB_SH_annualcond.csv"))
-
-Spring_GOM_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GM') %>%
-  dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
-readr::write_csv(Spring_GOM_SH_annualcond, here::here(out.dir,"Spring_GOM_SH_annualcond.csv"))
-
-Spr_SH_condNshelf <- dplyr::filter(Spring_SH_annualcond, nCond>=3) %>% ungroup()
+# SilverHake4Regions <- cond.epu %>% dplyr::mutate(SH_Region = case_when(STRATUM %in% c(1010:1120, 3010:3140, 3450:3550) ~ 'N_MAB',
+#                                                          STRATUM %in% c(1610:1760, 3150:3440) ~ 'S_MAB',
+#                                                          STRATUM %in% c(1130:1250, 3560)~ 'GB',
+#                                                          STRATUM %in% c(1260:1599, 3570:3920)~ 'GM')) %>%
+#                       filter(Species== "Silver hake")
+# 
+# Spring_N_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'N_MAB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Spring_N_MAB_SH_annualcond, here::here(out.dir,"Spring_N_MAB_SH_annualcond.csv"))
+# 
+# Spring_S_MAB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'S_MAB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Spring_S_MAB_SH_annualcond, here::here(out.dir,"Spring_S_MAB_SH_annualcond.csv"))
+# 
+# Spring_GB_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GB') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Spring_GB_SH_annualcond, here::here(out.dir,"Spring_GB_SH_annualcond.csv"))
+# 
+# Spring_GOM_SH_annualcond <- SilverHake4Regions %>% filter(SH_Region == 'GM') %>%
+#   dplyr::group_by(YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+# readr::write_csv(Spring_GOM_SH_annualcond, here::here(out.dir,"Spring_GOM_SH_annualcond.csv"))
+# 
+# Spr_SH_condNshelf <- dplyr::filter(Spring_SH_annualcond, nCond>=3) %>% ungroup()
 
 
 #Output GOM raw condition data for Kim Bastile:
@@ -563,18 +567,29 @@ Spr_SH_condNshelf <- dplyr::filter(Spring_SH_annualcond, nCond>=3) %>% ungroup()
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
 #After removing samples outside of 1 std. dev, cusk, smooth dogfish and blackbelly rosefish no longer have n>3 for >20 years:
-annualcond <- cond.epu %>% dplyr::group_by(Species, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu %>% dplyr::group_by(SpeciesName, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
-condNshelfSpp <- condNshelf %>% dplyr::add_count(Species) %>% 
+condNshelfSpp <- condNshelf %>% dplyr::add_count(SpeciesName) %>% 
   dplyr::filter(n >= 20)
 
-condNYrSpp <- condNshelfSpp %>% dplyr::distinct(Species)
+#Spring condition by year without EPU for Joe Warren and Mark Wuenschel
+cond_shelf <- condNshelfSpp %>% dplyr::rename(Time = YEAR, Var = SpeciesName)
+rel_condShelf <- cond_shelf %>% dplyr::select(Var, Time, MeanCond)
+readr::write_csv(rel_condShelf, here::here(out.dir,"RelCond2025_SpringShelf.csv"))
+
+condNYrSpp <- condNshelfSpp %>% dplyr::distinct(SpeciesName)
 
 #Summarize annually by EPU (use for SOE plots)
-annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondEPU <- cond.epu %>% dplyr::group_by(SpeciesName,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
-condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
+condNSppEPU <- condN %>% dplyr::add_count(SpeciesName, EPU) %>% 
   dplyr::filter(n >= 20)
+
+#SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023, Jan. 27, 2025):
+cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = SpeciesName)
+rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
+readr::write_csv(rel_condition, here::here(out.dir,"RelCond2025_SpringEPU.csv"))
+
 
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
 #readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2024_Spring.csv"))
