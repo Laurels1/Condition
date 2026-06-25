@@ -613,26 +613,31 @@ count(cond.epu, is.na(EPU))
 #2021: cusk, offshore hake, roughtail stingray,  spiny butterfly ray, smooth skate, rosette skate, clearnose skate, 
   #barndoor skate, bullnose ray, bluntnose stingray, longhorn sculpin, blackbelly rosefish, Atlantic croaker have more than 20 years of >3 samples each:
 #After removing samples outside of 1 std. dev, cusk, smooth dogfish and blackbelly rosefish no longer have n>3 for >20 years:
-annualcond <- cond.epu %>% dplyr::group_by(Species, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcond <- cond.epu %>% dplyr::group_by(SpeciesName, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condNshelf <- dplyr::filter(annualcond, nCond>=3) %>% ungroup()
-condNshelfSpp <- condNshelf %>% dplyr::add_count(Species) %>% 
+condNshelfSpp <- condNshelf %>% dplyr::add_count(SpeciesName) %>% 
   dplyr::filter(n >= 20)
+
+#Fall condition by year without EPU for Joe Warren and Mark Wuenschel
+cond_shelf <- condNshelfSpp %>% dplyr::rename(Time = YEAR, Var = SpeciesName)
+rel_condShelf <- cond_shelf %>% dplyr::select(Var, Time, MeanCond)
+#readr::write_csv(rel_condShelf, here::here(out.dir,"RelCond2025_FallShelf.csv"))
 
 condNYrSpp <- condNshelfSpp %>% dplyr::distinct(Species)
 
 #Summarize annually by EPU (use for SOE plots)
-annualcondEPU <- cond.epu %>% dplyr::group_by(Species,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
+annualcondEPU <- cond.epu %>% dplyr::group_by(SpeciesName,EPU, YEAR) %>% dplyr::summarize(MeanCond = mean(RelCond), nCond = dplyr::n())
 condN <- dplyr::filter(annualcondEPU, nCond>=3) %>% ungroup()
-condNSppEPU <- condN %>% dplyr::add_count(Species, EPU) %>% 
+condNSppEPU <- condN %>% dplyr::add_count(SpeciesName, EPU) %>% 
   dplyr::filter(n >= 20)
 
 #Sarah Gaichas data request 8/1/2024 for condition by EPU based on all survey strata (including 01410-01590):
 #readr::write_csv(condNSppEPU, here::here(out.dir,"AnnualRelCond2023_Fall.csv"))
 
 #SOE Condition data renamed for submission into google form and ecodata (Dec. 21, 2023, Jan. 27, 2025):
-cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = Species)
+cond_ecodata <- condNSppEPU %>% dplyr::rename(Time = YEAR, Var = SpeciesName)
 rel_condition <- cond_ecodata %>% dplyr::select(Var, EPU, Time, MeanCond)
-readr::write_csv(rel_condition, here::here(out.dir,"RelCond2025_Year.csv"))
+#readr::write_csv(rel_condition, here::here(out.dir,"RelCond2025_FallEPU.csv"))
 
 
 #Proportion of species below average for 2024 SOE:
